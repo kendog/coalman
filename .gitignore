@@ -3,4 +3,3 @@ venv/
 .DS_Store
 config.py
 static/uploads/
-
