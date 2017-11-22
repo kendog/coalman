@@ -1,41 +1,56 @@
 {% extends "layouts/layout1.html" %}
-{% set active_page = "admin_filters_edit" %}
+{% set active_section = "admin_filters" %}
 
 {% block title %}{{ filter.filter_type|upper }} Tag: {{ filter.name }}{% endblock %}
 
 {% block content %}
 
-    <form id="form" method="post" action="">
+    <h2>Edit Tag</h2>
+    <hr>
 
-        <div class="form-element">
+    <form id="filter-form" method="post" action="">
+
+        <div class="form-group">
             <label for="name">Name:</label>
-            <input id="name" name="name" type="text" value="{{ filter.name }}" />
+            <input id="name" name="name" type="text" class="form-control" value="{{ filter.name }}" />
         </div>
 
-        <div class="form-element">
+        <div class="form-group">
             <label for="name">Type:</label>
-            <select id="filter_type" name="filter_type">
-                {%  for filter_type in filter_types %}
-                    <option {% if filter_type.filter_type == filter.filter_type %}selected{% endif %} value="{{ filter_type.id }}">{{ filter_type.name }}</option>
+            <select id="filter_type" name="filter_type" class="form-control">
+                {%  for filter_type_item in filter_types %}
+                    <option {% if filter_type_item.id == filter.filter_type %}selected{% endif %} value="{{ filter_type_item.id }}">{{ filter_type_item.name }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <div class="form-element">
+        <div class="form-group">
             <label for="weight">Weight:</label>
-            <input id="weight" name="weight" type="text" value="{{ filter.weight }}" />
+            <input id="weight" name="weight" type="text" class="form-control" value="{{ filter.weight }}" />
         </div>
 
-        <div class="form-element">
-            <input type="submit" name="submit-edit" value="Update">
-        </div>
+        <hr>
 
-        <br><br>
-
-        <div class="form-element">
-            <a href="/admin/filters/delete/{{ filter.id }}">DELETE</>
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Submit">
         </div>
 
     </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#filter-form").validate({
+                rules: {
+                    name: "required",
+                    weight: "required"
+                }
+            });
+        });
+    </script>
 
 {% endblock %}

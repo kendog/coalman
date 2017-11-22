@@ -1,0 +1,20 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "login_user" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+    {% from "security/_macros.html" import render_field_with_errors, render_field %}
+    {% include "security/_messages.html" %}
+
+    <form class="form-signin" action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+        {{ login_user_form.hidden_tag() }}
+        {{ render_field_with_errors(login_user_form.email, class="form-control") }}
+        {{ render_field_with_errors(login_user_form.password, class="form-control") }}
+        {{ render_field_with_errors(login_user_form.remember, class="form-control") }}
+        {{ render_field(login_user_form.next) }}
+        {{ render_field(login_user_form.submit, class="btn btn-lg btn-primary btn-block") }}
+    </form>
+
+{% endblock %}

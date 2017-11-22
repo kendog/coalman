@@ -42,3 +42,28 @@ a.navbar-brand
 	margin: 0;
 	padding: 2px 10px 0 10px;
 }
+
+.btn-region, .btn-region:hover {
+    color: #fff;
+    background-color: #868e96;
+    border: #868e96;
+    cursor: default;
+}
+.btn-vertical, .btn-vertical:hover {
+    color: #fff;
+    background-color: #5bc0de;
+    border: #5bc0de;
+    cursor: default;
+}
+
+.btn-category, .btn-category:hover {
+    color: #fff;
+    background-color: #28a745;
+    border: #28a745;
+    cursor: default;
+}
+
+.error
+{
+    color: red;
+}

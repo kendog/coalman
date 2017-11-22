@@ -1,33 +1,79 @@
 {% extends "layouts/layout1.html" %}
-{% set active_page = "admin_files_add" %}
+{% set active_section = "admin_files" %}
 
 {% block title %}Add File{% endblock %}
 
 {% block content %}
 
-    <form id="form" method="post" action="" enctype=multipart/form-data>
+    <h2>Add New File</h2>
+    <hr>
 
-        <div class="form-element">
-            <label for="file">File:</label>
-            <input id="file" name="file" type="file">
+    <form id="files-form" method="post" action="" enctype=multipart/form-data>
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" class="form-control" value="" />
         </div>
 
-        <p>Metadata:</p>
-
-        <div class="form-element">
-            <label for="title">Title:</label>
-            <input id="title" name="title" type="text" value="" />
+        <div class="form-group">
+            <label for="desc">Description</label>
+            <input id="desc" name="desc" type="text" class="form-control" value="" />
         </div>
 
-        <div class="form-element">
-            <label for="desc">Desc:</label>
-            <input id="desc" name="desc" type="text" value="" />
+        <hr>
+
+        <div class="form-group">
+            <label for="file">Upload File</label>
+            <input id="file" name="file" type="file" class="form-control-file">
         </div>
 
-        <div class="form-element">
-            <input type="submit" name="submit-add" value="Add File">
+        <hr>
+
+        <div class="form-group">
+            <p><button class="btn btn-region btn-xs">region</button></p>
+            <div class="form-check form-check-inline">
+                {%  for filter in filter_hash['region'] %}
+                    <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
+                {% endfor %}
+            </div>
+            <br>
+            <p><button class="btn btn-vertical btn-xs">vertical</button></p>
+            <div class="form-check form-check-inline">
+                {%  for filter in filter_hash['vertical'] %}
+                    <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
+                {% endfor %}
+            </div>
+            <br>
+            <p><button class="btn btn-category btn-xs">category</button></p>
+            <div class="form-check form-check-inline">
+                {%  for filter in filter_hash['category'] %}
+                    <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
+                {% endfor %}
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Add">
         </div>
 
     </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#files-form").validate({
+                rules: {
+                    title: "required",
+                    desc: "required"
+                }
+            });
+        });
+    </script>
 
 {% endblock %}

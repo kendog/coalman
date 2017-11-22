@@ -65,7 +65,6 @@ class Filter(db.Model):
     __tablename__ = 'Filters'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
-#    filter_type = db.Column(db.String(225), db.ForeignKey("FilterTypes.id"))
     filter_type = db.Column(db.String(225))
     weight = db.Column(db.Integer())
 
@@ -82,17 +81,22 @@ security = Security(app, user_datastore)
 
 
 # Define Schemas
-class FileSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ('id', 'name', 'path', 'title', 'desc')
-
-
 class FilterSchema(ma.Schema):
     class Meta:
+        model = Filter
         # Fields to expose
-        fields = ('id', 'name', 'filter_type', 'weight')
+        fields = ('name', 'filter_type')
 
+
+class FileSchema(ma.Schema):
+
+    filters = ma.Nested(FilterSchema, many=True)
+
+    class Meta:
+        model = File
+        # Fields to expose
+
+        fields = ('id', 'name', 'title', 'desc', 'filters')
 
 file_schema = FileSchema()
 files_schema = FileSchema(many=True)
@@ -186,14 +190,13 @@ def files():
 # Tags APIs
 @app.route('/api/v1/filters', methods=['GET'])
 def filters():
-    regions = filters_schema.dump(Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all())
-    verticals = filters_schema.dump(Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all())
-    categories = filters_schema.dump(Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all())
-    results = {}
-    results['regions'] = regions.data
-    results['verticals'] = verticals.data
-    results['categories'] = categories.data
-    return jsonify({'results': results})
+#    filter_hash = {}
+#    filter_hash['regions'] = filters_schema.dump(Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()).data
+#    filter_hash['verticals'] = filters_schema.dump(Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()).data
+#    filter_hash['categories'] = filters_schema.dump(Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()).data
+#    return jsonify({'results': filter_hash})
+    results = filters_schema.dump(Filter.query.order_by(Filter.filter_type, Filter.weight).all())
+    return jsonify({'results': results.data})
 
 
 @app.route('/api/v1/filters/<filter_type>', methods=['GET'])
@@ -224,22 +227,36 @@ def allowed_file(filename):
 @roles_required('admin')
 def admin_files_add():
     if 'submit-add' in request.form:
-        if 'file' not in request.files:
-            return redirect(url_for('error_uploads', errors='No file part in the post request'))
-        the_actual_file = request.files['file']
-        if the_actual_file.filename == '':
-            return redirect(url_for('error_uploads', errors='No file selected or empty part without filename'))
-        if the_actual_file and allowed_file(the_actual_file.filename):
-            # upload the file
-            the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
-            # update the db
-            file = File(name=secure_filename(the_actual_file.filename), path=app.config['UPLOAD_FOLDER'], title=request.form['title'], desc=request.form['desc'])
-            db.session.add(file)
-            db.session.commit()
-            return redirect(url_for('admin_files_edit', id=file.id))
-        else:
-            return redirect(url_for('error_uploads', errors='No file or !allowed_file'))
-    return render_template('admin_files_add.html')
+        # Update Metadata
+        file = File(title=request.form.get('title'), desc=request.form.get('desc'))
+        db.session.commit()
+
+        # Update Tags
+        tags = request.form.getlist('tags')
+        for tag_id in tags:
+            exists = db.session.query(Filter.id).filter_by(id=tag_id).scalar()
+            if exists:
+                file.filters.append(Filter.query.filter_by(id=tag_id).first())
+                db.session.commit()
+
+        # Upload File
+        if 'file' in request.files:
+            the_actual_file = request.files['file']
+            if the_actual_file and allowed_file(the_actual_file.filename):
+                # upload the file
+                the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
+                # update the db
+                file.name = secure_filename(the_actual_file.filename)
+                file.path = app.config['UPLOAD_FOLDER']
+                db.session.commit()
+
+        return redirect(url_for('admin_files_edit', id=file.id))
+
+    filter_hash = {}
+    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    return render_template('admin_files_add.html', filter_hash=filter_hash)
 
 
 @app.route('/error/uploads/<errors>')
@@ -254,28 +271,41 @@ def admin_files_edit(id):
     if 'submit-edit' in request.form:
         exists = db.session.query(File.id).filter_by(id=id).scalar()
         if exists:
-            if 'file' not in request.files:
-                return redirect(url_for('error_uploads', errors='No file part in the post request'))
-            the_actual_file = request.files['file']
-            if the_actual_file.filename == '':
-                return redirect(url_for('error_uploads', errors='No file selected or empty part without filename'))
-            if the_actual_file.filename == '':
-                return redirect(url_for('error_uploads', errors='No file selected or empty part without filename'))
-            if the_actual_file and allowed_file(the_actual_file.filename):
-                # upload the file
-                the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
-                # update the db
-                file = File.query.filter_by(id=id).first()
-                file.name = secure_filename(the_actual_file.filename)
-                file.path = app.config['UPLOAD_FOLDER']
-                file.title = request.form.get('title')
-                file.desc = request.form.get('desc')
-                db.session.commit()
-                return redirect(url_for('admin_files_edit', id=file.id))
-            else:
-                return redirect(url_for('error_uploads', errors='No file or !allowed_file'))
+            # Update Metadata
+            file = File.query.filter_by(id=id).first()
+            file.title = request.form.get('title')
+            file.desc = request.form.get('desc')
+            db.session.commit()
+
+            # Update Tags
+            file.filters.clear()
+            db.session.commit()
+            tags = request.form.getlist('tags')
+            for tag_id in tags:
+                exists = db.session.query(Filter.id).filter_by(id=tag_id).scalar()
+                if exists:
+                    file.filters.append(Filter.query.filter_by(id=tag_id).first())
+                    db.session.commit()
+
+            # Upload File
+            if 'file' in request.files:
+                the_actual_file = request.files['file']
+                if the_actual_file and allowed_file(the_actual_file.filename):
+                    # upload the file
+                    the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
+                    # update the db
+                    file.name = secure_filename(the_actual_file.filename)
+                    file.path = app.config['UPLOAD_FOLDER']
+                    db.session.commit()
+
+            return redirect(url_for('admin_files_edit', id=file.id))
+
     file = File.query.filter_by(id=id).first()
-    return render_template('admin_files_edit.html', file=file)
+    filter_hash = {}
+    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    return render_template('admin_files_edit.html', file=file, filter_hash=filter_hash)
 
 
 @app.route('/admin/files/delete/<id>', methods=['POST', 'GET'])
@@ -289,7 +319,18 @@ def admin_files_delete(id):
             db.session.commit()
             return redirect(url_for('admin_files'))
     file = File.query.filter_by(id=id).first()
-    return render_template('admin_files_delete.html', file=file)
+    filter_hash = {}
+    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    return render_template('admin_files_delete.html', file=file, filter_hash=filter_hash)
+
+
+@app.route('/admin/filters')
+@roles_required('admin')
+def admin_filters_all():
+    filters = Filter.query.order_by(Filter.weight).all()
+    return render_template('admin_filters.html', filter_type='all', filters=filters)
 
 
 @app.route('/admin/filters/<filter_type>')
@@ -303,6 +344,7 @@ def admin_filters(filter_type):
 @roles_required('admin')
 def admin_filters_add(filter_type):
     if 'submit-add' in request.form:
+        filter_type = request.form['filter_type']
         db.session.add(Filter(name=request.form['name'], filter_type=filter_type, weight=request.form['weight']))
         db.session.commit()
         return redirect(url_for('admin_filters', filter_type=filter_type))

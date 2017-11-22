@@ -1,35 +1,56 @@
 {% extends "layouts/layout1.html" %}
-{% set active_page = "admin_filters_add" %}
+{% set active_section = "admin_filters" %}
 
-{% block title %}Add {{ filter_type|upper }} Tag{% endblock %}
+{% block title %}Add Tag{% endblock %}
 
 {% block content %}
 
-    <form id="form" method="post" action="">
+    <h2>Add Tag</h2>
+    <hr>
 
-        <div class="form-element">
+    <form id="filter-form" method="post" action="">
+
+        <div class="form-group">
             <label for="name">Name:</label>
-            <input id="name" name="name" type="text" value="" />
+            <input id="name" name="name" type="text" class="form-control" value="" />
         </div>
 
-        <div class="form-element">
+        <div class="form-group">
             <label for="name">Type:</label>
-            <select id="filter_type" name="filter_type">
+            <select id="filter_type" name="filter_type" class="form-control">
                 {%  for filter_type_item in filter_types %}
                     <option {% if filter_type_item.id == filter_type %}selected{% endif %} value="{{ filter_type_item.id }}">{{ filter_type_item.name }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <div class="form-element">
+        <div class="form-group">
             <label for="weight">Weight:</label>
-            <input id="weight" name="weight" type="text" value="0" />
+            <input id="weight" name="weight" type="text" class="form-control" value="0" />
         </div>
 
-        <div class="form-element">
-            <input type="submit" name="submit-add" value="Add">
+        <hr>
+
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
         </div>
 
     </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#filter-form").validate({
+                rules: {
+                    name: "required",
+                    weight: "required"
+                }
+            });
+        });
+    </script>
 
 {% endblock %}
