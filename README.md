@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+![alt text](https://github.com/kendog/coalman/blob/master/static/images/logo.png)
 
 coalman
 =========
