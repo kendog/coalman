@@ -163,10 +163,10 @@ def create_db():
     db.session.commit() 
     user = User.query.first()
     if user is None:
-        encrypted_password = utils.hash_password('P@ssw0rd!23')
-        user_datastore.create_user(email='kendog@gmail.com', password=encrypted_password)
+        encrypted_password = utils.hash_password('123456')
+        user_datastore.create_user(email='admin@coalman.com', password=encrypted_password)
         db.session.commit()
-        user_datastore.add_role_to_user('kendog@gmail.com', 'admin')
+        user_datastore.add_role_to_user('admin@coalman.com', 'admin')
         db.session.commit()
 
 
