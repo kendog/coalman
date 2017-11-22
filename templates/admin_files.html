@@ -1,0 +1,20 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_files" %}
+
+{% block title %}Files{% endblock %}
+
+{% block content %}
+
+    <ul>
+        {%  for file in files %}
+            <li>
+                <p><a href="/admin/files/edit/{{ file.id }}">{{ file.name }}</a></p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+        <a href="/admin/files/add">Add New File</a>
+    </p>
+
+{% endblock %}

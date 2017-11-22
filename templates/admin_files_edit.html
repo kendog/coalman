@@ -1,0 +1,45 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_files_edit" %}
+
+{% block title %}File: {{ file.name }}{% endblock %}
+
+{% block content %}
+
+    <form id="form" method="post" action="" enctype=multipart/form-data>
+
+        <div class="form-element">
+            <label for="name">Name:</label>
+            <input disabled id="name" name="name" type="text" value="{{ file.name }}" />
+        </div>
+
+        <div class="form-element">
+            <label for="file">Upload new file:</label>
+            <input id="file" name="file" type="file">
+        </div>
+
+        <p>Metadata:</p>
+
+        <div class="form-element">
+            <label for="title">Title:</label>
+            <input id="title" name="title" type="text" value="{{ file.title }}" />
+        </div>
+
+        <div class="form-element">
+            <label for="desc">Desc:</label>
+            <input id="desc" name="desc" type="text" value="{{ file.desc }}" />
+        </div>
+
+        <div class="form-element">
+            <input type="submit" name="submit-edit" value="Update">
+        </div>
+
+    </form>
+
+    <br><br>
+
+    <div class="form-element">
+        <a href="/admin/files/delete/{{ file.id }}">DELETE this Entry</>
+    </div>
+
+
+{% endblock %}

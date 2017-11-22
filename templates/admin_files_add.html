@@ -1,0 +1,33 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_files_add" %}
+
+{% block title %}Add File{% endblock %}
+
+{% block content %}
+
+    <form id="form" method="post" action="" enctype=multipart/form-data>
+
+        <div class="form-element">
+            <label for="file">File:</label>
+            <input id="file" name="file" type="file">
+        </div>
+
+        <p>Metadata:</p>
+
+        <div class="form-element">
+            <label for="title">Title:</label>
+            <input id="title" name="title" type="text" value="" />
+        </div>
+
+        <div class="form-element">
+            <label for="desc">Desc:</label>
+            <input id="desc" name="desc" type="text" value="" />
+        </div>
+
+        <div class="form-element">
+            <input type="submit" name="submit-add" value="Add File">
+        </div>
+
+    </form>
+
+{% endblock %}

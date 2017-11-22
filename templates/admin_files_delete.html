@@ -1,0 +1,38 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_files_delete" %}
+
+{% block title %}Delete {{ file.name }}{% endblock %}
+
+{% block content %}
+
+    <h3>Are you Sure????</h3>
+
+    <form id="form" method="post" action="">
+
+        <div class="form-element">
+            <label for="name">Name:</label>
+            <input disabled id="name" name="name" type="text" value="{{ file.name }}" />
+        </div>
+
+        <div class="form-element">
+            <label for="path">Path:</label>
+            <input disabled id="path" name="path" type="text" value="{{ file.path }}" />
+        </div>
+
+        <div class="form-element">
+            <label for="title">Title:</label>
+            <input disabled id="title" name="title" type="text" value="{{ file.title }}" />
+        </div>
+
+        <div class="form-element">
+            <label for="desc">Desc:</label>
+            <input disabled id="desc" name="desc" type="text" value="{{ file.desc }}" />
+        </div>
+
+        <div class="form-element">
+            <input type="submit" name="submit-delete" value="Delete">
+        </div>
+
+    </form>
+
+{% endblock %}

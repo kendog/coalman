@@ -1,0 +1,35 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_filters_add" %}
+
+{% block title %}Add {{ filter_type|upper }} Tag{% endblock %}
+
+{% block content %}
+
+    <form id="form" method="post" action="">
+
+        <div class="form-element">
+            <label for="name">Name:</label>
+            <input id="name" name="name" type="text" value="" />
+        </div>
+
+        <div class="form-element">
+            <label for="name">Type:</label>
+            <select id="filter_type" name="filter_type">
+                {%  for filter_type_item in filter_types %}
+                    <option {% if filter_type_item.id == filter_type %}selected{% endif %} value="{{ filter_type_item.id }}">{{ filter_type_item.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-element">
+            <label for="weight">Weight:</label>
+            <input id="weight" name="weight" type="text" value="0" />
+        </div>
+
+        <div class="form-element">
+            <input type="submit" name="submit-add" value="Add">
+        </div>
+
+    </form>
+
+{% endblock %}

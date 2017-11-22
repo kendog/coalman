@@ -1,0 +1,20 @@
+{% extends "layouts/layout1.html" %}
+{% set active_page = "admin_filters" %}
+
+{% block title %}{{ filter_type|upper }} Tags{% endblock %}
+
+{% block content %}
+
+    <ul>
+        {%  for filter in filters %}
+            <li>
+                <p><a href="/admin/filters/edit/{{ filter.id }}">{{ filter.name }}</a></p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+        <a href="/admin/filters/add/{{ filter_type }}">Add {{ filter_type }}</a>
+    </p>
+
+{% endblock %}
