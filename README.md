@@ -1,6 +1,4 @@
-![alt text](https://github.com/kendog/coalman/blob/master/static/images/logo-header.png)
-
-coalman
+![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
 =========
 
 A document management, packaging and distribution service for your organization written in Python and Flask.
