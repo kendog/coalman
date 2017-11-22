@@ -3,8 +3,8 @@ coalman
 
 A document management, packaging and distribution application for your organization written in Python and Flask.
 
-* Manage and categorize your documents with customizable tagging.
-* Package and distribute groups of documents to end-users -or- send them to coalman's self-service portal.
+* Manage and categorize your documents with a customizable tagging system.
+* Package and distribute groups of documents to end-users -or- send them to the self-service portal.
 * APIs for custom web and mobile applications.
 
 Installation
