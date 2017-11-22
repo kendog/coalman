@@ -1,4 +1,4 @@
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://user:pass@host:port/database'
+SQLALCHEMY_DATABASE_URI = 'db_protocol://user:pass@host:port/database'
 SECRET_KEY = 'secret_key'
 SECURITY_REGISTERABLE = True
 SECURITY_PASSWORD_HASH = 'bcrypt'
