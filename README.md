@@ -1,4 +1,4 @@
-![alt text](https://github.com/kendog/coalman/blob/master/static/images/logo.png)
+![alt text](https://github.com/kendog/coalman/blob/master/static/images/logo-header.png)
 
 coalman
 =========
