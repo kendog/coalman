@@ -1,7 +1,9 @@
+![alt text](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+
 coalman
 =========
 
-A document management, packaging and distribution application for your organization written in Python and Flask.
+A document management, packaging and distribution service for your organization written in Python and Flask.
 
 * Manage and categorize your documents with a customizable tagging system.
 * Package and distribute groups of documents to end-users -or- send them to the self-service portal.
