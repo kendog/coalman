@@ -387,5 +387,5 @@ def admin_filters_delete(id):
 
 
 if __name__ == "__main__":
-    #app.run('localhost')
-    app.run(host='0.0.0.0')
+    app.run('localhost')
+    #app.run(host='0.0.0.0')
