@@ -1,7 +1,7 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
 =========
 
-Open Source file distribution platform for your front-end applications.  Written in Python and Flask.
+Open Source file distribution platform for your front-end applications. Written in Python and Flask.
 
 * Manage, categorize and distribute files.
 * Create APIs for your front-end applications.
