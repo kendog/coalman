@@ -1,12 +1,11 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
 =========
 
-Open Source document management and distribution application for your organization.  Written in Python and Flask.
+Open Source file distribution platform for your front-end applications.  Written in Python and Flask.
 
-* Manage and distribute groups of documents to end-users.
+* Manage, categorize and distribute files.
+* Create APIs for your front-end applications.
 * Customizable self-service portal.
-* Analytics.
-* APIs for web and mobile applications.</li>
 
 Installation
 ------------
