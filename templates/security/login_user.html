@@ -5,16 +5,38 @@
 
 {% block content %}
 
-    {% from "security/_macros.html" import render_field_with_errors, render_field %}
-    {% include "security/_messages.html" %}
+    <div class="row">
+        <div class="col-md-7">
 
-    <form class="form-signin" action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
-        {{ login_user_form.hidden_tag() }}
-        {{ render_field_with_errors(login_user_form.email, class="form-control") }}
-        {{ render_field_with_errors(login_user_form.password, class="form-control") }}
-        {{ render_field_with_errors(login_user_form.remember, class="form-control") }}
-        {{ render_field(login_user_form.next) }}
-        {{ render_field(login_user_form.submit, class="btn btn-lg btn-primary btn-block") }}
-    </form>
+            <p>Open Source document management and distribution application for your organization.</p>
+            <ul>
+                <li>Manage and distribute groups of documents to end-users.</li>
+                <li>Customizable self-service portal.</li>
+                <li>Analytics.</li>
+                <li>APIs for web and mobile applications.</li>
+            </ul>
+        </div>
+        <div class="col-md-1"></div>
+
+        <div class="col-md-4">
+
+               <h3>Login</h3>
+
+                <hr>
+
+                {% from "security/_macros.html" import render_field_with_errors, render_field %}
+
+                <form class="form-signin" action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+                    {{ login_user_form.hidden_tag() }}
+                    {{ render_field_with_errors(login_user_form.email, class="form-control") }}
+                    {{ render_field_with_errors(login_user_form.password, class="form-control") }}
+                    {{ render_field_with_errors(login_user_form.remember, class="form-control") }}
+                    {{ render_field(login_user_form.next) }}
+                    {{ render_field(login_user_form.submit, class="btn btn-primary") }}
+                </form>
+
+        </div>
+    </div>
+
 
 {% endblock %}

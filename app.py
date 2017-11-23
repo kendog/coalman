@@ -99,6 +99,7 @@ class FileSchema(ma.Schema):
 
         fields = ('id', 'name', 'title', 'desc', 'filters')
 
+
 file_schema = FileSchema()
 files_schema = FileSchema(many=True)
 filter_schema = FilterSchema()
@@ -191,11 +192,11 @@ def files():
 # Tags APIs
 @app.route('/api/v1/filters', methods=['GET'])
 def filters():
-#    filter_hash = {}
-#    filter_hash['regions'] = filters_schema.dump(Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()).data
-#    filter_hash['verticals'] = filters_schema.dump(Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()).data
-#    filter_hash['categories'] = filters_schema.dump(Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()).data
-#    return jsonify({'results': filter_hash})
+    # filter_hash = {}
+    # filter_hash['regions'] = filters_schema.dump(Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()).data
+    # filter_hash['verticals'] = filters_schema.dump(Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()).data
+    # filter_hash['categories'] = filters_schema.dump(Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()).data
+    # return jsonify({'results': filter_hash})
     results = filters_schema.dump(Filter.query.order_by(Filter.filter_type, Filter.weight).all())
     return jsonify({'results': results.data})
 
@@ -388,4 +389,3 @@ def admin_filters_delete(id):
 
 if __name__ == "__main__":
     app.run('localhost')
-    #app.run(host='0.0.0.0')
