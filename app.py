@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request, redirect, url_for, render_template
+from flask import Flask, jsonify, request, redirect, url_for, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required, roles_required, utils
 from flask_marshmallow import Marshmallow
@@ -111,19 +111,6 @@ filters_schema = FilterSchema(many=True)
 @app.before_first_request
 def create_db():
     db.create_all()
-    # Populate Files
-    file = File.query.first()
-    if file is None:
-        db.session.add(File(name="file1.pdf", path="/files/", title="File 1 (PDF)", desc="File 1 is a PDF."))
-        db.session.add(File(name="file2.pdf", path="/files/", title="File 2 (PDF)", desc="File 2 is a PDF."))
-        db.session.add(File(name="file3.pdf", path="/files/", title="File 3 (PDF)", desc="File 3 is a PDF."))
-        db.session.add(File(name="file4.pdf", path="/files/", title="File 4 (PDF)", desc="File 4 is a PDF."))
-        db.session.add(File(name="file5.pdf", path="/files/", title="File 5 (PDF)", desc="File 5 is a PDF."))
-        db.session.add(File(name="file6.pdf", path="/files/", title="File 6 (PDF)", desc="File 6 is a PDF."))
-        db.session.add(File(name="file7.pdf", path="/files/", title="File 7 (PDF)", desc="File 7 is a PDF."))
-        db.session.add(File(name="file8.pdf", path="/files/", title="File 8 (PDF)", desc="File 8 is a PDF."))
-        db.session.add(File(name="file9.pdf", path="/files/", title="File 9 (PDF)", desc="File 9 is a PDF."))
-        db.session.commit()
     # Populate FilterGroup
     filter_group = FilterType.query.first()
     if filter_group is None:
@@ -190,6 +177,14 @@ def files():
     return jsonify({'results': results.data})
 
 
+# Send APIs
+@app.route('/file/<id>')
+def send_file(id):
+    file = File.query.filter_by(id=id).first()
+    filepath = os.path.join(file.path, file.name)
+    return send_from_directory(file.path, file.name)
+
+
 # Tags APIs
 @app.route('/api/v1/filters', methods=['GET'])
 def filters():
@@ -206,6 +201,7 @@ def filters():
 def regions(filter_type):
     results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all())
     return jsonify({'results': results.data})
+
 
 
 # ADMIN Pages
@@ -316,7 +312,7 @@ def admin_files_edit(id):
 @roles_required('admin')
 def admin_files_delete(id):
     if 'submit-delete' in request.form:
-        exists = db.session.query(Filter.id).filter_by(id=id).scalar()
+        exists = db.session.query(File.id).filter_by(id=id).scalar()
         if exists:
             file = File.query.filter_by(id=id).first()
             db.session.delete(file)

@@ -10,34 +10,36 @@
 
     <form id="files-form" method="post" action="" enctype=multipart/form-data>
 
-                <div class="row">
+        <div class="row">
             <div class="col-md-7">
 
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
-        </div>
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="desc">Description</label>
-            <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
-        </div>
+                <hr>
 
-        <hr>
+                <div class="form-group">
+                    <label for="path">Path</label>
+                    <input disabled id="path" name="path" type="text" class="form-control" value="{{ file.path }}" />
+                    <label for="name">File</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                    <a href="/file/{{ file.id }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
+                </div>
 
-        <div class="form-group">
-            <label for="name">File</label>
-            <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
-        </div>
-
-        <div class="form-group">
-            <label for="file">Upload new file</label>
-            <input id="file" name="file" type="file" class="form-control">
-        </div>
+                <div class="form-group">
+                    <label for="file">Upload new file</label>
+                    <input id="file" name="file" type="file" class="form-control">
+                </div>
 
 
-                                    </div>
+            </div>
 
             <div class="col-md-1"></div>
 

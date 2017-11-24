@@ -13,7 +13,6 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>Name</th>
             <th>Title</th>
             <th>Description</th>
             <th>Tags:
@@ -28,7 +27,6 @@
         {%  for file in files %}
             <tr>
                 <td>{{ file.id }}</td>
-                <td>{{ file.name }}</td>
                 <td>{{ file.title }}</td>
                 <td>{{ file.desc }}</td>
                 <td>
@@ -37,6 +35,7 @@
                     {% endfor %}
                 </td>
                 <td>
+                    <a href="/file/{{ file.id }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
                     <a href="/admin/files/edit/{{ file.id }}" class="btn btn-warning btn-block btn-xs">Edit</a>
                     <a href="/admin/files/delete/{{ file.id }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
@@ -59,7 +58,7 @@
                 "columnDefs": [ {
                     "searchable": false,
                     "orderable": false,
-                    "targets": 5
+                    "targets": 4
                 } ]
             } );
         } );

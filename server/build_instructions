@@ -21,11 +21,13 @@ sudo yum -y install mod_wsgi
 
 sudo yum -y install git
 sudo git clone https://github.com/kendog/coalman.git /var/www/coalman/
-sudo pip install -r /var/www/coalman/requirements.txt
+sudo chmod 777 /var/www/coalman/uploads/
+
 sudo mv /var/www/coalman/config-sample.py /var/www/coalman/config.py
-sudo vi /var/www/coalman/config.py
+sudo vi /var/www/coalman/config.py # and make edits
 sudo cp /var/www/coalman/server/etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf
-# update conf
+
+sudo pip install -r /var/www/coalman/requirements.txt
 
 sudo systemctl restart httpd
 
