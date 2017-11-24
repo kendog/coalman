@@ -59,7 +59,7 @@ class File(db.Model):
     path = db.Column(db.String(255))
     title = db.Column(db.String(255))
     desc = db.Column(db.String(255))
-    filters = db.relationship('Filter', secondary=filters_files, lazy='subquery', backref=db.backref('pages', lazy=True))
+    filters = db.relationship('Filter', secondary=filters_files, lazy='subquery', backref=db.backref('Files', lazy=True))
 
 
 class Filter(db.Model):
@@ -280,14 +280,14 @@ def admin_files_edit(id):
             db.session.commit()
 
             # Update Tags
-            file.filters.clear()
-            db.session.commit()
             tags = request.form.getlist('tags')
+            new_filters = []
             for tag_id in tags:
                 exists = db.session.query(Filter.id).filter_by(id=tag_id).scalar()
                 if exists:
-                    file.filters.append(Filter.query.filter_by(id=tag_id).first())
-                    db.session.commit()
+                    new_filters.append(Filter.query.filter_by(id=tag_id).first())
+            file.filters[:] = new_filters
+            db.session.commit()
 
             # Upload File
             if 'file' in request.files:

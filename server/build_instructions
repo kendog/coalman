@@ -1,0 +1,33 @@
+sudo yum -y clean all
+sudo yum -y update
+
+sudo yum -y install httpd
+sudo systemctl start httpd
+sudo systemctl enable httpd
+
+
+sudo yum -y install mariadb-server
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+sudo mysql_secure_installation
+##Create usrrs manually... or run sql
+
+sudo setsebool -P httpd_can_network_connect_db on
+
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+sudo python get-pip.py
+
+sudo yum -y install mod_wsgi
+
+sudo yum -y install git
+sudo git clone https://github.com/kendog/coalman.git /var/www/coalman/
+sudo pip install -r /var/www/coalman/requirements.txt
+sudo mv /var/www/coalman/config-sample.py /var/www/coalman/config.py
+sudo vi /var/www/coalman/config.py
+sudo cp /var/www/coalman/server/etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf
+# update conf
+
+sudo systemctl restart httpd
+
+#sudo systemctl restart mariadb
+#sudo cat /var/log/httpd/error_log
