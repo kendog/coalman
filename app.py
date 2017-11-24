@@ -231,6 +231,7 @@ def admin_files_add():
     if 'submit-add' in request.form:
         # Update Metadata
         file = File(title=request.form.get('title'), desc=request.form.get('desc'))
+        db.session.add(file)
         db.session.commit()
 
         # Update Tags
