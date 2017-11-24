@@ -187,19 +187,17 @@ def send_file(id):
 
 # Tags APIs
 @app.route('/api/v1/filters', methods=['GET'])
-def filters():
-    # filter_hash = {}
-    # filter_hash['regions'] = filters_schema.dump(Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()).data
-    # filter_hash['verticals'] = filters_schema.dump(Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()).data
-    # filter_hash['categories'] = filters_schema.dump(Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()).data
-    # return jsonify({'results': filter_hash})
-    results = filters_schema.dump(Filter.query.order_by(Filter.filter_type, Filter.weight).all())
-    return jsonify({'results': results.data})
+def filters_all():
+    return redirect(url_for('filters', filter_type='all'))
+
 
 
 @app.route('/api/v1/filters/<filter_type>', methods=['GET'])
-def regions(filter_type):
-    results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all())
+def filters(filter_type):
+    if filter_type == 'all':
+        results = filters_schema.dump(Filter.query.order_by(Filter.filter_type, Filter.weight).all())
+    else:
+        results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.filter_type, Filter.weight).all())
     return jsonify({'results': results.data})
 
 
