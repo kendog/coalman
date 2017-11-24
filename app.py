@@ -329,15 +329,18 @@ def admin_files_delete(id):
 @app.route('/admin/filters')
 @roles_required('admin')
 def admin_filters_all():
-    filters = Filter.query.order_by(Filter.weight).all()
-    return render_template('admin_filters.html', filter_type='all', filters=filters)
+    return redirect(url_for('admin_filters', filter_type='all'))
 
 
 @app.route('/admin/filters/<filter_type>')
 @roles_required('admin')
 def admin_filters(filter_type):
-    filters = Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all()
-    return render_template('admin_filters.html', filter_type=filter_type, filters=filters)
+    if filter_type == 'all':
+        filters = Filter.query.order_by(Filter.weight).all()
+    else:
+        filters = Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all()
+    filter_types = FilterType.query.all()
+    return render_template('admin_filters.html', filter_type=filter_type, filters=filters, filter_types=filter_types)
 
 
 @app.route('/admin/filters/add/<filter_type>', methods=['POST', 'GET'])
