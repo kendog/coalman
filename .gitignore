@@ -2,5 +2,11 @@ venv/
 .idea/
 .DS_Store
 config.py
-uploads/
 buildfiles/
+
+# exclude everything
+uploads/*
+
+# exception to the rule
+!uploads/.gitkeep
+

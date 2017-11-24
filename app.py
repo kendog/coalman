@@ -11,7 +11,8 @@ app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-ALLOWED_EXTENSIONS = set(['pdf', 'PDF', 'png', 'PNG'])
+app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
+app.config['ALLOWED_EXTENSIONS'] = set(['pdf', 'PDF', 'png', 'PNG'])
 
 # Define models
 roles_users = db.Table('roles_users',
@@ -222,7 +223,7 @@ def admin_files():
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
 @app.route('/admin/files/add', methods=['POST', 'GET'])
