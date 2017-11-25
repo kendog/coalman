@@ -6,3 +6,4 @@ PyMySQL
 flask_marshmallow
 flask_sqlalchemy
 marshmallow-sqlalchemy
+flask_cors

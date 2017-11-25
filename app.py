@@ -5,12 +5,14 @@ from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMix
 from flask_marshmallow import Marshmallow
 from werkzeug.utils import secure_filename
 import zipfile
+from flask_cors import CORS
 
 # Create app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
 app.config['DOWNLOAD_FOLDER'] = app.root_path + '/downloads/'
