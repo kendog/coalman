@@ -296,7 +296,7 @@ def admin_files_add():
                 file.path = app.config['UPLOAD_FOLDER']
                 db.session.commit()
 
-        return redirect(url_for('admin_files_edit', id=file.id))
+        return redirect(url_for('admin_files'))
 
     filter_hash = {}
     filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
