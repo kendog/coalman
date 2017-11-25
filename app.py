@@ -71,12 +71,16 @@ class Filter(db.Model):
     name = db.Column(db.String(255))
     filter_type = db.Column(db.String(225))
     weight = db.Column(db.Integer())
+    filter_type_id = db.Column(db.Integer, db.ForeignKey('FilterTypes.id'))
+    filter_type = db.relationship("FilterType", back_populates="filters")
 
 
 class FilterType(db.Model):
     __tablename__ = 'FilterTypes'
-    id = db.Column(db.String(225), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
+    tag = db.Column(db.String(255))
+    filters = db.relationship("Filter", back_populates="filter_type")
 
 
 # Setup Flask-Security
@@ -85,7 +89,16 @@ security = Security(app, user_datastore)
 
 
 # Define Schemas
+class FilterTypeSchema(ma.Schema):
+    class Meta:
+        model = FilterType
+        # Fields to expose
+        fields = ('name', 'tag')
+
+
 class FilterSchema(ma.Schema):
+    filter_type = ma.Nested(FilterTypeSchema)
+
     class Meta:
         model = Filter
         # Fields to expose
@@ -93,7 +106,6 @@ class FilterSchema(ma.Schema):
 
 
 class FileSchema(ma.Schema):
-
     filters = ma.Nested(FilterSchema, many=True)
 
     class Meta:
@@ -116,42 +128,48 @@ def create_db():
     # Populate FilterGroup
     filter_group = FilterType.query.first()
     if filter_group is None:
-        db.session.add(FilterType(id="region", name="Region"))
-        db.session.add(FilterType(id="vertical", name="Vertical"))
-        db.session.add(FilterType(id="category", name="Category"))
+        region = FilterType(tag="region", name="Region")
+        vertical = FilterType(tag="vertical", name="Vertical")
+        category = FilterType(tag="category", name="Category")
+        db.session.add(region)
+        db.session.add(vertical)
+        db.session.add(category)
         db.session.commit()
     # Populate Filters
     filter = Filter.query.first()
     if filter is None:
-        db.session.add(Filter(name="Americas", filter_type="region", weight=0))
-        db.session.add(Filter(name="APAC", filter_type="region", weight=1))
-        db.session.add(Filter(name="EMEA", filter_type="region", weight=2))
-        db.session.add(Filter(name="E-commerce", filter_type="vertical", weight=0))
-        db.session.add(Filter(name="Education", filter_type="vertical", weight=1))
-        db.session.add(Filter(name="Energy", filter_type="vertical", weight=2))
-        db.session.add(Filter(name="Financial Services", filter_type="vertical", weight=3))
-        db.session.add(Filter(name="Government", filter_type="vertical", weight=4))
-        db.session.add(Filter(name="Healthcare", filter_type="vertical", weight=5))
-        db.session.add(Filter(name="Insurance", filter_type="vertical", weight=6))
-        db.session.add(Filter(name="Manufacturing", filter_type="vertical", weight=7))
-        db.session.add(Filter(name="Media &amp; Entertainment", filter_type="vertical", weight=8))
-        db.session.add(Filter(name="Reseller &amp; Service Provider", filter_type="vertical", weight=9))
-        db.session.add(Filter(name="Retail", filter_type="vertical", weight=10))
-        db.session.add(Filter(name="Scientific Research", filter_type="vertical", weight=11))
-        db.session.add(Filter(name="Service Provider", filter_type="vertical", weight=12))
-        db.session.add(Filter(name="Technology", filter_type="vertical", weight=13))
-        db.session.add(Filter(name="Telecommunications", filter_type="vertical", weight=14))
-        db.session.add(Filter(name="Travel &amp; Hospitality", filter_type="vertical", weight=15))
-        db.session.add(Filter(name="Web Services", filter_type="vertical", weight=16))
-        db.session.add(Filter(name="Identity and Policy Control", filter_type="category", weight=0))
-        db.session.add(Filter(name="Network Management", filter_type="category", weight=1))
-        db.session.add(Filter(name="Network Operating System", filter_type="category", weight=2))
-        db.session.add(Filter(name="Routers", filter_type="category", weight=3))
-        db.session.add(Filter(name="Security", filter_type="category", weight=4))
-        db.session.add(Filter(name="Services", filter_type="category", weight=5))
-        db.session.add(Filter(name="Software Defined Networking", filter_type="category", weight=6))
-        db.session.add(Filter(name="Switches", filter_type="category", weight=7))
-        db.session.add(Filter(name="Wireless", filter_type="category", weight=8))
+        filter_type = FilterType.query.filter_by(tag='region').first()
+        db.session.add(Filter(name="Americas", filter_type=filter_type, weight=0))
+        db.session.add(Filter(name="APAC", filter_type=filter_type, weight=1))
+        db.session.add(Filter(name="EMEA", filter_type=filter_type, weight=2))
+        filter_type = FilterType.query.filter_by(tag='vertical').first()
+        db.session.add(Filter(name="E-commerce", filter_type=filter_type, weight=0))
+        db.session.add(Filter(name="Education", filter_type=filter_type, weight=1))
+        db.session.add(Filter(name="Energy", filter_type=filter_type, weight=2))
+        db.session.add(Filter(name="Financial Services", filter_type=filter_type, weight=3))
+        db.session.add(Filter(name="Government", filter_type=filter_type, weight=4))
+        db.session.add(Filter(name="Healthcare", filter_type=filter_type, weight=5))
+        db.session.add(Filter(name="Insurance", filter_type=filter_type, weight=6))
+        db.session.add(Filter(name="Manufacturing", filter_type=filter_type, weight=7))
+        db.session.add(Filter(name="Media &amp; Entertainment", filter_type=filter_type, weight=8))
+        db.session.add(Filter(name="Reseller &amp; Service Provider", filter_type=filter_type, weight=9))
+        db.session.add(Filter(name="Retail", filter_type=filter_type, weight=10))
+        db.session.add(Filter(name="Scientific Research", filter_type=filter_type, weight=11))
+        db.session.add(Filter(name="Service Provider", filter_type=filter_type, weight=12))
+        db.session.add(Filter(name="Technology", filter_type=filter_type, weight=13))
+        db.session.add(Filter(name="Telecommunications", filter_type=filter_type, weight=14))
+        db.session.add(Filter(name="Travel &amp; Hospitality", filter_type=filter_type, weight=15))
+        db.session.add(Filter(name="Web Services", filter_type=filter_type, weight=16))
+        filter_type = FilterType.query.filter_by(tag='category').first()
+        db.session.add(Filter(name="Identity and Policy Control", filter_type=filter_type, weight=0))
+        db.session.add(Filter(name="Network Management", filter_type=filter_type, weight=1))
+        db.session.add(Filter(name="Network Operating System", filter_type=filter_type, weight=2))
+        db.session.add(Filter(name="Routers", filter_type=filter_type, weight=3))
+        db.session.add(Filter(name="Security", filter_type=filter_type, weight=4))
+        db.session.add(Filter(name="Services", filter_type=filter_type, weight=5))
+        db.session.add(Filter(name="Software Defined Networking", filter_type=filter_type, weight=6))
+        db.session.add(Filter(name="Switches", filter_type=filter_type, weight=7))
+        db.session.add(Filter(name="Wireless", filter_type=filter_type, weight=8))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -174,8 +192,14 @@ def index():
 
 # FILE APIs
 @app.route('/api/v1/files', methods=['GET'])
-def files():
+def api_v1_files():
     results = files_schema.dump(File.query.all())
+    return jsonify({'results': results.data})
+
+
+@app.route('/api/v1/file/<id>', methods=['GET'])
+def api_v1_file(id):
+    results = file_schema.dump(File.query.filter_by(id=id).first())
     return jsonify({'results': results.data})
 
 
@@ -210,9 +234,10 @@ def filters_all():
 @app.route('/api/v1/filters/<filter_type>', methods=['GET'])
 def filters(filter_type):
     if filter_type == 'all':
-        results = filters_schema.dump(Filter.query.order_by(Filter.filter_type, Filter.weight).all())
+        results = filters_schema.dump(Filter.query.order_by(Filter.filter_type_id, Filter.weight).all())
     else:
-        results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.filter_type, Filter.weight).all())
+        filter_type = FilterType.query.filter_by(tag=filter_type).first()
+        results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all())
     return jsonify({'results': results.data})
 
 
@@ -265,9 +290,9 @@ def admin_files_add():
         return redirect(url_for('admin_files_edit', id=file.id))
 
     filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
     return render_template('admin_files_add.html', filter_hash=filter_hash)
 
 
@@ -314,9 +339,9 @@ def admin_files_edit(id):
 
     file = File.query.filter_by(id=id).first()
     filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
     return render_template('admin_files_edit.html', file=file, filter_hash=filter_hash)
 
 
@@ -332,39 +357,41 @@ def admin_files_delete(id):
             return redirect(url_for('admin_files'))
     file = File.query.filter_by(id=id).first()
     filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type='region').order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type='vertical').order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type='category').order_by(Filter.weight).all()
+    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
+    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
+    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
     return render_template('admin_files_delete.html', file=file, filter_hash=filter_hash)
 
 
 @app.route('/admin/filters')
 @roles_required('admin')
 def admin_filters_all():
-    return redirect(url_for('admin_filters', filter_type='all'))
+    return redirect(url_for('admin_filters', filter_type_tag='all'))
 
 
-@app.route('/admin/filters/<filter_type>')
+@app.route('/admin/filters/<filter_type_tag>')
 @roles_required('admin')
-def admin_filters(filter_type):
-    if filter_type == 'all':
+def admin_filters(filter_type_tag):
+    filter_types = FilterType.query.all()
+    filter_type = None
+    if filter_type_tag == 'all':
         filters = Filter.query.order_by(Filter.weight).all()
     else:
-        filters = Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all()
-    filter_types = FilterType.query.all()
-    return render_template('admin_filters.html', filter_type=filter_type, filters=filters, filter_types=filter_types)
+        filter_type = FilterType.query.filter_by(tag=filter_type_tag).first()
+        filters = Filter.query.filter_by(filter_type_id=filter_type.id).order_by(Filter.weight).all()
+    return render_template('admin_filters.html', filters=filters, filter_type=filter_type, filter_types=filter_types)
 
 
-@app.route('/admin/filters/add/<filter_type>', methods=['POST', 'GET'])
+@app.route('/admin/filters/add', methods=['POST', 'GET'])
 @roles_required('admin')
-def admin_filters_add(filter_type):
+def admin_filters_add():
     if 'submit-add' in request.form:
-        filter_type = request.form['filter_type']
-        db.session.add(Filter(name=request.form['name'], filter_type=filter_type, weight=request.form['weight']))
+        filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
+        db.session.add(Filter(name=request.form['name'], filter_type_id=filter_type.id, weight=request.form['weight']))
         db.session.commit()
-        return redirect(url_for('admin_filters', filter_type=filter_type))
+        return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
     filter_types = FilterType.query.all()
-    return render_template('admin_filters_add.html', filter_type=filter_type, filter_types=filter_types)
+    return render_template('admin_filters_add.html', filter_types=filter_types)
 
 
 @app.route('/admin/filters/edit/<id>', methods=['POST', 'GET'])
@@ -373,12 +400,13 @@ def admin_filters_edit(id):
     if 'submit-edit' in request.form:
         exists = db.session.query(Filter.id).filter_by(id=id).scalar()
         if exists:
+            filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
             filter = Filter.query.filter_by(id=id).first()
             filter.name = request.form.get('name')
-            filter.filter_type = request.form.get('filter_type')
+            filter.filter_type_id = filter_type.id
             filter.weight = request.form.get('weight')
             db.session.commit()
-            return redirect(url_for('admin_filters', filter_type=filter.filter_type))
+            return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
     filter = Filter.query.filter_by(id=id).first()
     filter_types = FilterType.query.all()
     return render_template('admin_filters_edit.html', filter=filter, filter_types=filter_types)
@@ -390,11 +418,14 @@ def admin_filters_delete(id):
     if 'submit-delete' in request.form:
         exists = db.session.query(Filter.id).filter_by(id=id).scalar()
         if exists:
+            print "request.form.get('filter_type_id')"
+            print request.form.get('filter_type_id')
+            filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
+            print filter_type.id
             filter = Filter.query.filter_by(id=id).first()
-            filter_type = filter.filter_type
             db.session.delete(filter)
             db.session.commit()
-            return redirect(url_for('admin_filters', filter_type=filter_type))
+            return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
     filter = Filter.query.filter_by(id=id).first()
     filter_types = FilterType.query.all()
     return render_template('admin_filters_delete.html', filter=filter, filter_types=filter_types)

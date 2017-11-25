@@ -6,8 +6,7 @@
 {% block content %}
 
     <h3>File List</h3>
-
-        <p>API: <a href="/api/v1/files" target="_blank">/api/v1/files</a></p>
+    <p>API: <a href="/api/v1/files" target="_blank">/api/v1/files</a></p>
     <hr>
 
     <table id="files-table" class="table table-striped table-bordered">
@@ -32,7 +31,7 @@
                 <td>{{ file.desc }}</td>
                 <td>
                     {%  for filter_item in file.filters %}
-                        <button class="btn btn-{{ filter_item.filter_type }} btn-xs">{{ filter_item.name }} </button>
+                        <button class="btn btn-{{ filter_item.filter_type.tag }} btn-xs">{{ filter_item.name }} </button>
                     {% endfor %}
                 </td>
                 <td>

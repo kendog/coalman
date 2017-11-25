@@ -6,49 +6,49 @@
 {% block content %}
 
     <h3>Delete File</h3>
-    <p>Are you sure???</p>
+    <p>API: <a href="/api/v1/file/{{ file.id }}" target="_blank">/api/v1/file/{{ file.id }}</a></p>
+    <p>Are you sure?</p>
 
     <form id="filter-form" method="post" action="">
 
 
-                    <div class="row">
+        <div class="row">
             <div class="col-md-7">
-
 
                 <hr>
 
 
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input disabled id="name" name="name" type="text" class="form-control" value="{{ filter.name }}" />
-        </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ filter.name }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="name">Type:</label>
-            <select disabled id="filter_type" name="filter_type" class="form-control">
-                {%  for filter_type_item in filter_types %}
-                    <option {% if filter_type_item.id == filter.filter_type %}selected{% endif %} value="{{ filter_type_item.id }}">{{ filter_type_item.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="name">Type:</label>
+                    <select disabled class="form-control">
+                        <option value="">Select Type</option>
+                        {%  for filter_type_item in filter_types %}
+                            <option {% if filter_type_item.id == filter.filter_type_id %}selected{% endif %} value="{{ filter_type_item.id }}">{{ filter_type_item.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" id="filter_type_id" name="filter_type_id" value="{{ filter.filter_type_id  }}">
+                </div>
 
-        <div class="form-group">
-            <label for="weight">Weight:</label>
-            <input disabled id="weight" name="weight" type="text" class="form-control" value="{{ filter.weight }}" />
-        </div>
+                <div class="form-group">
+                    <label for="weight">Weight:</label>
+                    <input disabled id="weight" name="weight" type="text" class="form-control" value="{{ filter.weight }}" />
+                </div>
 
-        <hr>
+                <hr>
 
-                                                </div>
+            </div>
 
             <div class="col-md-1"></div>
 
             <div class="col-md-4">
 
-                                                    </div>
+            </div>
         </div>
-
-
 
         <div class="form-group">
             <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
@@ -58,6 +58,17 @@
 
 {% endblock %}
 
+{% block plugins %}
 
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#filter-form").validate({
+                rules: {
+                    filter_type_id: "required"
+                }
+            });
+        });
+    </script>
 
-
+{% endblock %}
