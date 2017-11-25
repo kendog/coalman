@@ -119,6 +119,8 @@ file_schema = FileSchema()
 files_schema = FileSchema(many=True)
 filter_schema = FilterSchema()
 filters_schema = FilterSchema(many=True)
+filtertype_schema = FileSchema()
+filtertypes_schema = FileSchema(many=True)
 
 
 # First Run / Init
@@ -204,24 +206,31 @@ def api_v1_file(id):
 
 
 # Zip APIs
-@app.route('/zip/')
+@app.route('/zip')
 def zip():
-    zf = zipfile.ZipFile("%s.zip" % (dst), "w", zipfile.ZIP_DEFLATED)
-    abs_src = os.path.abspath(src)
-    for dirname, subdirs, files in os.walk(src):
-        for filename in files:
-            absname = os.path.abspath(os.path.join(dirname, filename))
-            arcname = absname[len(abs_src) + 1:]
-            print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
-            zf.write(absname, arcname)
+    file = File.query.filter_by(id=id).first()
+    zf = zipfile.ZipFile(app.config['DOWNLOAD_FOLDER'] + "myzip.zip", "w", zipfile.ZIP_DEFLATED)
+    absname = os.path.abspath(os.path.join(file.path, file.name))
+    arcname = absname[len(abs_src) + 1:]
+    print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
+    zf.write(absname, arcname)
     zf.close()
+
+#    zf = zipfile.ZipFile("%s.zip" % (dst), "w", zipfile.ZIP_DEFLATED)
+ #   abs_src = os.path.abspath(src)
+  #  for dirname, subdirs, files in os.walk(src):
+   #     for filename in files:
+    #        absname = os.path.abspath(os.path.join(dirname, filename))
+     #       arcname = absname[len(abs_src) + 1:]
+      #      print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
+       #     zf.write(absname, arcname)
+    #zf.close()
 
 
 # Send APIs
 @app.route('/download/<id>')
 def send_file(id):
     file = File.query.filter_by(id=id).first()
-    print file.path, file.name
     return send_from_directory(file.path, file.name)
 
 
