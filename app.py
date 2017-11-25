@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required, roles_required, utils
 from flask_marshmallow import Marshmallow
 from werkzeug.utils import secure_filename
+import zipfile
 
 # Create app
 app = Flask(__name__)
@@ -12,6 +13,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
+app.config['DOWNLOAD_FOLDER'] = app.root_path + '/downloads/'
 app.config['ALLOWED_EXTENSIONS'] = set(['pdf', 'PDF', 'png', 'PNG'])
 
 # Define models
@@ -177,11 +179,25 @@ def files():
     return jsonify({'results': results.data})
 
 
+# Zip APIs
+@app.route('/zip/')
+def zip():
+    zf = zipfile.ZipFile("%s.zip" % (dst), "w", zipfile.ZIP_DEFLATED)
+    abs_src = os.path.abspath(src)
+    for dirname, subdirs, files in os.walk(src):
+        for filename in files:
+            absname = os.path.abspath(os.path.join(dirname, filename))
+            arcname = absname[len(abs_src) + 1:]
+            print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
+            zf.write(absname, arcname)
+    zf.close()
+
+
 # Send APIs
-@app.route('/file/<id>')
+@app.route('/download/<id>')
 def send_file(id):
     file = File.query.filter_by(id=id).first()
-    filepath = os.path.join(file.path, file.name)
+    print file.path, file.name
     return send_from_directory(file.path, file.name)
 
 
@@ -191,7 +207,6 @@ def filters_all():
     return redirect(url_for('filters', filter_type='all'))
 
 
-
 @app.route('/api/v1/filters/<filter_type>', methods=['GET'])
 def filters(filter_type):
     if filter_type == 'all':
@@ -199,7 +214,6 @@ def filters(filter_type):
     else:
         results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.filter_type, Filter.weight).all())
     return jsonify({'results': results.data})
-
 
 
 # ADMIN Pages
