@@ -16,7 +16,7 @@
             {% endfor %}
         </select>
     </div>
-        <p>API: <a href="/api/v1/filters/{{ filter_type.tag }}" target="_blank">/api/v1/filters/{{ filter_type.tag }}</a></p>
+        <p>API: <a href="/api/v1/filters/{% if filter_type == None %}all{% else %}{{ filter_type.tag }}{% endif %}" target="_blank">/api/v1/filters/{% if filter_type == None %}all{% else %}{{ filter_type.tag }}{% endif %}</a></p>
     <hr>
 
     <table id="filters-table" class="table table-striped table-bordered">
