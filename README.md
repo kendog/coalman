@@ -3,7 +3,7 @@
 
 Coleman is an open-source content services platform written in Python and Flask.
 
-* Categorize, package and distribute content.
+* Categorize, package (zip) and distribute content.
 * APIs for your front-end applications.
 * Customizable self-service portal.
 
