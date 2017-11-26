@@ -18,7 +18,7 @@ Installation
 
 4. Install dependencies from `requirements.txt`.
 
-5. Create DB.
+5. db.create_all() and seed filter types.
 
 Development
 -----------
