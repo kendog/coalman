@@ -107,8 +107,17 @@ class FilterSchema(ma.Schema):
         fields = ('name', 'filter_type')
 
 
+class FilterSchema2(ma.Schema):
+    filter_type = ma.Nested(FilterTypeSchema)
+
+    class Meta:
+        model = Filter
+        # Fields to expose
+        fields = ('name', 'filter_type_id', 'id')
+
+
 class FileSchema(ma.Schema):
-    filters = ma.Nested(FilterSchema, many=True)
+    filters = ma.Nested(FilterSchema2, many=True)
 
     class Meta:
         model = File
@@ -119,8 +128,8 @@ class FileSchema(ma.Schema):
 
 file_schema = FileSchema()
 files_schema = FileSchema(many=True)
-filter_schema = FilterSchema()
-filters_schema = FilterSchema(many=True)
+filter_schema = FilterSchema2()
+filters_schema = FilterSchema2(many=True)
 filtertype_schema = FileSchema()
 filtertypes_schema = FileSchema(many=True)
 
@@ -155,14 +164,14 @@ def create_db():
         db.session.add(Filter(name="Healthcare", filter_type=filter_type, weight=5))
         db.session.add(Filter(name="Insurance", filter_type=filter_type, weight=6))
         db.session.add(Filter(name="Manufacturing", filter_type=filter_type, weight=7))
-        db.session.add(Filter(name="Media &amp; Entertainment", filter_type=filter_type, weight=8))
-        db.session.add(Filter(name="Reseller &amp; Service Provider", filter_type=filter_type, weight=9))
+        db.session.add(Filter(name="Media & Entertainment", filter_type=filter_type, weight=8))
+        db.session.add(Filter(name="Reseller & Service Provider", filter_type=filter_type, weight=9))
         db.session.add(Filter(name="Retail", filter_type=filter_type, weight=10))
         db.session.add(Filter(name="Scientific Research", filter_type=filter_type, weight=11))
         db.session.add(Filter(name="Service Provider", filter_type=filter_type, weight=12))
         db.session.add(Filter(name="Technology", filter_type=filter_type, weight=13))
         db.session.add(Filter(name="Telecommunications", filter_type=filter_type, weight=14))
-        db.session.add(Filter(name="Travel &amp; Hospitality", filter_type=filter_type, weight=15))
+        db.session.add(Filter(name="Travel & Hospitality", filter_type=filter_type, weight=15))
         db.session.add(Filter(name="Web Services", filter_type=filter_type, weight=16))
         filter_type = FilterType.query.filter_by(tag='category').first()
         db.session.add(Filter(name="Identity and Policy Control", filter_type=filter_type, weight=0))
@@ -192,6 +201,8 @@ def create_db():
 @app.route('/')
 def index():
     return redirect(url_for('admin'))
+#   return redirect(url_for('admin_files'))
+
 
 
 # FILE APIs
@@ -256,7 +267,7 @@ def filters(filter_type):
 @app.route('/admin')
 @login_required
 def admin():
-    return render_template('admin.html')
+    return redirect(url_for('admin_files'))
 
 
 @app.route('/admin/files')

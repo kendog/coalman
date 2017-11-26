@@ -34,7 +34,7 @@
             <tr>
                 <td>{{ filter.id }}</td>
                 <td>{{ filter.name }}</td>
-                <td>{{ filter.filter_type.name }}</td>
+                <td><button class="btn btn-{{ filter.filter_type.tag }} btn-xs">{{ filter.filter_type.name }} </button></td>
                 <td>{{ filter.weight }}</td>
                 <td>
                     <a href="/admin/filters/edit/{{ filter.id }}" class="btn btn-warning btn-block btn-xs">Edit</a>
