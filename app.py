@@ -113,11 +113,11 @@ class FilterSchema2(ma.Schema):
     class Meta:
         model = Filter
         # Fields to expose
-        fields = ('name', 'filter_type_id', 'id')
+        fields = ('name', 'filter_type_id', 'id', 'filter_type')
 
 
 class FileSchema(ma.Schema):
-    filters = ma.Nested(FilterSchema2, many=True)
+    filters = ma.Nested(FilterSchema, many=True)
 
     class Meta:
         model = File
@@ -128,8 +128,8 @@ class FileSchema(ma.Schema):
 
 file_schema = FileSchema()
 files_schema = FileSchema(many=True)
-filter_schema = FilterSchema2()
-filters_schema = FilterSchema2(many=True)
+filter_schema = FilterSchema()
+filters_schema = FilterSchema(many=True)
 filtertype_schema = FileSchema()
 filtertypes_schema = FileSchema(many=True)
 
