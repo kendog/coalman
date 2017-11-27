@@ -270,7 +270,7 @@ def admin():
 
 
 @app.route('/admin/files')
-@roles_required('admin')
+@login_required
 def admin_files():
     files = File.query.all()
     return render_template('admin_files.html', files=files)
@@ -281,7 +281,7 @@ def allowed_file(filename):
 
 
 @app.route('/admin/files/add', methods=['POST', 'GET'])
-@roles_required('admin')
+@login_required
 def admin_files_add():
     if 'submit-add' in request.form:
         # Update Metadata
@@ -324,7 +324,7 @@ def error_uploads(errors):
 
 
 @app.route('/admin/files/edit/<id>', methods=['POST', 'GET'])
-@roles_required('admin')
+@login_required
 def admin_files_edit(id):
     if 'submit-edit' in request.form:
         exists = db.session.query(File.id).filter_by(id=id).scalar()
@@ -367,7 +367,7 @@ def admin_files_edit(id):
 
 
 @app.route('/admin/files/delete/<id>', methods=['POST', 'GET'])
-@roles_required('admin')
+@login_required
 def admin_files_delete(id):
     if 'submit-delete' in request.form:
         exists = db.session.query(File.id).filter_by(id=id).scalar()
