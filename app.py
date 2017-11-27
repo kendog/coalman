@@ -204,7 +204,6 @@ def index():
 #   return redirect(url_for('admin_files'))
 
 
-
 # FILE APIs
 @app.route('/api/v1/files', methods=['GET'])
 def api_v1_files():
@@ -451,6 +450,59 @@ def admin_filters_delete(id):
     filter = Filter.query.filter_by(id=id).first()
     filter_types = FilterType.query.all()
     return render_template('admin_filters_delete.html', filter=filter, filter_types=filter_types)
+
+
+@app.route('/admin/users')
+@roles_required('admin')
+def admin_users():
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+
+@app.route('/admin/users/add', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_users_add():
+    if 'submit-add' in request.form:
+        encrypted_password = utils.hash_password(request.form['password'])
+        user_datastore.create_user(email=request.form['email'], password=encrypted_password)
+        db.session.commit()
+        user_datastore.add_role_to_user(request.form['email'], request.form['role'])
+        db.session.commit()
+        return redirect(url_for('admin_users'))
+    roles = Role.query.all()
+    return render_template('admin_users_add.html', roles=roles)
+
+
+@app.route('/admin/users/edit/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_users_edit(id):
+    if 'submit-edit' in request.form:
+        exists = user_datastore.get_user(id)
+        if exists:
+            user = user_datastore.get_user(id)
+            user_datastore.remove_role_from_user(user.email, 'admin')
+            user_datastore.remove_role_from_user(user.email, 'end-user')
+            user_datastore.add_role_to_user(user.email, request.form['role'])
+            db.session.commit()
+        return redirect(url_for('admin_users'))
+    user = User.query.filter_by(id=id).first()
+    roles = Role.query.all()
+    return render_template('admin_users_edit.html', user=user, roles=roles)
+
+
+@app.route('/admin/users/delete/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_users_delete(id):
+    if 'submit-delete' in request.form:
+        exists = user_datastore.get_user(id)
+        if exists:
+            user = user_datastore.get_user(id)
+            db.session.delete(user)
+            db.session.commit()
+        return redirect(url_for('admin_users'))
+    user = User.query.filter_by(id=id).first()
+    roles = Role.query.all()
+    return render_template('admin_users_delete.html', user=user, roles=roles)
 
 
 if __name__ == "__main__":
