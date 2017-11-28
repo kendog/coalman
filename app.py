@@ -10,13 +10,17 @@ from flask_cors import CORS
 # Create app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
 app.config['DOWNLOAD_FOLDER'] = app.root_path + '/downloads/'
 app.config['ALLOWED_EXTENSIONS'] = set(['pdf', 'PDF', 'png', 'PNG'])
+
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+
+
 
 # Define models
 roles_users = db.Table('roles_users',
@@ -51,8 +55,8 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
 
 
-filters_files = db.Table('tags',
-    db.Column('filter_id', db.Integer, db.ForeignKey('Filters.id'), primary_key=True),
+tags_files = db.Table('tags_files',
+    db.Column('tag_id', db.Integer, db.ForeignKey('Tags.id'), primary_key=True),
     db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True)
 )
 
@@ -64,25 +68,26 @@ class File(db.Model):
     path = db.Column(db.String(255))
     title = db.Column(db.String(255))
     desc = db.Column(db.String(255))
-    filters = db.relationship('Filter', secondary=filters_files, lazy='subquery', backref=db.backref('Files', lazy=True))
+    tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
 
 
-class Filter(db.Model):
-    __tablename__ = 'Filters'
+class Tag(db.Model):
+    __tablename__ = 'Tags'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
-    filter_type = db.Column(db.String(225))
+    tag_id = db.Column(db.String(255))
     weight = db.Column(db.Integer())
-    filter_type_id = db.Column(db.Integer, db.ForeignKey('FilterTypes.id'))
-    filter_type = db.relationship("FilterType", back_populates="filters")
+    tag_group_id = db.Column(db.Integer, db.ForeignKey('TagGroups.id'))
+    tag_group = db.relationship("TagGroup", back_populates="tags")
 
 
-class FilterType(db.Model):
-    __tablename__ = 'FilterTypes'
-    id = db.Column(db.Integer, primary_key=True)
+class TagGroup(db.Model):
+    __tablename__ = 'TagGroups'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
-    tag = db.Column(db.String(255))
-    filters = db.relationship("Filter", back_populates="filter_type")
+    tag_id = db.Column(db.String(255))
+    weight = db.Column(db.Integer())
+    tags = db.relationship("Tag", back_populates="tag_group")
 
 
 # Setup Flask-Security
@@ -91,98 +96,83 @@ security = Security(app, user_datastore)
 
 
 # Define Schemas
-class FilterTypeSchema(ma.Schema):
+class TagGroupSchema(ma.Schema):
     class Meta:
-        model = FilterType
+        model = TagGroup
         # Fields to expose
-        fields = ('name', 'tag')
+        fields = ('name', 'tag_id')
 
 
-class FilterSchema(ma.Schema):
-    filter_type = ma.Nested(FilterTypeSchema)
-
-    class Meta:
-        model = Filter
-        # Fields to expose
-        fields = ('name', 'filter_type')
-
-
-class FilterSchema2(ma.Schema):
-    filter_type = ma.Nested(FilterTypeSchema)
+class TagSchema(ma.Schema):
+    tag_group = ma.Nested(TagGroupSchema)
 
     class Meta:
-        model = Filter
+        model = Tag
         # Fields to expose
-        fields = ('name', 'filter_type_id', 'id', 'filter_type')
+        fields = ('name', 'tag_id', 'tag_group')
 
 
 class FileSchema(ma.Schema):
-    filters = ma.Nested(FilterSchema, many=True)
+    tags = ma.Nested(TagGroupSchema, many=True)
 
     class Meta:
         model = File
         # Fields to expose
-
-        fields = ('id', 'name', 'title', 'desc', 'filters')
+        fields = ('id', 'name', 'title', 'desc', 'tags')
 
 
 file_schema = FileSchema()
 files_schema = FileSchema(many=True)
-filter_schema = FilterSchema()
-filters_schema = FilterSchema(many=True)
-filtertype_schema = FileSchema()
-filtertypes_schema = FileSchema(many=True)
+tag_schema = TagSchema()
+tags_schema = TagSchema(many=True)
+tag_group_schema = TagGroupSchema()
+tag_groups_schema = TagGroupSchema(many=True)
 
 
 # First Run / Init
 @app.before_first_request
 def create_db():
     db.create_all()
-    # Populate FilterGroup
-    filter_group = FilterType.query.first()
-    if filter_group is None:
-        region = FilterType(tag="region", name="Region")
-        vertical = FilterType(tag="vertical", name="Vertical")
-        category = FilterType(tag="category", name="Category")
-        db.session.add(region)
-        db.session.add(vertical)
-        db.session.add(category)
+    # Populate Tag Groups
+    if TagGroup.query.first() is None:
+        db.session.add(TagGroup(name="Region", tag_id="region", weight=0))
+        db.session.add(TagGroup(name="Vertical", tag_id="vertical", weight=0))
+        db.session.add(TagGroup(name="Category", tag_id="category", weight=0))
         db.session.commit()
-    # Populate Filters
-    filter = Filter.query.first()
-    if filter is None:
-        filter_type = FilterType.query.filter_by(tag='region').first()
-        db.session.add(Filter(name="Americas", filter_type=filter_type, weight=0))
-        db.session.add(Filter(name="APAC", filter_type=filter_type, weight=1))
-        db.session.add(Filter(name="EMEA", filter_type=filter_type, weight=2))
-        filter_type = FilterType.query.filter_by(tag='vertical').first()
-        db.session.add(Filter(name="E-commerce", filter_type=filter_type, weight=0))
-        db.session.add(Filter(name="Education", filter_type=filter_type, weight=1))
-        db.session.add(Filter(name="Energy", filter_type=filter_type, weight=2))
-        db.session.add(Filter(name="Financial Services", filter_type=filter_type, weight=3))
-        db.session.add(Filter(name="Government", filter_type=filter_type, weight=4))
-        db.session.add(Filter(name="Healthcare", filter_type=filter_type, weight=5))
-        db.session.add(Filter(name="Insurance", filter_type=filter_type, weight=6))
-        db.session.add(Filter(name="Manufacturing", filter_type=filter_type, weight=7))
-        db.session.add(Filter(name="Media & Entertainment", filter_type=filter_type, weight=8))
-        db.session.add(Filter(name="Reseller & Service Provider", filter_type=filter_type, weight=9))
-        db.session.add(Filter(name="Retail", filter_type=filter_type, weight=10))
-        db.session.add(Filter(name="Scientific Research", filter_type=filter_type, weight=11))
-        db.session.add(Filter(name="Service Provider", filter_type=filter_type, weight=12))
-        db.session.add(Filter(name="Technology", filter_type=filter_type, weight=13))
-        db.session.add(Filter(name="Telecommunications", filter_type=filter_type, weight=14))
-        db.session.add(Filter(name="Travel & Hospitality", filter_type=filter_type, weight=15))
-        db.session.add(Filter(name="Web Services", filter_type=filter_type, weight=16))
-        filter_type = FilterType.query.filter_by(tag='category').first()
-        db.session.add(Filter(name="Identity and Policy Control", filter_type=filter_type, weight=0))
-        db.session.add(Filter(name="Network Management", filter_type=filter_type, weight=1))
-        db.session.add(Filter(name="Network Operating System", filter_type=filter_type, weight=2))
-        db.session.add(Filter(name="Routers", filter_type=filter_type, weight=3))
-        db.session.add(Filter(name="Security", filter_type=filter_type, weight=4))
-        db.session.add(Filter(name="Services", filter_type=filter_type, weight=5))
-        db.session.add(Filter(name="Software Defined Networking", filter_type=filter_type, weight=6))
-        db.session.add(Filter(name="Switches", filter_type=filter_type, weight=7))
-        db.session.add(Filter(name="Wireless", filter_type=filter_type, weight=8))
+    # Populate Tags
+    if Tag.query.first() is None:
+        tag_group = TagGroup.query.filter_by(tag_id='region').first()
+        db.session.add(Tag(name="Americas", tag_id='americas', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="APAC", tag_id='apac', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="EMEA", tag_id='emea', tag_group=tag_group, weight=0))
+        tag_group = TagGroup.query.filter_by(tag_id='vertical').first()
+        db.session.add(Tag(name="E-commerce", tag_id='e-commerce', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Education", tag_id='education', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Energy", tag_id='energy', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Financial Services", tag_id='financial-services', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Government", tag_id='government', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Healthcare", tag_id='healthcare', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Insurance", tag_id='insurance', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Manufacturing", tag_id='manufacturing', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Media & Entertainment", tag_id='media-entertainment', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Reseller & Service Provider", tag_id='reseller-service-provider', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Retail", tag_id='retail', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Scientific Research", tag_id='scientific-research', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Service Provider", tag_id='service-provider', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Technology", tag_id='technology', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Telecommunications", tag_id='telecommunications', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Travel & Hospitality", tag_id='travel-hospitality', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Web Services", tag_id='web-services', tag_group=tag_group, weight=0))
+        tag_group = TagGroup.query.filter_by(tag_id='category').first()
+        db.session.add(Tag(name="Identity & Policy Control", tag_id='identity-policy-control', tag_group=tag_group, weight=0))
+        db.session.add(Tag(name="Network Management", tag_id='network-management', tag_group=tag_group, weight=1))
+        db.session.add(Tag(name="Network Operating System", tag_id='network-operating-system', tag_group=tag_group, weight=2))
+        db.session.add(Tag(name="Routers", tag_id='routers', tag_group=tag_group, weight=3))
+        db.session.add(Tag(name="Security", tag_id='security', tag_group=tag_group, weight=4))
+        db.session.add(Tag(name="Services", tag_id='services', tag_group=tag_group, weight=5))
+        db.session.add(Tag(name="Software Defined Networking", tag_id='software-defined-networking', tag_group=tag_group, weight=6))
+        db.session.add(Tag(name="Switches", tag_id='switches', tag_group=tag_group, weight=7))
+        db.session.add(Tag(name="Wireless", tag_id='wireless', tag_group=tag_group, weight=8))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -201,7 +191,6 @@ def create_db():
 @app.route('/')
 def index():
     return redirect(url_for('admin'))
-#   return redirect(url_for('admin_files'))
 
 
 # FILE APIs
@@ -247,18 +236,24 @@ def send_file(id):
 
 
 # Tags APIs
-@app.route('/api/v1/filters', methods=['GET'])
-def filters_all():
-    return redirect(url_for('filters', filter_type='all'))
+@app.route('/api/v1/tags', methods=['GET'])
+def api_v1_tags_all():
+    return redirect(url_for('tags', tag_group='all'))
 
 
-@app.route('/api/v1/filters/<filter_type>', methods=['GET'])
-def filters(filter_type):
-    if filter_type == 'all':
-        results = filters_schema.dump(Filter.query.order_by(Filter.filter_type_id, Filter.weight).all())
+@app.route('/api/v1/tags/<tag_group_tag>', methods=['GET'])
+def api_v1_tags(tag_group_tag):
+    if tag_group_tag == 'all':
+        results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
     else:
-        filter_type = FilterType.query.filter_by(tag=filter_type).first()
-        results = filters_schema.dump(Filter.query.filter_by(filter_type=filter_type).order_by(Filter.weight).all())
+        tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
+        results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
+    return jsonify({'results': results.data})
+
+
+@app.route('/api/v1/tag_groups', methods=['GET'])
+def api_v1_tag_groups():
+    results = tag_groups_schema.dump(TagGroup.query.order_by(TagGroup.weight).all())
     return jsonify({'results': results.data})
 
 
@@ -273,7 +268,8 @@ def admin():
 @login_required
 def admin_files():
     files = File.query.all()
-    return render_template('admin_files.html', files=files)
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    return render_template('admin_files.html', files=files, tag_groups=tag_groups)
 
 
 def allowed_file(filename):
@@ -291,10 +287,10 @@ def admin_files_add():
 
         # Update Tags
         tags = request.form.getlist('tags')
-        for tag_id in tags:
-            exists = db.session.query(Filter.id).filter_by(id=tag_id).scalar()
+        for item in tags:
+            exists = db.session.query(Tag.id).filter_by(id=item).scalar()
             if exists:
-                file.filters.append(Filter.query.filter_by(id=tag_id).first())
+                file.tags.append(Tag.query.filter_by(id=item).first())
                 db.session.commit()
 
         # Upload File
@@ -310,11 +306,11 @@ def admin_files_add():
 
         return redirect(url_for('admin_files'))
 
-    filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
-    return render_template('admin_files_add.html', filter_hash=filter_hash)
+    tag_hash = {}
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    for groups in tag_groups:
+        tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
+    return render_template('admin_files_add.html', tag_groups=tag_groups, tag_hash=tag_hash)
 
 
 @app.route('/error/uploads/<errors>')
@@ -337,12 +333,12 @@ def admin_files_edit(id):
 
             # Update Tags
             tags = request.form.getlist('tags')
-            new_filters = []
-            for tag_id in tags:
-                exists = db.session.query(Filter.id).filter_by(id=tag_id).scalar()
+            new_tags = []
+            for item in tags:
+                exists = db.session.query(Tag.id).filter_by(id=item).scalar()
                 if exists:
-                    new_filters.append(Filter.query.filter_by(id=tag_id).first())
-            file.filters[:] = new_filters
+                    new_tags.append(Tag.query.filter_by(id=item).first())
+            file.tags[:] = new_tags
             db.session.commit()
 
             # Upload File
@@ -356,14 +352,14 @@ def admin_files_edit(id):
                     file.path = app.config['UPLOAD_FOLDER']
                     db.session.commit()
 
-            return redirect(url_for('admin_files_edit', id=file.id))
+            return redirect(url_for('admin_files'))
 
     file = File.query.filter_by(id=id).first()
-    filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
-    return render_template('admin_files_edit.html', file=file, filter_hash=filter_hash)
+    tag_hash = {}
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    for groups in tag_groups:
+        tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
+    return render_template('admin_files_edit.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
 
 
 @app.route('/admin/files/delete/<id>', methods=['POST', 'GET'])
@@ -377,79 +373,124 @@ def admin_files_delete(id):
             db.session.commit()
             return redirect(url_for('admin_files'))
     file = File.query.filter_by(id=id).first()
-    filter_hash = {}
-    filter_hash['region'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='region').first()).order_by(Filter.weight).all()
-    filter_hash['vertical'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='vertical').first()).order_by(Filter.weight).all()
-    filter_hash['category'] = Filter.query.filter_by(filter_type=FilterType.query.filter_by(tag='category').first()).order_by(Filter.weight).all()
-    return render_template('admin_files_delete.html', file=file, filter_hash=filter_hash)
+    tag_hash = {}
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    for groups in tag_groups:
+        tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
+    return render_template('admin_files_delete.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
 
 
-@app.route('/admin/filters')
+@app.route('/admin/tags')
 @roles_required('admin')
-def admin_filters_all():
-    return redirect(url_for('admin_filters', filter_type_tag='all'))
+def admin_tags_all():
+    return redirect(url_for('admin_tags', tag_group_tag='all'))
 
 
-@app.route('/admin/filters/<filter_type_tag>')
+@app.route('/admin/tags/<tag_group_tag>')
 @roles_required('admin')
-def admin_filters(filter_type_tag):
-    filter_types = FilterType.query.all()
-    filter_type = None
-    if filter_type_tag == 'all':
-        filters = Filter.query.order_by(Filter.weight).all()
+def admin_tags(tag_group_tag):
+    tag_groups = TagGroup.query.all()
+    tag_group = None
+    if tag_group_tag == 'all':
+        tags = Tag.query.order_by(Tag.weight).all()
     else:
-        filter_type = FilterType.query.filter_by(tag=filter_type_tag).first()
-        filters = Filter.query.filter_by(filter_type_id=filter_type.id).order_by(Filter.weight).all()
-    return render_template('admin_filters.html', filters=filters, filter_type=filter_type, filter_types=filter_types)
+        tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
+        tags = Tag.query.filter_by(tag_group_id=tag_group.id).order_by(Tag.weight).all()
+    return render_template('admin_tags.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
 
 
-@app.route('/admin/filters/add', methods=['POST', 'GET'])
+@app.route('/admin/tags/add', methods=['POST', 'GET'])
 @roles_required('admin')
-def admin_filters_add():
+def admin_tags_add():
     if 'submit-add' in request.form:
-        filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
-        db.session.add(Filter(name=request.form['name'], filter_type_id=filter_type.id, weight=request.form['weight']))
+        tag_group = TagGroup.query.filter_by(id=request.form.get('tag_group_id')).first()
+        db.session.add(Tag(name=request.form['name'], tag_id=request.form['tag_id'], tag_group=tag_group, weight=request.form['weight']))
         db.session.commit()
-        return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
-    filter_types = FilterType.query.all()
-    return render_template('admin_filters_add.html', filter_types=filter_types)
+        return redirect(url_for('admin_tags', tag_group_tag=tag_group.tag_id))
+    tag_groups = TagGroup.query.all()
+    return render_template('admin_tags_add.html', tag_groups=tag_groups)
 
 
-@app.route('/admin/filters/edit/<id>', methods=['POST', 'GET'])
+@app.route('/admin/tags/edit/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
-def admin_filters_edit(id):
+def admin_tags_edit(id):
     if 'submit-edit' in request.form:
-        exists = db.session.query(Filter.id).filter_by(id=id).scalar()
+        exists = db.session.query(Tag.id).filter_by(id=id).scalar()
         if exists:
-            filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
-            filter = Filter.query.filter_by(id=id).first()
-            filter.name = request.form.get('name')
-            filter.filter_type_id = filter_type.id
-            filter.weight = request.form.get('weight')
+            tag_group = TagGroup.query.filter_by(id=request.form.get('tag_group_id')).first()
+            tag = Tag.query.filter_by(id=id).first()
+            tag.name = request.form.get('name')
+            tag.tag_id = request.form.get('tag_id')
+            tag.tag_group = tag_group
+            tag.weight = request.form.get('weight')
             db.session.commit()
-            return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
-    filter = Filter.query.filter_by(id=id).first()
-    filter_types = FilterType.query.all()
-    return render_template('admin_filters_edit.html', filter=filter, filter_types=filter_types)
+            return redirect(url_for('admin_tags', tag_group_tag=tag_group.tag_id))
+    tag = Tag.query.filter_by(id=id).first()
+    tag_groups = TagGroup.query.all()
+    return render_template('admin_tags_edit.html', tag=tag, tag_groups=tag_groups)
 
 
-@app.route('/admin/filters/delete/<id>', methods=['POST', 'GET'])
+@app.route('/admin/tags/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
-def admin_filters_delete(id):
+def admin_tags_delete(id):
     if 'submit-delete' in request.form:
-        exists = db.session.query(Filter.id).filter_by(id=id).scalar()
+        exists = db.session.query(Tag.id).filter_by(id=id).scalar()
         if exists:
-            print "request.form.get('filter_type_id')"
-            print request.form.get('filter_type_id')
-            filter_type = FilterType.query.filter_by(id=request.form.get('filter_type_id')).first()
-            print filter_type.id
-            filter = Filter.query.filter_by(id=id).first()
-            db.session.delete(filter)
+            tag_group = TagGroup.query.filter_by(id=request.form.get('tag_group_id')).first()
+            tag = Tag.query.filter_by(id=id).first()
+            db.session.delete(tag)
             db.session.commit()
-            return redirect(url_for('admin_filters', filter_type_tag=filter_type.tag))
-    filter = Filter.query.filter_by(id=id).first()
-    filter_types = FilterType.query.all()
-    return render_template('admin_filters_delete.html', filter=filter, filter_types=filter_types)
+            return redirect(url_for('admin_tags', tag_group_tag=tag_group.tag_id))
+    tag = Tag.query.filter_by(id=id).first()
+    tag_groups = TagGroup.query.all()
+    return render_template('admin_tags_delete.html', tag=tag, tag_groups=tag_groups)
+
+
+@app.route('/admin/tag_groups')
+@roles_required('admin')
+def admin_tag_groups():
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    return render_template('admin_tag_groups.html', tag_groups=tag_groups)
+
+
+@app.route('/admin/tag_groups/add', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_tag_groups_add():
+    if 'submit-add' in request.form:
+        db.session.add(TagGroup(name=request.form['name'], tag_id=request.form['tag_id'], weight=request.form['weight']))
+        db.session.commit()
+        return redirect(url_for('admin_tag_groups'))
+    return render_template('admin_tag_groups_add.html')
+
+
+@app.route('/admin/tag_groups/edit/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_tag_groups_edit(id):
+    if 'submit-edit' in request.form:
+        exists = db.session.query(TagGroup.id).filter_by(id=id).scalar()
+        if exists:
+            tag_group = TagGroup.query.filter_by(id=id).first()
+            tag_group.name = request.form.get('name')
+            tag_group.tag_id = request.form.get('tag_id')
+            tag_group.weight = request.form.get('weight')
+            db.session.commit()
+            return redirect(url_for('admin_tag_groups'))
+    tag_group = TagGroup.query.filter_by(id=id).first()
+    return render_template('admin_tag_groups_edit.html', tag_group=tag_group)
+
+
+@app.route('/admin/tag_groups/delete/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_tag_groups_delete(id):
+    if 'submit-delete' in request.form:
+        exists = db.session.query(TagGroup.id).filter_by(id=id).scalar()
+        if exists:
+            tag_group = TagGroup.query.filter_by(id=id).first()
+            db.session.delete(tag_group)
+            db.session.commit()
+            return redirect(url_for('admin_tag_groups'))
+    tag_group = TagGroup.query.filter_by(id=id).first()
+    return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
 
 
 @app.route('/admin/users')

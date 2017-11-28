@@ -5,7 +5,7 @@
 
 {% block content %}
 
-    <h3>File List</h3>
+    <h3>Files</h3>
     <p>API: <a href="/api/v1/files" target="_blank">/api/v1/files</a></p>
     <hr>
 
@@ -16,9 +16,9 @@
             <th>Title</th>
             <th>Description</th>
             <th>Tags:
-                <button class="btn btn-region btn-xs">region</button>
-                <button class="btn btn-vertical btn-xs">vertical</button>
-                <button class="btn btn-category btn-xs">category</button>
+                {%  for group in tag_groups %}
+                    <button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button>
+                {% endfor %}
             </th>
             <th></th>
         </tr>
@@ -30,8 +30,8 @@
                 <td>{{ file.title }}</td>
                 <td>{{ file.desc }}</td>
                 <td>
-                    {%  for filter_item in file.filters %}
-                        <button class="btn btn-{{ filter_item.filter_type.tag }} btn-xs">{{ filter_item.name }} </button>
+                    {%  for tag in file.tags %}
+                        <button class="btn btn-{{ tag.tag_group.tag_id }} btn-xs">{{ tag.name }} </button>
                     {% endfor %}
                 </td>
                 <td>

@@ -1,0 +1,67 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "admin_tag_groups_add" %}
+
+{% block title %}Add Tag{% endblock %}
+
+{% block content %}
+
+    <h3>Add Tag Group</h3>
+
+    <form id="tag-group-form" method="post" action="">
+
+        <div class="row">
+            <div class="col-md-7">
+
+                <hr>
+
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input id="name" name="name" type="text" class="form-control" value="" />
+                </div>
+
+                <div class="form-group">
+                    <label for="tag_id">Tag ID:</label>
+                    <input id="tag_id" name="tag_id" type="text" class="form-control" value="" />
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight:</label>
+                    <input id="weight" name="weight" type="text" class="form-control" value="0" />
+                </div>
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#tag-group-form").validate({
+                rules: {
+                    name: "required",
+                    tag_id: "required",
+                    weight: "required"
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

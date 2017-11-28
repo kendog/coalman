@@ -1,5 +1,5 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "admin_files" %}
+{% set active_section = "admin_files_add" %}
 
 {% block title %}Add File{% endblock %}
 
@@ -37,26 +37,15 @@
 
             <div class="col-md-4">
                 <div class="form-group">
-                    <p><button class="btn btn-region btn-xs">region</button></p>
-                    <div class="form-check form-check-inline">
-                        {%  for filter in filter_hash['region'] %}
-                            <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                        {% endfor %}
-                    </div>
-                    <br>
-                    <p><button class="btn btn-vertical btn-xs">vertical</button></p>
-                    <div class="form-check form-check-inline">
-                        {%  for filter in filter_hash['vertical'] %}
-                            <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                        {% endfor %}
-                    </div>
-                    <br>
-                    <p><button class="btn btn-category btn-xs">category</button></p>
-                    <div class="form-check form-check-inline">
-                        {%  for filter in filter_hash['category'] %}
-                            <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                        {% endfor %}
-                    </div>
+                    {%  for group in tag_groups %}
+                    <p><button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button></p>
+                        <div class="form-check form-check-inline">
+                            {%  for tag in tag_hash[group.tag_id] %}
+                                <input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}
+                            {% endfor %}
+                        </div>
+                        <br>
+                    {% endfor %}
                 </div>
 
             </div>

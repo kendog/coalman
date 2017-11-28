@@ -1,5 +1,5 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "admin_files" %}
+{% set active_section = "admin_files_delete" %}
 
 {% block title %}Delete {{ file.name }}{% endblock %}
 
@@ -11,58 +11,43 @@
 
     <form id="files-form" method="post" action="">
 
-            <div class="row">
+        <div class="row">
             <div class="col-md-7">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input disabled id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input disabled id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
-        </div>
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    <input disabled id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="desc">Description</label>
-            <input disabled id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
-        </div>
+                <hr>
 
-        <hr>
+                <div class="form-group">
+                    <label for="name">File</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                </div>
 
-        <div class="form-group">
-            <label for="name">File</label>
-            <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
-        </div>
-
-
-                        </div>
+            </div>
 
             <div class="col-md-1"></div>
 
-            <div class="col-md-4">
-
-
-        <div class="form-group">
-            <p><button class="btn btn-region btn-xs">region</button></p>
-            <div class="form-check form-check-inline">
-                {%  for filter in filter_hash['region'] %}
-                    <input disabled {% if filter in file.filters %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                {% endfor %}
-            </div>
-            <br>
-            <p><button class="btn btn-vertical btn-xs">vertical</button></p>
-            <div class="form-check form-check-inline">
-                {%  for filter in filter_hash['vertical'] %}
-                    <input disabled {% if filter in file.filters %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                {% endfor %}
-            </div>
-            <br>
-            <p><button class="btn btn-category btn-xs">category</button></p>
-            <div class="form-check form-check-inline">
-                {%  for filter in filter_hash['category'] %}
-                    <input disabled {% if filter in file.filters %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ filter.id }}"> {{ filter.name }}
-                {% endfor %}
-            </div>
-        </div>
-
+             <div class="col-md-4">
+                <div class="form-group">
+                    {%  for group in tag_groups %}
+                    <p><button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button></p>
+                        <div class="form-check form-check-inline">
+                            {%  for tag in tag_hash[group.tag_id] %}
+                                <input disabled {% if tag in file.tags %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}
+                            {% endfor %}
                         </div>
+                        <br>
+                    {% endfor %}
+                </div>
+
+            </div>
         </div>
 
         <hr>
