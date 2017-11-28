@@ -6,6 +6,7 @@ from flask_marshmallow import Marshmallow
 from werkzeug.utils import secure_filename
 import zipfile
 from flask_cors import CORS
+import datetime
 
 # Create app
 app = Flask(__name__)
@@ -69,6 +70,8 @@ class File(db.Model):
     title = db.Column(db.String(255))
     desc = db.Column(db.String(255))
     tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 
 class Tag(db.Model):
@@ -88,6 +91,35 @@ class TagGroup(db.Model):
     tag_id = db.Column(db.String(255))
     weight = db.Column(db.Integer())
     tags = db.relationship("Tag", back_populates="tag_group")
+
+
+packages_files = db.Table('packages_files',
+    db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True),
+    db.Column('package_id', db.Integer, db.ForeignKey('Packages.id'), primary_key=True)
+)
+
+
+class Package(db.Model):
+    __tablename__ = 'Packages'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
+    path = db.Column(db.String(255))
+    url = db.Column(db.String(255))
+    user_name = db.Column(db.String(255))
+    user_email = db.Column(db.String(255))
+    files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
+    status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
+    status = db.relationship("PackageStatus", back_populates="packages")
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
+
+
+class PackageStatus(db.Model):
+    __tablename__ = 'PackageStatuses'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
+    tag_id = db.Column(db.String(255))
+    packages = db.relationship("Package", back_populates="status")
 
 
 # Setup Flask-Security
@@ -144,7 +176,16 @@ def create_db():
         db.session.commit()
         user_datastore.add_role_to_user('admin@coalman.com', 'admin')
         db.session.commit()
-
+    # Populate Package Statuses
+    package_statuses = PackageStatus.query.first()
+    if package_statuses is None:
+        db.session.add(PackageStatus(name="Not Started", tag_id="not-started"))
+        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
+        db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
+        db.session.add(PackageStatus(name="Deferred", tag_id="deferred"))
+        db.session.add(PackageStatus(name="Completed", tag_id="completed"))
+        db.session.add(PackageStatus(name="Error", tag_id="error"))
+        db.session.commit()
 
 # Public Frontend
 @app.route('/')
@@ -187,11 +228,17 @@ def zip():
     #zf.close()
 
 
-# Send APIs
-@app.route('/download/<id>')
-def send_file(id):
+# download APIs
+@app.route('/download/file/<id>')
+def download_file(id):
     file = File.query.filter_by(id=id).first()
     return send_from_directory(file.path, file.name)
+
+
+@app.route('/download/package/<id>')
+def download_package(id):
+    package = Package.query.filter_by(id=id).first()
+    return send_from_directory(package.path, package.name)
 
 
 # Tags APIs
@@ -455,6 +502,58 @@ def admin_tag_groups_delete(id):
             return redirect(url_for('admin_tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
     return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
+
+
+@app.route('/admin/packages')
+@roles_required('admin')
+def admin_packages():
+    packages = Package.query.all()
+    return render_template('admin_packages.html', packages=packages)
+
+
+@app.route('/admin/packages/add', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_packages_add():
+    if 'submit-add' in request.form:
+        # Update Metadata
+        package = Package(user_name=request.form.get('user_name'), user_email=request.form.get('user_email'), status_id=1)
+        db.session.add(package)
+        db.session.commit()
+
+        # Update Tags
+        file_ids = request.form.getlist('files')
+        for item in file_ids:
+            exists = db.session.query(File.id).filter_by(id=item).scalar()
+            if exists:
+                package.files.append(File.query.filter_by(id=item).first())
+                db.session.commit()
+
+        # Package Files
+        package.status_id = 2
+        db.session.commit()
+
+        dest_filename = str(package.id) + ".zip"
+        dest_filepath = app.config['DOWNLOAD_FOLDER']
+        zf = zipfile.ZipFile(dest_filepath + dest_filename, "w", zipfile.ZIP_DEFLATED)
+        abs_src = os.path.abspath(app.config['DOWNLOAD_FOLDER'])
+        print "abs_src", abs_src
+        for file in package.files:
+            print 'adding ', file.name
+            absname = os.path.abspath(os.path.join(file.path + file.name))
+            print "absname", absname
+            arcname = absname[len(file.path):]
+            print "arcname", arcname
+            zf.write(absname, arcname)
+        print 'closing'
+        zf.close()
+        package.status_id = 5
+        package.name = dest_filename
+        package.path = dest_filepath
+        package.url = "/download/package/" + str(package.id)
+        db.session.commit()
+        return redirect(url_for('admin_packages'))
+    files = File.query.all()
+    return render_template('admin_packages_add.html', files=files)
 
 
 @app.route('/admin/users')
