@@ -37,48 +37,25 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manage Files <span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Files <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="/admin/files">View All Files</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/admin/files/add">+ Add File</a></li>
+                                <li><a href="/admin/files">Manage Files</a></li>
+                                <li><a href="/admin/tags">Manage Tags</a></li>
+                                <li><a href="/admin/files/api">APIs</a></li>
                             </ul>
                         </li>
-                        {% if current_user.has_role('admin') %}
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manage Tags <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="/admin/tags">View All Tags</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="/admin/tags/add">+ Add Tag</a></li>
-                                </ul>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manage Tag Groups <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="/admin/tag_groups">View All Tag Groups</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="/admin/tag_groups/add">+ Add Group</a></li>
-                                </ul>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Manage Users <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="/admin/users">View All Users</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="/admin/users/add">+ Add User</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account Settings <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a>{{ current_user.email }}</a></li>
+                                <li><a>logged in as: {{ current_user.email }}</a></li>
                                 <li role="separator" class="divider"></li>
                                 {% if current_user.has_role('admin') %}
+                                    <li><a href="/admin/tag_groups">Manage Tag Groups</a></li>
+                                    <li><a href="/admin/users">Manage Users</a></li>
+                                    <li role="separator" class="divider"></li>
                                 {% endif %}
                                 <li><a href="/logout">Logout</a></li>
                             </ul>

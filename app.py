@@ -133,47 +133,6 @@ tag_groups_schema = TagGroupSchema(many=True)
 @app.before_first_request
 def create_db():
     db.create_all()
-    # Populate Tag Groups
-    if TagGroup.query.first() is None:
-        db.session.add(TagGroup(name="Region", tag_id="region", weight=0))
-        db.session.add(TagGroup(name="Vertical", tag_id="vertical", weight=0))
-        db.session.add(TagGroup(name="Category", tag_id="category", weight=0))
-        db.session.commit()
-    # Populate Tags
-    if Tag.query.first() is None:
-        tag_group = TagGroup.query.filter_by(tag_id='region').first()
-        db.session.add(Tag(name="Americas", tag_id='americas', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="APAC", tag_id='apac', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="EMEA", tag_id='emea', tag_group=tag_group, weight=0))
-        tag_group = TagGroup.query.filter_by(tag_id='vertical').first()
-        db.session.add(Tag(name="E-commerce", tag_id='e-commerce', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Education", tag_id='education', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Energy", tag_id='energy', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Financial Services", tag_id='financial-services', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Government", tag_id='government', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Healthcare", tag_id='healthcare', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Insurance", tag_id='insurance', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Manufacturing", tag_id='manufacturing', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Media & Entertainment", tag_id='media-entertainment', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Reseller & Service Provider", tag_id='reseller-service-provider', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Retail", tag_id='retail', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Scientific Research", tag_id='scientific-research', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Service Provider", tag_id='service-provider', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Technology", tag_id='technology', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Telecommunications", tag_id='telecommunications', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Travel & Hospitality", tag_id='travel-hospitality', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Web Services", tag_id='web-services', tag_group=tag_group, weight=0))
-        tag_group = TagGroup.query.filter_by(tag_id='category').first()
-        db.session.add(Tag(name="Identity & Policy Control", tag_id='identity-policy-control', tag_group=tag_group, weight=0))
-        db.session.add(Tag(name="Network Management", tag_id='network-management', tag_group=tag_group, weight=1))
-        db.session.add(Tag(name="Network Operating System", tag_id='network-operating-system', tag_group=tag_group, weight=2))
-        db.session.add(Tag(name="Routers", tag_id='routers', tag_group=tag_group, weight=3))
-        db.session.add(Tag(name="Security", tag_id='security', tag_group=tag_group, weight=4))
-        db.session.add(Tag(name="Services", tag_id='services', tag_group=tag_group, weight=5))
-        db.session.add(Tag(name="Software Defined Networking", tag_id='software-defined-networking', tag_group=tag_group, weight=6))
-        db.session.add(Tag(name="Switches", tag_id='switches', tag_group=tag_group, weight=7))
-        db.session.add(Tag(name="Wireless", tag_id='wireless', tag_group=tag_group, weight=8))
-        db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
     user_datastore.find_or_create_role(name='end-user', description='End user')
@@ -238,16 +197,14 @@ def send_file(id):
 # Tags APIs
 @app.route('/api/v1/tags', methods=['GET'])
 def api_v1_tags_all():
-    return redirect(url_for('tags', tag_group='all'))
+    results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
+    return jsonify({'results': results.data})
 
 
 @app.route('/api/v1/tags/<tag_group_tag>', methods=['GET'])
 def api_v1_tags(tag_group_tag):
-    if tag_group_tag == 'all':
-        results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
-    else:
-        tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
-        results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
+    tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
+    results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
     return jsonify({'results': results.data})
 
 
@@ -378,6 +335,13 @@ def admin_files_delete(id):
     for groups in tag_groups:
         tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
     return render_template('admin_files_delete.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
+
+
+@app.route('/admin/files/api')
+@roles_required('admin')
+def admin_files_api():
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    return render_template('admin_files_api.html', tag_groups=tag_groups)
 
 
 @app.route('/admin/tags')

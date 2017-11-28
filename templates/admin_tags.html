@@ -6,6 +6,9 @@
 {% block content %}
 
     <h3>Tags {% if tag_group %}({{ tag_group.name }}){% endif %}</h3>
+    <a href="/admin/tags/add" class="btn btn-primary">+ Add Tag</a>
+
+        <hr>
 
     <div class="form-group">
         <label for="name">Tag Group:</label>
@@ -16,8 +19,6 @@
             {% endfor %}
         </select>
     </div>
-        <p>API: <a href="/api/v1/tags/{% if tag_group == None %}all{% else %}{{ tag_group.tag_id }}{% endif %}" target="_blank">/api/v1/tags/{% if tag_group == None %}all{% else %}{{ tag_group.tag_id }}{% endif %}</a></p>
-    <hr>
 
     <table id="filters-table" class="table table-striped table-bordered">
         <thead>
