@@ -25,7 +25,7 @@
         {%  for package in packages %}
             <tr>
                 <td>{{ package.user_name }}<br>{{ package.user_email }}</td>
-                <td><a href="{{ url_for('download_package', uuid=package.uuid) }}" target="_blank">{{ url_for('download_package', uuid=package.uuid) }}</a></td>
+                <td><a href="{{ package.link }}" target="_blank">{{ package.link }}</a></td>
                 <td>
                     <ul class="list-unstyled">
                         {%  for file in package.files %}

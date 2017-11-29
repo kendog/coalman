@@ -9,3 +9,9 @@ DEBUG = True
 UPLOAD_FOLDER = '/uploads/'
 TEMP_FOLDER = '/tmp/'
 ALLOWED_EXTENSIONS = set(['pdf', 'PDF', 'png', 'PNG'])
+
+MAIL_SERVER = ''
+MAIL_PORT = 587
+MAIL_USE_SSL = True
+MAIL_USERNAME = ''
+MAIL_PASSWORD = ''

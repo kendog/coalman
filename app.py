@@ -139,10 +139,6 @@ class MailSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     subject = db.Column(db.String(255))
     message = db.Column(db.UnicodeText())
-    login = db.Column(db.String(255))
-    password = db.Column(db.String(255))
-    smtp_server = db.Column(db.String(255))
-    smtp_port = db.Column(db.String(255))
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
@@ -211,17 +207,17 @@ def send_notification(uuid):
     db.session.commit()
     # Build the Mail
     mail_setting = MailSetting.query.first()
-    header = 'From: %s\n' % mail_setting.login
+    header = 'From: %s\n' % app.config['MAIL_USERNAME']
     header += 'To: %s\n' % package.user_email
     header += 'Subject: %s\n\n' % mail_setting.subject
-    message = header + mail_setting.message + '\n\n';
+    message = header + mail_setting.message + '\n\n' + package.link;
     # Send the Mail
-    server = smtplib.SMTP(mail_setting.smtp_server, int(mail_setting.smtp_port))
+    server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
     server.ehlo()
     server.starttls()
     server.ehlo()
-    server.login(mail_setting.login, mail_setting.password)
-    results = server.sendmail(mail_setting.login, package.user_email, message + '\n\n' + package.link)
+    server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+    results = server.sendmail(app.config['MAIL_USERNAME'], package.user_email, message)
 
     server.quit()
     print "results", results
@@ -252,7 +248,7 @@ def create_db():
     # Default Mail Settings
     mail_setting = MailSetting.query.first()
     if mail_setting is None:
-        db.session.add(MailSetting(smtp_server="smtp.gmail.com", smtp_port="587", login="", password="", subject="Your files are ready.", message="Your files are ready.  Download using the link below."))
+        db.session.add(MailSetting(subject="Your files are ready.", message="Your files are ready.  Download using the link below."))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
