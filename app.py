@@ -165,6 +165,16 @@ tag_groups_schema = TagGroupSchema(many=True)
 @app.before_first_request
 def create_db():
     db.create_all()
+    # Populate Package Statuses
+    package_statuses = PackageStatus.query.first()
+    if package_statuses is None:
+        db.session.add(PackageStatus(name="Not Started", tag_id="not-started"))
+        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
+        db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
+        db.session.add(PackageStatus(name="Deferred", tag_id="deferred"))
+        db.session.add(PackageStatus(name="Completed", tag_id="completed"))
+        db.session.add(PackageStatus(name="Error", tag_id="error"))
+        db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
     user_datastore.find_or_create_role(name='end-user', description='End user')
@@ -176,16 +186,7 @@ def create_db():
         db.session.commit()
         user_datastore.add_role_to_user('admin@coalman.com', 'admin')
         db.session.commit()
-    # Populate Package Statuses
-    package_statuses = PackageStatus.query.first()
-    if package_statuses is None:
-        db.session.add(PackageStatus(name="Not Started", tag_id="not-started"))
-        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
-        db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
-        db.session.add(PackageStatus(name="Deferred", tag_id="deferred"))
-        db.session.add(PackageStatus(name="Completed", tag_id="completed"))
-        db.session.add(PackageStatus(name="Error", tag_id="error"))
-        db.session.commit()
+
 
 # Public Frontend
 @app.route('/')
@@ -204,28 +205,6 @@ def api_v1_files():
 def api_v1_file(id):
     results = file_schema.dump(File.query.filter_by(id=id).first())
     return jsonify({'results': results.data})
-
-
-# Zip APIs
-@app.route('/zip')
-def zip():
-    file = File.query.filter_by(id=id).first()
-    zf = zipfile.ZipFile(app.config['DOWNLOAD_FOLDER'] + "myzip.zip", "w", zipfile.ZIP_DEFLATED)
-    absname = os.path.abspath(os.path.join(file.path, file.name))
-    arcname = absname[len(abs_src) + 1:]
-    print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
-    zf.write(absname, arcname)
-    zf.close()
-
-#    zf = zipfile.ZipFile("%s.zip" % (dst), "w", zipfile.ZIP_DEFLATED)
- #   abs_src = os.path.abspath(src)
-  #  for dirname, subdirs, files in os.walk(src):
-   #     for filename in files:
-    #        absname = os.path.abspath(os.path.join(dirname, filename))
-     #       arcname = absname[len(abs_src) + 1:]
-      #      print 'zipping %s as %s' % (os.path.join(dirname, filename), arcname)
-       #     zf.write(absname, arcname)
-    #zf.close()
 
 
 # download APIs
