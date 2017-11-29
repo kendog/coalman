@@ -1,0 +1,88 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "admin_mail_settings_edit" %}
+
+{% block title %}Edit Mail Settings{% endblock %}
+
+{% block content %}
+
+    <h3>Edit Mail Settings</h3>
+
+    <form id="mail_setting-form" method="post" action="">
+
+        <div class="row">
+            <div class="col-md-7">
+
+                <hr>
+
+                <div class="form-group">
+                    <label for="smtp_server">SMTP Server:</label>
+                    <input type="text" class="form-control" id="smtp_server" name="smtp_server" value="{{ mail_setting.smtp_server }}" >
+                </div>
+
+                <div class="form-group">
+                    <label for="smtp_port">SMTP Port:</label>
+                    <input type="text" class="form-control" id="smtp_port" name="smtp_port" value="{{ mail_setting.smtp_port }}" >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="login">Email:</label>
+                    <input type="text" class="form-control" id="login" name="login" value="{{ mail_setting.login }}" >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" value="{{ mail_setting.password }}" >
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" class="form-control" id="subject" name="subject" value="{{ mail_setting.subject }}" >
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message:</label>
+                    <input type="text" class="form-control" id="message" name="message" value="{{ mail_setting.message }}" >
+                </div>
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="Submit" class="btn btn-primary" name="submit-edit" value="Update">
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#mail_setting-form").validate({
+                rules: {
+                    subject: "required",
+                    message: "required",
+                    smtp_server: "required",
+                    smtp_port: "required",
+                    login: "required",
+                    password: "required"
+
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

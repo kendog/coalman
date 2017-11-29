@@ -20,8 +20,6 @@ ma = Marshmallow(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-
-
 # Define models
 roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('Users.id')),
@@ -107,6 +105,7 @@ class Package(db.Model):
     uuid = db.Column(db.String(255))
     name = db.Column(db.String(255))
     path = db.Column(db.String(255))
+    link = db.Column(db.String(255))
     user_name = db.Column(db.String(255))
     user_email = db.Column(db.String(255))
     files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
@@ -135,14 +134,15 @@ class NotificationStatus(db.Model):
     packages = db.relationship("Package", back_populates="notification_status")
 
 
-class NotificationSetting(db.Model):
-    __tablename__ = 'NotificationSettings'
+class MailSetting(db.Model):
+    __tablename__ = 'MailSettings'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     subject = db.Column(db.String(255))
     message = db.Column(db.UnicodeText())
     login = db.Column(db.String(255))
     password = db.Column(db.String(255))
     smtp_server = db.Column(db.String(255))
+    smtp_port = db.Column(db.String(255))
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
@@ -206,22 +206,25 @@ def package_files(uuid):
 
 
 def send_notification(uuid):
-    notification_settings = NotificationSetting.first()
     package = Package.query.filter_by(uuid=uuid).first()
     package.notification_status_id = 2
     db.session.commit()
     # Build the Mail
-    header = 'From: %s\n' % notification_settings.login
-    header += 'To: %s\n' % ','.join(package.user_email)
-    header += 'Subject: %s\n\n' % notification_settings.subject
-    message = header + notification_settings.message + '\n\n' + package.url
+    mail_setting = MailSetting.query.first()
+    header = 'From: %s\n' % mail_setting.login
+    header += 'To: %s\n' % package.user_email
+    header += 'Subject: %s\n\n' % mail_setting.subject
+    message = header + mail_setting.message + '\n\n';
     # Send the Mail
-    server = smtplib.SMTP(notification_settings.smtp_server)
+    server = smtplib.SMTP(mail_setting.smtp_server, int(mail_setting.smtp_port))
+    server.ehlo()
     server.starttls()
-    server.login(notification_settings.login, notification_settings.password)
-    results = server.sendmail(notification_settings.login, package.user_email, message)
+    server.ehlo()
+    server.login(mail_setting.login, mail_setting.password)
+    results = server.sendmail(mail_setting.login, package.user_email, message + '\n\n' + package.link)
+
     server.quit()
-    print results
+    print "results", results
     package.notification_status_id = 3
     db.session.commit()
     return results
@@ -245,6 +248,11 @@ def create_db():
         db.session.add(NotificationStatus(name="In Progress", tag_id="in-progress"))
         db.session.add(NotificationStatus(name="Sent", tag_id="sent"))
         db.session.add(NotificationStatus(name="Error", tag_id="error"))
+        db.session.commit()
+    # Default Mail Settings
+    mail_setting = MailSetting.query.first()
+    if mail_setting is None:
+        db.session.add(MailSetting(smtp_server="smtp.gmail.com", smtp_port="587", login="", password="", subject="Your files are ready.", message="Your files are ready.  Download using the link below."))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -302,6 +310,7 @@ def api_v1_request_package():
         package.notification_status_id = 1
         package.name = package.uuid + ".zip"
         package.path = app.config['TEMP_FOLDER']
+        package.link = url_for('download_package', uuid=package.uuid)
         db.session.commit()
 
         # Add Files
@@ -312,7 +321,7 @@ def api_v1_request_package():
                 db.session.commit()
 
         # Send Email
-        #send_notification(package.uuid)
+        send_notification(package.uuid)
 
         results['status'] = 'success'
         results['uuid'] = package.uuid
@@ -689,6 +698,22 @@ def admin_users_delete(id):
     user = User.query.filter_by(id=id).first()
     roles = Role.query.all()
     return render_template('admin_users_delete.html', user=user, roles=roles)
+
+
+@app.route('/admin/mail_settings/edit', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_mail_settings_edit():
+    mail_setting = MailSetting.query.first()
+    if 'submit-edit' in request.form and mail_setting:
+        mail_setting.subject = request.form.get('subject')
+        mail_setting.message = request.form.get('message')
+        mail_setting.login = request.form.get('login')
+        mail_setting.password = request.form.get('password')
+        mail_setting.smtp_server = request.form.get('smtp_server')
+        mail_setting.smtp_port = request.form.get('smtp_port')
+        db.session.commit()
+        return redirect(url_for('admin_mail_settings_edit', mail_setting=mail_setting))
+    return render_template('admin_mail_settings_edit.html', mail_setting=mail_setting)
 
 
 if __name__ == "__main__":
