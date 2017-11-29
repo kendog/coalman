@@ -6,3 +6,6 @@ SECURITY_PASSWORD_HASH = 'bcrypt'
 SECURITY_PASSWORD_SALT = 'password_salt'
 DEBUG = True
 
+UPLOAD_FOLDER = '/uploads/'
+TEMP_FOLDER = '/tmp/'
+ALLOWED_EXTENSIONS = set(['pdf', 'PDF', 'png', 'PNG'])

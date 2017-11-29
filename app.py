@@ -13,10 +13,7 @@ import smtplib
 # Create app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-
-app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
-app.config['TEMP_FOLDER'] = '/tmp/'
-app.config['ALLOWED_EXTENSIONS'] = set(['pdf', 'PDF', 'png', 'PNG'])
+app.config['UPLOAD_FOLDER'] = app.root_path + app.config['UPLOAD_FOLDER']
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
