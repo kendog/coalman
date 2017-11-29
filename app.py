@@ -384,11 +384,11 @@ def admin_files_delete(id):
     return render_template('admin_files_delete.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
 
 
-@app.route('/admin/files/api')
+@app.route('/admin/apis')
 @roles_required('admin')
-def admin_files_api():
+def admin_apis():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
-    return render_template('admin_files_api.html', tag_groups=tag_groups)
+    return render_template('admin_apis.html', tag_groups=tag_groups)
 
 
 @app.route('/admin/tags')
@@ -554,6 +554,19 @@ def admin_packages_add():
         return redirect(url_for('admin_packages'))
     files = File.query.all()
     return render_template('admin_packages_add.html', files=files)
+
+
+@app.route('/admin/packages/delete/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_packages_delete(id):
+    package = Package.query.filter_by(id=id).first()
+    if 'submit-delete' in request.form:
+        if package:
+            db.session.delete(package)
+            db.session.commit()
+            return redirect(url_for('admin_packages'))
+    files = File.query.all()
+    return render_template('admin_packages_delete.html', package=package, files=files)
 
 
 @app.route('/admin/users')

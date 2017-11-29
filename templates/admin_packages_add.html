@@ -8,11 +8,11 @@
     <h3>Add Package</h3>
     <hr>
 
-    <form id="files-form" method="post" action="" enctype=multipart/form-data>
+    <form id="packages-form" method="post" action="" enctype=multipart/form-data>
 
 
         <div class="row">
-            <div class="col-md-7">
+            <div class="col-md-4">
 
                 <div class="form-group">
                     <label for="user_name">User Name:</label>
@@ -25,20 +25,26 @@
                 </div>
 
                 <hr>
-
+                
 
 
             </div>
 
             <div class="col-md-1"></div>
 
-            <div class="col-md-4">
+            <div class="col-md-7">
                 <div class="form-group">
                     <label for="user_name">Files:</label>
+                    <ul class="list-unstyled">
                     {%  for file in files %}
-                        <br>
-                        <input class="form-check-input" type="checkbox" id="files" name="files" value="{{ file.id }}"> {{ file.name }}
+                        {% if file.name %}
+                            <li>
+                                <input class="form-check-input" type="checkbox" id="files" name="files" value="{{ file.id }}"> {{ file.name }}
+                                <b>|</b> {{ file.title }}<br>
+                            </li>
+                        {% endif %}
                     {% endfor %}
+                    </ul>
                 </div>
 
             </div>
@@ -59,7 +65,7 @@
     <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(function () {
-            $("#files-form").validate({
+            $("#packages-form").validate({
                 rules: {
                     user_name: "required",
                     user_email: "required",

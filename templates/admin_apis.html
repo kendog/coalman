@@ -1,22 +1,24 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "admin_files_api" %}
 
-{% block title %}File APIs{% endblock %}
+{% block title %}APIs{% endblock %}
 
 {% block content %}
 
-    <h3>File APIs</h3>
+    <h3>APIs</h3>
     <hr>
 
     <div>
         <p>Files: <a href="/api/v1/files" target="_blank">/api/v1/files</a></p>
+        <hr>
         <p>Tags: <a href="/api/v1/tags" target="_blank">/api/v1/tags</a></p>
         {%  for group in tag_groups %}
             <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ group.name }} Tags: <a href="/api/v1/tags/{{ group.tag_id }}" target="_blank">/api/v1/tags/{{ group.tag_id }}</a></p>
         {% endfor %}
+        <hr>
         <p>Tag Groups: <a href="/api/v1/tag_groups" target="_blank">/api/v1/tag_groups</a></p>
     </div>
-
+        <hr>
 {% endblock %}
 
 {% block plugins %}

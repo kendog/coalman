@@ -13,7 +13,6 @@
     <table id="tag-groups-table" class="table table-striped table-bordered">
         <thead>
         <tr>
-            <th>ID</th>
             <th>Name</th>
             <th>Tag ID</th>
             <th>Weight</th>
@@ -23,7 +22,6 @@
         <tbody>
         {%  for tag_group in tag_groups %}
             <tr>
-                <td>{{ tag_group.id }}</td>
                 <td>{{ tag_group.name }}</td>
                 <td>{{ tag_group.tag_id }}</td>
                 <td>{{ tag_group.weight }}</td>
@@ -50,7 +48,7 @@
                 "columnDefs": [ {
                     "searchable": false,
                     "orderable": false,
-                    "targets": 4
+                    "targets": 3
                 } ]
             } );
 

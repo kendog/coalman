@@ -1,0 +1,80 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "admin_packages_add" %}
+
+{% block title %}Delete Package{% endblock %}
+
+{% block content %}
+
+    <h3>Delete Package</h3>
+    <p>Are you sure???</p>
+    <hr>
+
+    <form id="packages-form" method="post" action="" enctype=multipart/form-data>
+
+
+        <div class="row">
+            <div class="col-md-4">
+
+                <div class="form-group">
+                    <label for="user_name">User Name:</label>
+                    <input disabled id="user_name" name="user_name" type="text" class="form-control" value="{{ package.user_name }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="user_email">User Email:</label>
+                    <input disabled id="user_email" name="user_email" type="text" class="form-control" value="{{ package.user_email }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="created">Date Created:</label>
+                    <input disabled id="created" name="created" type="text" class="form-control" value="{{ package.created }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="updated">Last Updated:</label>
+                    <input disabled id="updated" name="updated" type="text" class="form-control" value="{{ package.updated }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="status_name">Status</label>
+                    <input disabled id="status_name" name="status_name" type="text" class="form-control" value="{{ package.status.name }}" />
+                </div>
+
+                <hr>
+
+            </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-7">
+                <div class="form-group">
+                    <label for="user_name">Files:</label>
+                    <ul class="list-unstyled">
+                        {%  for file in files %}
+                            {% if file.name %}
+                            <li>
+                                <input disabled class="form-check-input" type="checkbox" id="files" name="files" {% if file in package.files %}checked{% endif %} value="{{ file.id }}"> {{ file.name }}
+                                <b>|</b> {{ file.title }}<br>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+
+{% endblock %}
