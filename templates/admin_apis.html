@@ -9,14 +9,39 @@
     <hr>
 
     <div>
+        <p><b>Content</b></p>
         <p>Files: <a href="/api/v1/files" target="_blank">/api/v1/files</a></p>
-        <hr>
         <p>Tags: <a href="/api/v1/tags" target="_blank">/api/v1/tags</a></p>
         {%  for group in tag_groups %}
             <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ group.name }} Tags: <a href="/api/v1/tags/{{ group.tag_id }}" target="_blank">/api/v1/tags/{{ group.tag_id }}</a></p>
         {% endfor %}
-        <hr>
         <p>Tag Groups: <a href="/api/v1/tag_groups" target="_blank">/api/v1/tag_groups</a></p>
+
+        <hr>
+
+        <p><b>Packaging and Distribution</b></p>
+        <p>Create new package and notify user via email.</p>
+        <p>[POST] /api/v1/request/package</p>
+        <p>Payload:</p>
+        <pre>
+{
+	"user_name": "First Last",
+	"user_email": "user_id@domain.com",
+	"file_ids" : [1, 2, 3]
+}
+        </pre>
+        <p>Result:</p>
+        <pre>
+{
+    "results": {
+        "status": "success",
+        "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"
+    }
+}
+        </pre>
+        <br>
+        <p>Zip files and download package.</p>
+        <p>[GET] /download/package/&lt;uuid&gt;</p>
     </div>
         <hr>
 {% endblock %}

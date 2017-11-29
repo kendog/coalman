@@ -6,7 +6,7 @@
 {% block content %}
 
     <h3>Tags {% if tag_group %}({{ tag_group.name }}){% endif %}</h3>
-    <a href="/admin/tags/add" class="btn btn-primary">+ Add Tag</a>
+    <a href="{{ url_for('admin_tags_add') }}" class="btn btn-primary">+ Add Tag</a>
 
         <hr>
 
@@ -38,8 +38,8 @@
                 <td><button class="btn btn-{{ tag.tag_group.tag_id }} btn-xs">{{ tag.tag_group.name }} </button></td>
                 <td>{{ tag.weight }}</td>
                 <td>
-                    <a href="/admin/tags/edit/{{ tag.id }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="/admin/tags/delete/{{ tag.id }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('admin_tags_edit', id=tag.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('admin_tags_delete', id=tag.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}

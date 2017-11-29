@@ -6,7 +6,7 @@
 {% block content %}
 
     <h3>Files</h3>
-    <a href="/admin/files/add" class="btn btn-primary">+ Add File</a>
+    <a href="{{ url_for('admin_files_add') }}" class="btn btn-primary">+ Add File</a>
     <hr>
 
     <table id="files-table" class="table table-striped table-bordered">
@@ -35,9 +35,9 @@
                     {% endfor %}
                 </td>
                 <td>
-                    <a href="/download/file/{{ file.id }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
-                    <a href="/admin/files/edit/{{ file.id }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="/admin/files/delete/{{ file.id }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('download_file', id=file.id) }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
+                    <a href="{{ url_for('admin_files_edit', id=file.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('admin_files_delete', id=file.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}

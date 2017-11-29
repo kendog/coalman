@@ -8,7 +8,7 @@
 {% block content %}
 
     <h3>Users</h3>
-    <a href="/admin/users/add" class="btn btn-primary">+ Add User</a>
+    <a href="{{ url_for('admin_users_add') }}" class="btn btn-primary">+ Add User</a>
     <hr>
 
     <table id="users-table" class="table table-striped table-bordered">

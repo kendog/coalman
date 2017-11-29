@@ -1,5 +1,5 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "admin_packages_add" %}
+{% set active_section = "admin_packages_delete" %}
 
 {% block title %}Delete Package{% endblock %}
 
@@ -36,8 +36,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="status_name">Status</label>
-                    <input disabled id="status_name" name="status_name" type="text" class="form-control" value="{{ package.status.name }}" />
+                    <label for="package_status">Package Status</label>
+                    <input disabled id="package_status" name="package_status" type="text" class="form-control" value="{{ package.package_status.name }}" />
+                </div>
+
+
+                <div class="form-group">
+                    <label for="notification_status">Notification Status</label>
+                    <input disabled id="notification_status" name="notification_status" type="text" class="form-control" value="{{ package.notification_status.name }}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="downloads">Downloads</label>
+                    <input disabled id="downloads" name="downloads" type="text" class="form-control" value="{{ package.downloads }}" />
                 </div>
 
                 <hr>
@@ -50,13 +61,11 @@
                 <div class="form-group">
                     <label for="user_name">Files:</label>
                     <ul class="list-unstyled">
-                        {%  for file in files %}
-                            {% if file.name %}
+                        {%  for file in package.files %}
                             <li>
                                 <input disabled class="form-check-input" type="checkbox" id="files" name="files" {% if file in package.files %}checked{% endif %} value="{{ file.id }}"> {{ file.name }}
                                 <b>|</b> {{ file.title }}<br>
                             </li>
-                            {% endif %}
                         {% endfor %}
                     </ul>
                 </div>

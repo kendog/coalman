@@ -6,17 +6,18 @@
 {% block content %}
 
     <h3>Packages</h3>
-    <a href="/admin/packages/add" class="btn btn-primary">+ Add Package</a>
+    <a href="{{ url_for('admin_packages_add') }}" class="btn btn-primary">+ Add Package</a>
     <hr>
 
     <table id="packages-table" class="table table-striped table-bordered">
         <thead>
         <tr>
             <th>User</th>
-            <th>Archive</th>
             <th>URL</th>
             <th>File(s)</th>
-            <th>Status</th>
+            <th>Package Status</th>
+            <th>Notification Status</th>
+            <th>Downloads</th>
             <th></th>
         </tr>
         </thead>
@@ -24,8 +25,7 @@
         {%  for package in packages %}
             <tr>
                 <td>{{ package.user_name }}<br>{{ package.user_email }}</td>
-                <td>{{ package.name }}</td>
-                <td>{{ package.url }}</td>
+                <td><a href="{{ url_for('download_package', uuid=package.uuid) }}" target="_blank">{{ url_for('download_package', uuid=package.uuid) }}</a></td>
                 <td>
                     <ul class="list-unstyled">
                         {%  for file in package.files %}
@@ -33,10 +33,11 @@
                         {% endfor %}
                     </ul>
                 </td>
-                <td>{{ package.status.name }}</td>
+                <td>{{ package.package_status.name }}</td>
+                <td>{{ package.notification_status.name }}</td>
+                <td>{{ package.downloads }}</td>
                 <td>
-                    <a href="{{ package.url }}" class="btn btn-block btn-xs" target="_blank">Download</a>
-                    <a href="/admin/packages/delete/{{ package.id }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('admin_packages_delete', id=package.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}

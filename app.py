@@ -7,13 +7,15 @@ from werkzeug.utils import secure_filename
 import zipfile
 from flask_cors import CORS
 import datetime
+import uuid
+import smtplib
 
 # Create app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 app.config['UPLOAD_FOLDER'] = app.root_path + '/uploads/'
-app.config['DOWNLOAD_FOLDER'] = app.root_path + '/downloads/'
+app.config['TEMP_FOLDER'] = '/tmp/'
 app.config['ALLOWED_EXTENSIONS'] = set(['pdf', 'PDF', 'png', 'PNG'])
 
 db = SQLAlchemy(app)
@@ -68,7 +70,7 @@ class File(db.Model):
     name = db.Column(db.String(255))
     path = db.Column(db.String(255))
     title = db.Column(db.String(255))
-    desc = db.Column(db.String(255))
+    desc = db.Column(db.UnicodeText())
     tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
@@ -82,7 +84,8 @@ class Tag(db.Model):
     weight = db.Column(db.Integer())
     tag_group_id = db.Column(db.Integer, db.ForeignKey('TagGroups.id'))
     tag_group = db.relationship("TagGroup", back_populates="tags")
-
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 class TagGroup(db.Model):
     __tablename__ = 'TagGroups'
@@ -91,6 +94,8 @@ class TagGroup(db.Model):
     tag_id = db.Column(db.String(255))
     weight = db.Column(db.Integer())
     tags = db.relationship("Tag", back_populates="tag_group")
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 
 packages_files = db.Table('packages_files',
@@ -102,14 +107,17 @@ packages_files = db.Table('packages_files',
 class Package(db.Model):
     __tablename__ = 'Packages'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uuid = db.Column(db.String(255))
     name = db.Column(db.String(255))
     path = db.Column(db.String(255))
-    url = db.Column(db.String(255))
     user_name = db.Column(db.String(255))
     user_email = db.Column(db.String(255))
     files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
-    status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
-    status = db.relationship("PackageStatus", back_populates="packages")
+    package_status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
+    package_status = db.relationship("PackageStatus", back_populates="packages")
+    notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
+    notification_status = db.relationship("NotificationStatus", back_populates="packages")
+    downloads = db.Column(db.Integer, default=0)
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
@@ -119,7 +127,27 @@ class PackageStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
     tag_id = db.Column(db.String(255))
-    packages = db.relationship("Package", back_populates="status")
+    packages = db.relationship("Package", back_populates="package_status")
+
+
+class NotificationStatus(db.Model):
+    __tablename__ = 'NotificationStatuses'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
+    tag_id = db.Column(db.String(255))
+    packages = db.relationship("Package", back_populates="notification_status")
+
+
+class NotificationSetting(db.Model):
+    __tablename__ = 'NotificationSettings'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    subject = db.Column(db.String(255))
+    message = db.Column(db.UnicodeText())
+    login = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    smtp_server = db.Column(db.String(255))
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 
 # Setup Flask-Security
@@ -161,6 +189,47 @@ tag_group_schema = TagGroupSchema()
 tag_groups_schema = TagGroupSchema(many=True)
 
 
+# Most "def" initly needed functions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+
+def package_files(uuid):
+    package = Package.query.filter_by(uuid=uuid).first()
+    package.package_status_id = 2
+    db.session.commit()
+    zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
+    for file in package.files:
+        absname = os.path.abspath(os.path.join(file.path + file.name))
+        arcname = absname[len(file.path):]
+        zf.write(absname, arcname)
+    zf.close()
+    package.package_status_id = 3
+    db.session.commit()
+
+
+def send_notification(uuid):
+    notification_settings = NotificationSetting.first()
+    package = Package.query.filter_by(uuid=uuid).first()
+    package.notification_status_id = 2
+    db.session.commit()
+    # Build the Mail
+    header = 'From: %s\n' % notification_settings.login
+    header += 'To: %s\n' % ','.join(package.user_email)
+    header += 'Subject: %s\n\n' % notification_settings.subject
+    message = header + notification_settings.message + '\n\n' + package.url
+    # Send the Mail
+    server = smtplib.SMTP(notification_settings.smtp_server)
+    server.starttls()
+    server.login(notification_settings.login, notification_settings.password)
+    results = server.sendmail(notification_settings.login, package.user_email, message)
+    server.quit()
+    print results
+    package.notification_status_id = 3
+    db.session.commit()
+    return results
+
+
 # First Run / Init
 @app.before_first_request
 def create_db():
@@ -168,12 +237,17 @@ def create_db():
     # Populate Package Statuses
     package_statuses = PackageStatus.query.first()
     if package_statuses is None:
-        db.session.add(PackageStatus(name="Not Started", tag_id="not-started"))
-        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
         db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
-        db.session.add(PackageStatus(name="Deferred", tag_id="deferred"))
+        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
         db.session.add(PackageStatus(name="Completed", tag_id="completed"))
         db.session.add(PackageStatus(name="Error", tag_id="error"))
+        db.session.commit()
+    notification_statuses = NotificationStatus.query.first()
+    if notification_statuses is None:
+        db.session.add(NotificationStatus(name="Waiting", tag_id="waiting"))
+        db.session.add(NotificationStatus(name="In Progress", tag_id="in-progress"))
+        db.session.add(NotificationStatus(name="Sent", tag_id="sent"))
+        db.session.add(NotificationStatus(name="Error", tag_id="error"))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -207,16 +281,60 @@ def api_v1_file(id):
     return jsonify({'results': results.data})
 
 
-# download APIs
 @app.route('/download/file/<id>')
+@login_required
 def download_file(id):
     file = File.query.filter_by(id=id).first()
     return send_from_directory(file.path, file.name)
 
 
-@app.route('/download/package/<id>')
-def download_package(id):
-    package = Package.query.filter_by(id=id).first()
+@app.route('/api/v1/request/package', methods=['POST', 'GET'])
+def api_v1_request_package():
+    results = {}
+    if request.json:
+        json_data = request.json  # will be
+
+        user_name = json_data.get("user_name")
+        user_email = json_data.get("user_email")
+        file_ids = json_data.get("file_ids")
+
+        package = Package(uuid=str(uuid.uuid4()), user_name=user_name, user_email=user_email)
+        db.session.add(package)
+        db.session.commit()
+        package.package_status_id = 1
+        package.notification_status_id = 1
+        package.name = package.uuid + ".zip"
+        package.path = app.config['TEMP_FOLDER']
+        db.session.commit()
+
+        # Add Files
+        for item in file_ids:
+            exists = db.session.query(File.id).filter_by(id=item).scalar()
+            if exists:
+                package.files.append(File.query.filter_by(id=item).first())
+                db.session.commit()
+
+        # Send Email
+        #send_notification(package.uuid)
+
+        results['status'] = 'success'
+        results['uuid'] = package.uuid
+
+    else:
+        results['status'] = 'error - No JSON Payload'
+
+    return jsonify({'results': results})
+
+
+@app.route('/download/package/<uuid>')
+def download_package(uuid):
+    package = Package.query.filter_by(uuid=uuid).first()
+    # check for package first...
+    if not os.path.isfile(package.path + package.name):
+        # File does not exist...  Create Package
+        package_files(package.uuid)
+    package.downloads += 1
+    db.session.commit()
     return send_from_directory(package.path, package.name)
 
 
@@ -253,10 +371,6 @@ def admin_files():
     files = File.query.all()
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
     return render_template('admin_files.html', files=files, tag_groups=tag_groups)
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
 @app.route('/admin/files/add', methods=['POST', 'GET'])
@@ -495,41 +609,21 @@ def admin_packages():
 def admin_packages_add():
     if 'submit-add' in request.form:
         # Update Metadata
-        package = Package(user_name=request.form.get('user_name'), user_email=request.form.get('user_email'), status_id=1)
+        package = Package(uuid=str(uuid.uuid4()), user_name=request.form.get('user_name'), user_email=request.form.get('user_email'))
         db.session.add(package)
         db.session.commit()
-
-        # Update Tags
+        package.package_status_id = 1
+        package.notification_status_id = 1
+        package.name = package.uuid + ".zip"
+        package.path = app.config['TEMP_FOLDER']
+        db.session.commit()
+        # Add Files
         file_ids = request.form.getlist('files')
         for item in file_ids:
             exists = db.session.query(File.id).filter_by(id=item).scalar()
             if exists:
                 package.files.append(File.query.filter_by(id=item).first())
                 db.session.commit()
-
-        # Package Files
-        package.status_id = 2
-        db.session.commit()
-
-        dest_filename = str(package.id) + ".zip"
-        dest_filepath = app.config['DOWNLOAD_FOLDER']
-        zf = zipfile.ZipFile(dest_filepath + dest_filename, "w", zipfile.ZIP_DEFLATED)
-        abs_src = os.path.abspath(app.config['DOWNLOAD_FOLDER'])
-        print "abs_src", abs_src
-        for file in package.files:
-            print 'adding ', file.name
-            absname = os.path.abspath(os.path.join(file.path + file.name))
-            print "absname", absname
-            arcname = absname[len(file.path):]
-            print "arcname", arcname
-            zf.write(absname, arcname)
-        print 'closing'
-        zf.close()
-        package.status_id = 5
-        package.name = dest_filename
-        package.path = dest_filepath
-        package.url = "/download/package/" + str(package.id)
-        db.session.commit()
         return redirect(url_for('admin_packages'))
     files = File.query.all()
     return render_template('admin_packages_add.html', files=files)
@@ -544,8 +638,7 @@ def admin_packages_delete(id):
             db.session.delete(package)
             db.session.commit()
             return redirect(url_for('admin_packages'))
-    files = File.query.all()
-    return render_template('admin_packages_delete.html', package=package, files=files)
+    return render_template('admin_packages_delete.html', package=package)
 
 
 @app.route('/admin/users')
