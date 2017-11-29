@@ -9,6 +9,8 @@ from flask_cors import CORS
 import datetime
 import uuid
 import smtplib
+import socket
+import babel
 
 # Create app
 app = Flask(__name__)
@@ -226,6 +228,20 @@ def send_notification(uuid):
     return results
 
 
+# jinja Date Stuff
+def format_datetime(value, format='small'):
+    if format == 'full':
+        format="EEEE, d. MMMM y 'at' HH:mm"
+    elif format == 'medium':
+        format="EE MM/dd/y HH:mm"
+    elif format == 'small':
+        format = "MM/dd/yy HH:mm"
+    return babel.dates.format_datetime(value, format)
+
+
+app.jinja_env.filters['datetime'] = format_datetime
+
+
 # First Run / Init
 @app.before_first_request
 def create_db():
@@ -235,7 +251,7 @@ def create_db():
     if package_statuses is None:
         db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
         db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
-        db.session.add(PackageStatus(name="Completed", tag_id="completed"))
+        db.session.add(PackageStatus(name="Complete", tag_id="complete"))
         db.session.add(PackageStatus(name="Error", tag_id="error"))
         db.session.commit()
     notification_statuses = NotificationStatus.query.first()
@@ -248,7 +264,7 @@ def create_db():
     # Default Mail Settings
     mail_setting = MailSetting.query.first()
     if mail_setting is None:
-        db.session.add(MailSetting(subject="Your files are ready.", message="Your files are ready.  Download using the link below."))
+        db.session.add(MailSetting(subject="Your coalman package is ready!", message='Your coalman package is ready!\nDownload using the link below:'))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -306,7 +322,7 @@ def api_v1_request_package():
         package.notification_status_id = 1
         package.name = package.uuid + ".zip"
         package.path = app.config['TEMP_FOLDER']
-        package.link = url_for('download_package', uuid=package.uuid)
+        package.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + socket.getfqdn() + url_for('download_package', uuid=package.uuid)
         db.session.commit()
 
         # Add Files
