@@ -1,11 +1,11 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
 =========
 
-Coleman is an open-source content services platform written in Python and Flask.
+Coleman is an open-source content management, packaging and delivery microservice written in Python and Flask.
 
-* Categorize, package (zip) and distribute content.
-* APIs for your front-end applications.
-* Customizable self-service portal.
+* Categorize, package and distribute your content.
+* Create APIs and services for your front-end applications.
+* Customize your settings via the administration portal.
 
 Installation
 ------------
