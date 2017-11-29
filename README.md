@@ -4,8 +4,7 @@
 Coleman is an open-source content management, packaging and delivery microservice written in Python and Flask.
 
 * Categorize, package and distribute your content.
-* Create APIs and services for your front-end applications.
-* Customize your settings via the administration portal.
+* Create APIs for your front-end applications.
 
 Installation
 ------------
