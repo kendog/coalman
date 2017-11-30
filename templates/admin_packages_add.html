@@ -1,18 +1,18 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "admin_packages_add" %}
 
-{% block title %}Add Package{% endblock %}
+{% block title %}Create Package{% endblock %}
 
 {% block content %}
 
-    <h3>Add Package</h3>
+    <h3>Create Package</h3>
     <hr>
 
     <form id="packages-form" method="post" action="" enctype=multipart/form-data>
 
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-5">
 
                 <div class="form-group">
                     <label for="user_name">Recipient Name:</label>
@@ -34,7 +34,7 @@
 
             <div class="col-md-1"></div>
 
-            <div class="col-md-7">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="files">Files:</label>
                     <ul class="list-unstyled">
@@ -55,7 +55,7 @@
         <hr>
 
         <div class="form-group">
-            <input type="submit" class="btn btn-primary" name="submit-add" value="Add">
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
         </div>
 
     </form>

@@ -12,7 +12,7 @@
     <form id="files-form" method="post" action="">
 
         <div class="row">
-            <div class="col-md-7">
+            <div class="col-md-5">
                 <div class="form-group">
                     <label for="title">Title</label>
                     <input disabled id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
@@ -44,8 +44,9 @@
 
             <div class="col-md-1"></div>
 
-             <div class="col-md-4">
+             <div class="col-md-6">
                 <div class="form-group">
+                    <label for="file">Tags:</label>
                     {%  for group in tag_groups %}
                         <p><button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button></p>
                         <ul class="list-unstyled">

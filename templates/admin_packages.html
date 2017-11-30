@@ -1,26 +1,26 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "admin_packages" %}
 
-{% block title %}Packages{% endblock %}
+{% block title %}Manage Packages{% endblock %}
 
 {% block content %}
 
-    <h3>Packages</h3>
-    <a href="{{ url_for('admin_packages_add') }}" class="btn btn-primary">+ Add Package</a>
+    <h3>Manage Packages</h3>
+
     <hr>
 
     <table id="packages-table" class="table table-striped table-bordered">
         <thead>
         <tr>
             <th>ID</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th>Created By</th>
-            <th>Link</th>
+            <th>Created For</th>
+            <th>Download Link</th>
             <th>File(s)</th>
             <th>Packaging</th>
             <th>Notification</th>
             <th>Downloads</th>
+            <th>Created</th>
+            <th>Updated</th>
             <th></th>
         </tr>
         </thead>
@@ -28,8 +28,6 @@
         {%  for package in packages %}
             <tr>
                 <td>{{ package.id }}</td>
-                <td>{{ package.created|datetime }}</td>
-                <td>{{ package.updated|datetime }}</td>
                 <td>{{ package.user_name }}<br>{{ package.user_email }}</td>
                 <td><a href="{{ package.link }}" target="_blank">{{ package.link }}</a></td>
                 <td>
@@ -42,6 +40,8 @@
                 <td>{{ package.package_status.name }}</td>
                 <td>{{ package.notification_status.name }}</td>
                 <td>{{ package.downloads }}</td>
+                <td>{{ package.created|datetime }}</td>
+                <td>{{ package.updated|datetime }}</td>
                 <td>
                     <a href="{{ url_for('admin_packages_delete', id=package.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
@@ -49,6 +49,7 @@
         {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('admin_packages_add') }}" class="btn btn-success">+ Create Package</a>
 
 {% endblock %}
 

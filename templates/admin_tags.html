@@ -1,17 +1,16 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "admin_tags" %}
 
-{% block title %}{% if tag_group %}({{ tag_group.name }}){% endif %} Tags{% endblock %}
+{% block title %}Manage Tags {% if tag_group %}({{ tag_group.name }}){% endif %}{% endblock %}
 
 {% block content %}
 
-    <h3>Tags {% if tag_group %}({{ tag_group.name }}){% endif %}</h3>
-    <a href="{{ url_for('admin_tags_add') }}" class="btn btn-primary">+ Add Tag</a>
+    <h3>Manage Tags</h3>
 
         <hr>
 
     <div class="form-group">
-        <label for="name">Tag Group:</label>
+        <label for="name">Group Filter:</label>
         <select id="tag_group_tag" name="tag_group_tag" class="form-control">
             <option value="all">All</option>
             {%  for group in tag_groups %}
@@ -25,7 +24,7 @@
         <tr>
             <th>Name</th>
             <th>Tag ID</th>
-            <th>Tag Group</th>
+            <th>Group</th>
             <th>Weight</th>
             <th></th>
         </tr>
@@ -45,6 +44,7 @@
         {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('admin_tags_add') }}" class="btn btn-success">+ Add Tag</a>
 
 {% endblock %}
 

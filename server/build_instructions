@@ -37,3 +37,4 @@ sudo systemctl restart httpd
 
 #selinux...  need a permanent solution
 #setenforce 0
+#/etc/sysconfig/selinux

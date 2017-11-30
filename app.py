@@ -282,7 +282,7 @@ def create_db():
 # Public Frontend
 @app.route('/')
 def index():
-    return redirect(url_for('admin'))
+    return render_template('index.html')
 
 
 # FILE APIs

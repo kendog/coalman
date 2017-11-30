@@ -1,12 +1,12 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "admin_files" %}
 
-{% block title %}Files{% endblock %}
+{% block title %}Manage Files{% endblock %}
 
 {% block content %}
 
-    <h3>Files</h3>
-    <a href="{{ url_for('admin_files_add') }}" class="btn btn-primary">+ Add File</a>
+    <h3>Manage Files</h3>
+    <!--<a href="{{ url_for('admin_files_add') }}" class="btn btn-success">+ Add File</a>//-->
     <hr>
 
     <table id="files-table" class="table table-striped table-bordered">
@@ -16,13 +16,13 @@
             <th>Title</th>
             <th>File</th>
             <th>Description</th>
-            <th>Tags:
+            <th>Tags:<br>
                 {%  for group in tag_groups %}
                     <button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button>
                 {% endfor %}
             </th>
             <th></th>
-        </tr>
+        </tr
         </thead>
         <tbody>
         {%  for file in files %}
@@ -45,6 +45,7 @@
         {% endfor %}
         </tbody>
     </table>
+    <a href="{{ url_for('admin_files_add') }}" class="btn btn-success">+ Add File</a>
 
 {% endblock %}
 
