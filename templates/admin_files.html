@@ -12,8 +12,8 @@
     <table id="files-table" class="table table-striped table-bordered">
         <thead>
         <tr>
-            <th>File Name</th>
             <th>Title</th>
+            <th>File</th>
             <th>Description</th>
             <th>Tags:
                 {%  for group in tag_groups %}
@@ -26,8 +26,8 @@
         <tbody>
         {%  for file in files %}
             <tr>
-                <td>{{ file.name }}</td>
                 <td>{{ file.title }}</td>
+                <td>{{ file.name }}</td>
                 <td>{{ file.desc }}</td>
                 <td>
                     {%  for tag in file.tags %}

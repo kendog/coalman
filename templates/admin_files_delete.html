@@ -26,6 +26,16 @@
                 <hr>
 
                 <div class="form-group">
+                    <label for="path">Path</label>
+                    <input disabled id="path" name="path" type="text" class="form-control" value="{{ file.path }}" />
+                    <label for="name">File</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                    <a href="{{ url_for('download_file', id=file.id) }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
+                </div>
+
+                <hr>
+
+                <div class="form-group">
                     <label for="name">File</label>
                     <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
                 </div>

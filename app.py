@@ -84,6 +84,7 @@ class Tag(db.Model):
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
+
 class TagGroup(db.Model):
     __tablename__ = 'TagGroups'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -412,11 +413,16 @@ def admin_files_add():
         if 'file' in request.files:
             the_actual_file = request.files['file']
             if the_actual_file and allowed_file(the_actual_file.filename):
+                directory = app.config['UPLOAD_FOLDER'] + str(file.id) + '/'
+                try:
+                    os.stat(directory)
+                except:
+                    os.mkdir(directory)
                 # upload the file
-                the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
+                the_actual_file.save(os.path.join(directory, secure_filename(the_actual_file.filename)))
                 # update the db
                 file.name = secure_filename(the_actual_file.filename)
-                file.path = app.config['UPLOAD_FOLDER']
+                file.path = directory
                 db.session.commit()
 
         return redirect(url_for('admin_files'))
@@ -460,11 +466,16 @@ def admin_files_edit(id):
             if 'file' in request.files:
                 the_actual_file = request.files['file']
                 if the_actual_file and allowed_file(the_actual_file.filename):
+                    directory = app.config['UPLOAD_FOLDER'] + str(file.id) + '/'
+                    try:
+                        os.stat(directory)
+                    except:
+                        os.mkdir(directory)
                     # upload the file
-                    the_actual_file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(the_actual_file.filename)))
+                    the_actual_file.save(os.path.join(directory, secure_filename(the_actual_file.filename)))
                     # update the db
                     file.name = secure_filename(the_actual_file.filename)
-                    file.path = app.config['UPLOAD_FOLDER']
+                    file.path = directory
                     db.session.commit()
 
             return redirect(url_for('admin_files'))
@@ -712,9 +723,9 @@ def admin_users_delete(id):
     return render_template('admin_users_delete.html', user=user, roles=roles)
 
 
-@app.route('/admin/mail_settings/edit', methods=['POST', 'GET'])
+@app.route('/admin/message/edit', methods=['POST', 'GET'])
 @roles_required('admin')
-def admin_mail_settings_edit():
+def admin_message_edit():
     mail_setting = MailSetting.query.first()
     if 'submit-edit' in request.form and mail_setting:
         mail_setting.subject = request.form.get('subject')
@@ -724,8 +735,8 @@ def admin_mail_settings_edit():
         mail_setting.smtp_server = request.form.get('smtp_server')
         mail_setting.smtp_port = request.form.get('smtp_port')
         db.session.commit()
-        return redirect(url_for('admin_mail_settings_edit', mail_setting=mail_setting))
-    return render_template('admin_mail_settings_edit.html', mail_setting=mail_setting)
+        return redirect(url_for('admin_message_edit', mail_setting=mail_setting))
+    return render_template('admin_message_edit.html', mail_setting=mail_setting)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "admin_mail_settings_edit" %}
+{% set active_section = "admin_message_edit" %}
 
-{% block title %}Edit Mail Settings{% endblock %}
+{% block title %}Notification Message{% endblock %}
 
 {% block content %}
 
-    <h3>Edit Mail Settings</h3>
+    <h3>Notification Message</h3>
 
     <form id="mail_setting-form" method="post" action="">
 
@@ -21,7 +21,7 @@
 
                 <div class="form-group">
                     <label for="message">Message:</label>
-                    <input type="text" class="form-control" id="message" name="message" value="{{ mail_setting.message }}" >
+                    <textarea class="form-control" id="message" name="message" rows="3">{{ mail_setting.message }}</textarea>
                 </div>
 
                 <hr>
