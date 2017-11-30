@@ -323,7 +323,7 @@ def api_v1_request_package():
         package.notification_status_id = 1
         package.name = package.uuid + ".zip"
         package.path = app.config['TEMP_FOLDER']
-        package.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + socket.getfqdn() + url_for('download_package', uuid=package.uuid)
+        package.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for('download_package', uuid=package.uuid)
         db.session.commit()
 
         # Add Files
