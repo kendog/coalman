@@ -35,3 +35,6 @@ sudo systemctl restart httpd
 
 #sudo systemctl restart mariadb
 #sudo cat /var/log/httpd/error_log
+
+#selinux...  need a permanent solution
+#setenforce 0

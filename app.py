@@ -9,7 +9,6 @@ from flask_cors import CORS
 import datetime
 import uuid
 import smtplib
-import socket
 import babel
 
 # Create app
