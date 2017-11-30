@@ -273,9 +273,9 @@ def create_db():
     user = User.query.first()
     if user is None:
         encrypted_password = utils.hash_password('123456')
-        user_datastore.create_user(email='admin@coalman.com', password=encrypted_password)
+        user_datastore.create_user(email='admin@coalman.io', password=encrypted_password)
         db.session.commit()
-        user_datastore.add_role_to_user('admin@coalman.com', 'admin')
+        user_datastore.add_role_to_user('admin@coalman.io', 'admin')
         db.session.commit()
 
 
