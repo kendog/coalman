@@ -23,7 +23,6 @@ sudo yum -y install mod_wsgi
 sudo yum -y install git
 sudo git clone https://github.com/kendog/coalman.git /var/www/coalman/
 sudo chmod 777 /var/www/coalman/uploads/
-sudo chmod 777 /var/www/coalman/downloads/
 
 sudo mv /var/www/coalman/config-sample.py /var/www/coalman/config.py
 sudo vi /var/www/coalman/config.py # and make edits

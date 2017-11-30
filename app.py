@@ -333,7 +333,8 @@ def api_v1_request_package():
                 db.session.commit()
 
         # Send Email
-        send_notification(package.uuid)
+        if json_data.get("notify"):
+            send_notification(package.uuid)
 
         results['status'] = 'success'
         results['uuid'] = package.uuid
@@ -639,7 +640,7 @@ def admin_packages_add():
         # Update Metadata
         user_name = request.form.get('user_name')
         user_email = request.form.get("user_email")
-        file_ids = request.form.get("files")
+        file_ids = request.form.getlist("files")
 
         package = Package(uuid=str(uuid.uuid4()), user_name=user_name, user_email=user_email)
         db.session.add(package)
@@ -655,6 +656,7 @@ def admin_packages_add():
 
         # Add Files
         for item in file_ids:
+            print item
             exists = db.session.query(File.id).filter_by(id=item).scalar()
             if exists:
                 package.files.append(File.query.filter_by(id=item).first())
