@@ -137,8 +137,8 @@ class NotificationStatus(db.Model):
     packages = db.relationship("Package", back_populates="notification_status")
 
 
-class MailSetting(db.Model):
-    __tablename__ = 'MailSettings'
+class Message(db.Model):
+    __tablename__ = 'Messages'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     subject = db.Column(db.String(255))
     message = db.Column(db.UnicodeText())
@@ -209,11 +209,11 @@ def send_notification(uuid):
     package.notification_status_id = 2
     db.session.commit()
     # Build the Mail
-    mail_setting = MailSetting.query.first()
+    message = Message.query.first()
     header = 'From: %s\n' % app.config['MAIL_USERNAME']
     header += 'To: %s\n' % package.user_email
-    header += 'Subject: %s\n\n' % mail_setting.subject
-    message = header + mail_setting.message + '\n\n' + package.link;
+    header += 'Subject: %s\n\n' % message.subject
+    message = header + message.message + '\n\n' + package.link;
     # Send the Mail
     server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
     server.ehlo()
@@ -263,9 +263,9 @@ def create_db():
         db.session.add(NotificationStatus(name="Error", tag_id="error"))
         db.session.commit()
     # Default Mail Settings
-    mail_setting = MailSetting.query.first()
-    if mail_setting is None:
-        db.session.add(MailSetting(subject="Your coalman package is ready!", message='Your coalman package is ready!\nDownload using the link below:'))
+    message = Message.query.first()
+    if message is None:
+        db.session.add(Message(subject="Your coalman package is ready!", message='Your coalman package is ready!\nDownload using the link below:'))
         db.session.commit()
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
@@ -726,17 +726,13 @@ def admin_users_delete(id):
 @app.route('/admin/message/edit', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_message_edit():
-    mail_setting = MailSetting.query.first()
-    if 'submit-edit' in request.form and mail_setting:
-        mail_setting.subject = request.form.get('subject')
-        mail_setting.message = request.form.get('message')
-        mail_setting.login = request.form.get('login')
-        mail_setting.password = request.form.get('password')
-        mail_setting.smtp_server = request.form.get('smtp_server')
-        mail_setting.smtp_port = request.form.get('smtp_port')
+    message = Message.query.first()
+    if 'submit-edit' in request.form and message:
+        message.subject = request.form.get('subject')
+        message.message = request.form.get('message')
         db.session.commit()
-        return redirect(url_for('admin_message_edit', mail_setting=mail_setting))
-    return render_template('admin_message_edit.html', mail_setting=mail_setting)
+        return redirect(url_for('admin_message_edit', message=message))
+    return render_template('admin_message_edit.html', message=message)
 
 
 if __name__ == "__main__":
