@@ -1,7 +1,6 @@
-web:
-  build: .
-  container_name: flock
-  ports:
+version: '2'
+services:
+  web:
+    build: .
+    ports:
     - "5000:5000"
-  volumes:
-    - .:/coalman
