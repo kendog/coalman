@@ -1,6 +1,21 @@
 {
-  "main.css": "static/css/main.01caa0e0.css",
-  "main.css.map": "static/css/main.01caa0e0.css.map",
-  "main.js": "static/js/main.9368f8f3.js",
-  "main.js.map": "static/js/main.9368f8f3.js.map"
+  "main.css": "static/css/main.2e71cd06.css",
+  "main.css.map": "static/css/main.2e71cd06.css.map",
+  "main.js": "static/js/main.e5127f73.js",
+  "main.js.map": "static/js/main.e5127f73.js.map",
+  "static/media/Antenna-ExtraLight.eot": "static/media/Antenna-ExtraLight.9118814c.eot",
+  "static/media/Antenna-ExtraLight.svg": "static/media/Antenna-ExtraLight.8a803fd5.svg",
+  "static/media/Antenna-ExtraLight.ttf": "static/media/Antenna-ExtraLight.2851dde4.ttf",
+  "static/media/Antenna-ExtraLight.woff": "static/media/Antenna-ExtraLight.6e18c2f1.woff",
+  "static/media/Antenna-Light.eot": "static/media/Antenna-Light.d1eec5eb.eot",
+  "static/media/Antenna-Light.svg": "static/media/Antenna-Light.c3e0222d.svg",
+  "static/media/Antenna-Light.ttf": "static/media/Antenna-Light.747e5a59.ttf",
+  "static/media/Antenna-Light.woff": "static/media/Antenna-Light.18f362d3.woff",
+  "static/media/Antenna-Regular.eot": "static/media/Antenna-Regular.82a313d0.eot",
+  "static/media/Antenna-Regular.svg": "static/media/Antenna-Regular.3a96bc31.svg",
+  "static/media/Antenna-Regular.ttf": "static/media/Antenna-Regular.6cf3ecd5.ttf",
+  "static/media/Antenna-Regular.woff": "static/media/Antenna-Regular.4ee1ebc9.woff",
+  "static/media/region-bg-americas.png": "static/media/region-bg-americas.c2a27581.png",
+  "static/media/region-bg-apac.png": "static/media/region-bg-apac.565a059f.png",
+  "static/media/region-bg-emea.png": "static/media/region-bg-emea.e8e2a5b4.png"
 }
