@@ -10,6 +10,7 @@ UPLOAD_FOLDER = '/uploads/'
 TEMP_FOLDER = '/tmp/'
 ALLOWED_EXTENSIONS = set(['pdf', 'PDF', 'png', 'PNG'])
 DOWNLOAD_PROTOCOL = 'http'
+DOWNLOAD_DOMAIN = 'www.coalman.io'
 
 MAIL_SERVER = ''
 MAIL_PORT = 587
