@@ -53,7 +53,7 @@ sudo yum -y install mod_wsgi
 #pull
 sudo git clone https://github.com/kendog/coalman.git /var/www/coalman.io
 sudo cp /var/www/coalman.io/server/etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf
-sudo cp /var/www/coalman.io/server/etc/httpd/conf/ssl.conf /etc/httpd/conf/ssl.conf
+sudo cp /var/www/coalman.io/server/etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf
 sudo cp /var/www/coalman.io/server/etc/httpd/sites-available/coalman.io.conf /etc/httpd/sites-available/coalman.io.conf
 sudo cp /var/www/coalman.io/server/etc/httpd/sites-available/demo.coalman.io.conf /etc/httpd/sites-available/demo.coalman.io.conf
 
