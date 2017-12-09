@@ -52,6 +52,7 @@ sudo yum -y install mod_wsgi
 
 #pull
 sudo git clone https://github.com/kendog/coalman.git /var/www/coalman.io
+sudo chown -R apache:apache /var/www/coalman.io/uploads/
 sudo cp /var/www/coalman.io/server/etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf
 sudo cp /var/www/coalman.io/server/etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf
 sudo cp /var/www/coalman.io/server/etc/httpd/sites-available/coalman.io.conf /etc/httpd/sites-available/coalman.io.conf
@@ -64,6 +65,7 @@ sudo ln -s /etc/httpd/sites-available/demo.coalman.io.conf /etc/httpd/sites-enab
 
 sudo mv /var/www/coalman.io/config-sample.py /var/www/coalman.io/config.py
 sudo vi /var/www/coalman.io/config.py # and make edits
+
 
 
 # Python Flask Requirements
@@ -84,4 +86,4 @@ sudo systemctl restart httpd
 sudo vi /etc/sysconfig/selinux
 
 sudo service httpd restart
-##sudo chmod 777 /var/www/coalman.io/uploads/
+
