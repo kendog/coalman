@@ -1,0 +1,37 @@
+# This YAML file is the instructions to Kubernetes for what you want running.
+# It is telling Kubernetes the following:
+# * You want a load-balanced service exposing port 6000
+# * You want four instances of the coalmen container running
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: coalman-service
+spec:
+  selector:
+    app: coalman
+  ports:
+  - protocol: "TCP"
+    port: 6000
+    targetPort: 5000
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coalman
+spec:
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: coalman
+    spec:
+      containers:
+      - name: coalman
+        image: coalman:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000

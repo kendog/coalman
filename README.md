@@ -24,7 +24,24 @@ Development
 
 To run the application for development execute `app.py` with the Python interpreter from the flask virtual environment.
 
-Production
+
+Docker Deployment
+-----------
+1. docker build -f Dockerfile -t coalman:latest .
+2. docker image ls
+3. docker run -p 5001:5000 hello-python
+
+
+Kubernettes Deployment
+-----------
+1. kubectl version
+2. kubectl config use-context docker-for-desktop
+3. kubectl get nodes
+4. kubectl apply -f deployment.yaml
+5. kubectl get pods
+
+
+Mod WSGI Deployment
 ----------
 
 If you are deploying to an Apache server, `apache/coalman.wsgi` has been provided for mod_wsgi deployments.
