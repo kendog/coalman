@@ -1,21 +1,9 @@
-FROM python:2.7
-ADD . /coalman
-WORKDIR /coalman
-EXPOSE 5000
-RUN pip install -r requirements.txt
-ENTRYPOINT ["python", "app.py"]
+FROM python:3.7
 
-
-FROM python:2.7
-
-EXPOSE 5000
-
-RUN mkdir /coalman
-WORKDIR /coalman
-
-COPY requirements.txt /coalman/requirements.txt
+RUN mkdir /app
+WORKDIR /app
+ADD . /app/
 RUN pip install -r requirements.txt
 
-COPY . /coalman
-
-CMD python app.py
+EXPOSE 5000
+CMD ["python", "/app/main.py"]

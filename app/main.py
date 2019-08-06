@@ -222,7 +222,7 @@ def send_notification(uuid):
     results = server.sendmail(app.config['MAIL_USERNAME'], package.user_email, message)
 
     server.quit()
-    print "results", results
+    #print "results", results
     package.notification_status_id = 3
     db.session.commit()
     return results
@@ -269,7 +269,7 @@ def create_db():
     # Populate Roles, Admin and Users
     user_datastore.find_or_create_role(name='admin', description='Administrator')
     user_datastore.find_or_create_role(name='end-user', description='End user')
-    db.session.commit() 
+    db.session.commit()
     user = User.query.first()
     if user is None:
         encrypted_password = utils.hash_password('123456')
@@ -656,7 +656,7 @@ def admin_packages_add():
 
         # Add Files
         for item in file_ids:
-            print item
+            #print item
             exists = db.session.query(File.id).filter_by(id=item).scalar()
             if exists:
                 package.files.append(File.query.filter_by(id=item).first())
