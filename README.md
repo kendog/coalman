@@ -1,4 +1,4 @@
-![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
+![Coalman](https://github.com/kendog/coalman/blob/master/app/static/images/logo-medium.png)
 =========
 
 Coleman is an open-source content management, packaging and delivery microservice written in Python and Flask.
