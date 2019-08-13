@@ -29,7 +29,7 @@ Docker Deployment
 -----------
 1. docker build -f Dockerfile -t coalman:latest .
 2. docker image ls
-3. docker run -p 5001:5000 hello-python
+3. docker run -p 5001:5000 main
 
 
 Kubernettes Deployment
