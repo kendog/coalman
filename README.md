@@ -1,4 +1,4 @@
-![Coalman](https://github.com/kendog/coalman/blob/master/static/images/logo-medium.png)
+![Coalman](https://github.com/kendog/coalman/blob/master/app/static/images/logo-medium.png)
 =========
 
 Coleman is an open-source content management, packaging and delivery microservice written in Python and Flask.
@@ -29,7 +29,7 @@ Docker Deployment
 -----------
 1. docker build -f Dockerfile -t coalman:latest .
 2. docker image ls
-3. docker run -p 5001:5000 hello-python
+3. docker run -p 5001:5000 main
 
 
 Kubernettes Deployment
