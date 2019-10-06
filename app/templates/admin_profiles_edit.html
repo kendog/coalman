@@ -1,0 +1,102 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "admin_profiles_edit" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+    <h3>Edit Profile</h3>
+
+    <form id="profiles-form" method="post" action="">
+
+        <div class="row">
+            <div class="col-md-7">
+
+                <hr>
+
+                <div class="form-group">
+                    <label for="user_id">User:</label>
+                    <select id="user_id" name="user_id" class="form-control">
+                        <option value="">Select User</option>
+                        {%  for user in users %}
+                          {% if user.id == profile.user_id %}
+                            <option selected value="{{ user.id }}">{{ user.email }}</option>
+                          {% else %}
+                            <option value="{{ user.id }}">{{ user.email }}</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <input type="text" class="form-control" id="bio" name="bio" value="{{ profile.bio }}" >
+                </div>
+                <div class="form-group">
+                    <label for="address1">Address 1:</label>
+                    <input type="text" class="form-control" id="address1" name="address1" value="{{ profile.address1 }}" >
+                </div>
+                <div class="form-group">
+                    <label for="address2">Address 2:</label>
+                    <input type="text" class="form-control" id="address1" name="address2" value="{{ profile.address2 }}" >
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ profile.city }}" >
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <input type="text" class="form-control" id="state" name="state" value="{{ profile.state }}" >
+                </div>
+                <div class="form-group">
+                    <label for="zip">Zip:</label>
+                    <input type="text" class="form-control" id="zip" name="zip" value="{{ profile.zip }}" >
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="text" class="form-control" id="phone" name="phone" value="{{ profile.phone }}" >
+                </div>
+
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Submit">
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            $("#profiles-form").validate({
+                rules: {
+                  email: "required",
+                  bio: "required",
+                  address1: "required",
+                  city: "required",
+                  state: "required",
+                  zip: "required",
+                  phone: "required",
+                  user_id: "required"
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}

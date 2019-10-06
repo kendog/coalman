@@ -10,6 +10,9 @@ import datetime
 import uuid
 import smtplib
 import babel
+#import re
+#import requests
+from flask_migrate import Migrate
 
 # Create app
 app = Flask(__name__)
@@ -19,6 +22,8 @@ app.config['UPLOAD_FOLDER'] = app.root_path + app.config['UPLOAD_FOLDER']
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+migrate = Migrate(app, db)
 
 
 # Define models
@@ -52,6 +57,22 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
+    profile = db.relationship('Profile', uselist=False, back_populates="user")
+
+
+class Profile(db.Model):
+    __tablename__ = 'Profiles'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    bio = db.Column(db.String(255))
+    address1 = db.Column(db.String(255))
+    address2 = db.Column(db.String(255))
+    city = db.Column(db.String(255))
+    state = db.Column(db.String(255))
+    zip = db.Column(db.String(255))
+    email = db.Column(db.String(255))
+    phone = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    user = db.relationship('User', back_populates='profile')
 
 
 tags_files = db.Table('tags_files',
@@ -245,31 +266,6 @@ app.jinja_env.filters['datetime'] = format_datetime
 # First Run / Init
 @app.before_first_request
 def create_db():
-    db.create_all()
-    # Populate Package Statuses
-    package_statuses = PackageStatus.query.first()
-    if package_statuses is None:
-        db.session.add(PackageStatus(name="Waiting", tag_id="waiting"))
-        db.session.add(PackageStatus(name="In Progress", tag_id="in-progress"))
-        db.session.add(PackageStatus(name="Complete", tag_id="complete"))
-        db.session.add(PackageStatus(name="Error", tag_id="error"))
-        db.session.commit()
-    notification_statuses = NotificationStatus.query.first()
-    if notification_statuses is None:
-        db.session.add(NotificationStatus(name="Waiting", tag_id="waiting"))
-        db.session.add(NotificationStatus(name="In Progress", tag_id="in-progress"))
-        db.session.add(NotificationStatus(name="Sent", tag_id="sent"))
-        db.session.add(NotificationStatus(name="Error", tag_id="error"))
-        db.session.commit()
-    # Default Mail Settings
-    message = Message.query.first()
-    if message is None:
-        db.session.add(Message(subject="Your coalman package is ready!", message='Your coalman package is ready!\nDownload using the link below:'))
-        db.session.commit()
-    # Populate Roles, Admin and Users
-    user_datastore.find_or_create_role(name='admin', description='Administrator')
-    user_datastore.find_or_create_role(name='end-user', description='End user')
-    db.session.commit()
     user = User.query.first()
     if user is None:
         encrypted_password = utils.hash_password('123456')
@@ -734,6 +730,146 @@ def admin_users_delete(id):
     user = User.query.filter_by(id=id).first()
     roles = Role.query.all()
     return render_template('admin_users_delete.html', user=user, roles=roles)
+
+
+@app.route('/admin/profiles')
+@roles_required('admin')
+def admin_profiles():
+    profiles = Profile.query.all()
+    return render_template('admin_profiles.html', profiles=profiles)
+
+
+@app.route('/admin/profiles/add', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_profiles_add():
+    if 'submit-add' in request.form:
+        user_id = request.form['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        profile = Profile(
+            email=user.email,
+            bio=request.form['bio'],
+            address1=request.form['address1'],
+            address2=request.form['address2'],
+            city=request.form['city'],
+            state=request.form['state'],
+            zip=request.form['zip'],
+            phone=request.form['phone'],
+            user_id=user_id)
+        db.session.add(profile)
+        db.session.commit()
+        return redirect(url_for('admin_profiles'))
+    users = User.query.all()
+    return render_template('admin_profiles_add.html', users=users)
+
+
+@app.route('/admin/profiles/edit/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_profiles_edit(id):
+    profile = Profile.query.filter_by(id=id).first()
+    if 'submit-edit' in request.form:
+        user_id = request.form['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        if profile:
+            profile.email = user.email,
+            profile.bio = request.form.get('bio')
+            profile.address1 = request.form.get('address1')
+            profile.address2 = request.form.get('address2')
+            profile.city = request.form.get('city')
+            profile.state = request.form.get('state')
+            profile.zip = request.form.get('zip')
+            profile.phone = request.form.get('phone')
+            profile.user_id = user_id
+            db.session.commit()
+        return redirect(url_for('admin_profiles'))
+    users = User.query.all()
+    return render_template('admin_profiles_edit.html', profile=profile, users=users)
+
+
+@app.route('/admin/profiles/delete/<id>', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_profiles_delete(id):
+    profile = Profile.query.filter_by(id=id).first()
+    if 'submit-delete' in request.form:
+        if profile:
+            db.session.delete(profile)
+            db.session.commit()
+        return redirect(url_for('admin_profiles'))
+    users = User.query.all()
+    return render_template('admin_profiles_delete.html', profile=profile, users=users)
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    user_id = current_user.get_id()
+    profile = Profile.query.filter_by(id=user_id).first()
+    return render_template('profile.html', profile=profile)
+
+
+@app.route('/profile/<id>')
+@login_required
+def get_profile(id):
+    profile = Profile.query.filter_by(id=id).first()
+    return render_template('profile.html', profile=profile)
+
+
+@app.route('/profile/add', methods=['POST', 'GET'])
+@login_required
+def profile_add():
+    if 'submit-add' in request.form:
+        user_id = current_user.get_id()
+        user = User.query.filter_by(id=user_id).first()
+        profile = Profile(
+            email=user.email,
+            bio=request.form['bio'],
+            address1=request.form['address1'],
+            address2=request.form['address2'],
+            city=request.form['city'],
+            state=request.form['state'],
+            zip=request.form['zip'],
+            phone=request.form['phone'],
+            user_id=user_id)
+        db.session.add(profile)
+        db.session.commit()
+        return redirect(url_for('profile'))
+    users = User.query.all()
+    return render_template('profile_add.html')
+
+
+@app.route('/profile/edit', methods=['POST', 'GET'])
+@login_required
+def profile_edit():
+
+    if 'submit-edit' in request.form:
+        user_id = current_user.get_id()
+        user = User.query.filter_by(id=user_id).first()
+        profile = Profile.query.filter_by(id=user_id).first()
+        if profile:
+            profile.email = request.form.get('email')
+            profile.bio = request.form.get('bio')
+            profile.address1 = request.form.get('address1')
+            profile.address2 = request.form.get('address2')
+            profile.city = request.form.get('city')
+            profile.state = request.form.get('state')
+            profile.zip = request.form.get('zip')
+            profile.phone = request.form.get('phone')
+            db.session.commit()
+        return redirect(url_for('profile'))
+    users = User.query.all()
+    return render_template('profile_edit.html', profile=profile)
+
+
+@app.route('/profile/delete', methods=['POST', 'GET'])
+@login_required
+def profile_delete():
+    user_id = current_user.get_id()
+    profile = Profile.query.filter_by(id=user_id).first()
+    if 'submit-delete' in request.form:
+        if profile:
+            db.session.delete(profile)
+            db.session.commit()
+        return redirect(url_for('profile'))
+    return render_template('profile_delete.html', profile=profile)
 
 
 @app.route('/admin/message/edit', methods=['POST', 'GET'])

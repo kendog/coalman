@@ -1,9 +1,10 @@
 Flask
 Flask-Security
 bcrypt
-psycopg2
+psycopg2-binary
 PyMySQL
 flask_marshmallow
 flask_sqlalchemy
 marshmallow-sqlalchemy
 flask_cors
+Flask-Migrate
