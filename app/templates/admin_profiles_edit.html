@@ -16,7 +16,7 @@
 
                 <div class="form-group">
                     <label for="user_id">User:</label>
-                    <select id="user_id" name="user_id" class="form-control">
+                    <select disabled id="user_id" name="user_id" class="form-control">
                         <option value="">Select User</option>
                         {%  for user in users %}
                           {% if user.id == profile.user_id %}
@@ -29,8 +29,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ profile.username }}" >
+                </div>
+                <div class="form-group">
                     <label for="bio">Bio:</label>
                     <input type="text" class="form-control" id="bio" name="bio" value="{{ profile.bio }}" >
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ profile.name }}" >
                 </div>
                 <div class="form-group">
                     <label for="address1">Address 1:</label>
@@ -61,18 +69,16 @@
                 <hr>
 
              </div>
+        </div>
 
-            <div class="col-md-1"></div>
-
-            <div class="col-md-4">
-
+        <div class="row">
+            <div class="col-md-7">
+              <div class="form-group">
+                  <input type="submit" class="btn btn-primary" name="submit-edit" value="Submit">
+              </div>
             </div>
         </div>
-
-        <div class="form-group">
-            <input type="submit" class="btn btn-primary" name="submit-edit" value="Submit">
-        </div>
-
+        
     </form>
 
 {% endblock %}

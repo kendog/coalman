@@ -15,8 +15,8 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="text" class="form-control" id="email" name="email" value="" >
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" value="" >
                 </div>
 
                 <div class="form-group">
@@ -60,7 +60,7 @@
         $(function () {
             $("#users-form").validate({
                 rules: {
-                    email: "required",
+                    username: "required",
                     password: "required",
                     role: "required"
                 }

@@ -21,17 +21,25 @@
                         <option value="">Select Type</option>
                         {%  for user in users %}
                           {% if user.id == profile.user_id %}
-                            <option selected value="{{ user.email }}">{{ user.id }}</option>
+                            <option selected value="{{ user.id }}">{{ user.email }}</option>
                           {% else %}
-                            <option value="{{ user.email }}">{{ user.id }}</option>
+                            <option value="{{ user.id }}">{{ user.email }}</option>
                           {% endif %}
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="bio">bio:</label>
+                    <label for="username">Username:</label>
+                    <input disabled type="text" class="form-control" id="username" name="username" value="{{ profile.username }}" >
+                </div>
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
                     <input disabled type="text" class="form-control" id="bio" name="bio" value="{{ profile.bio }}" >
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input disabled type="text" class="form-control" id="name" name="name" value="{{ profile.name }}" >
                 </div>
                 <div class="form-group">
                     <label for="address1">address1:</label>
@@ -54,7 +62,7 @@
                     <input disabled type="text" class="form-control" id="zip" name="zip" value="{{ profile.zip }}" >
                 </div>
                 <div class="form-group">
-                    <label for="phone">phone:</label>
+                    <label for="phone">Phone:</label>
                     <input disabled type="text" class="form-control" id="phone" name="phone" value="{{ profile.phone }}" >
                 </div>
 
@@ -62,18 +70,16 @@
                 <hr>
 
              </div>
+        </div>
 
-            <div class="col-md-1"></div>
-
-            <div class="col-md-4">
-
+        <div class="row">
+            <div class="col-md-7">
+              <div class="form-group">
+                  <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+              </div>
             </div>
         </div>
-
-        <div class="form-group">
-            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
-        </div>
-
+        
     </form>
 
 {% endblock %}

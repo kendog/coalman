@@ -13,7 +13,7 @@
     <table id="users-table" class="table table-striped table-bordered">
         <thead>
             <tr>
-                <th>Email</th>
+                <th>Username</th>
                 <th>Role(s)</th>
                 <th></th>
             </tr>
@@ -21,7 +21,7 @@
         <tbody>
         {%  for user in users %}
             <tr>
-                <td>{{ user.email }}</td>
+                <td>{{ user.username }}</td>
                 <td>
                     {%  for role in user.roles %}
                         {{ role.name }}

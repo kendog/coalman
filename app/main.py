@@ -63,13 +63,14 @@ class User(db.Model, UserMixin):
 class Profile(db.Model):
     __tablename__ = 'Profiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(255))
     bio = db.Column(db.String(255))
+    name = db.Column(db.String(255))
     address1 = db.Column(db.String(255))
     address2 = db.Column(db.String(255))
     city = db.Column(db.String(255))
     state = db.Column(db.String(255))
     zip = db.Column(db.String(255))
-    email = db.Column(db.String(255))
     phone = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
     user = db.relationship('User', back_populates='profile')
@@ -265,13 +266,12 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 # First Run / Init
 @app.before_first_request
-def create_db():
-    user = User.query.first()
-    if user is None:
-        encrypted_password = utils.hash_password('123456')
-        user_datastore.create_user(email='admin@coalman.io', password=encrypted_password)
+def before_first_request():
+    if not user_datastore.get_user('admin@beasel.io'):
+        encrypted_password = utils.hash_password('admin1234')
+        user_datastore.create_user(email='admin@beasel.io',password=encrypted_password)
         db.session.commit()
-        user_datastore.add_role_to_user('admin@coalman.io', 'admin')
+        user_datastore.add_role_to_user('admin@beasel.io', 'admin')
         db.session.commit()
 
 
@@ -679,6 +679,18 @@ def admin_packages_delete(id):
     return render_template('admin_packages_delete.html', package=package)
 
 
+@app.route('/admin/message/edit', methods=['POST', 'GET'])
+@roles_required('admin')
+def admin_message_edit():
+    message = Message.query.first()
+    if 'submit-edit' in request.form and message:
+        message.subject = request.form.get('subject')
+        message.message = request.form.get('message')
+        db.session.commit()
+        return redirect(url_for('admin_message_edit', message=message))
+    return render_template('admin_message_edit.html', message=message)
+
+
 @app.route('/admin/users')
 @roles_required('admin')
 def admin_users():
@@ -691,9 +703,9 @@ def admin_users():
 def admin_users_add():
     if 'submit-add' in request.form:
         encrypted_password = utils.hash_password(request.form['password'])
-        user_datastore.create_user(email=request.form['email'], password=encrypted_password)
+        user_datastore.create_user(username=request.form['username'], password=encrypted_password)
         db.session.commit()
-        user_datastore.add_role_to_user(request.form['email'], request.form['role'])
+        user_datastore.add_role_to_user(request.form['username'], request.form['role'])
         db.session.commit()
         return redirect(url_for('admin_users'))
     roles = Role.query.all()
@@ -707,9 +719,11 @@ def admin_users_edit(id):
         exists = user_datastore.get_user(id)
         if exists:
             user = user_datastore.get_user(id)
-            user_datastore.remove_role_from_user(user.email, 'admin')
-            user_datastore.remove_role_from_user(user.email, 'end-user')
-            user_datastore.add_role_to_user(user.email, request.form['role'])
+            user_datastore.remove_role_from_user(user.username, 'admin')
+            user_datastore.remove_role_from_user(user.username, 'end-user')
+            user_datastore.add_role_to_user(user.username, request.form['role'])
+            user.email = request.form['email']
+            user.phone = request.form['phone']
             db.session.commit()
         return redirect(url_for('admin_users'))
     user = User.query.filter_by(id=id).first()
@@ -746,8 +760,9 @@ def admin_profiles_add():
         user_id = request.form['user_id']
         user = User.query.filter_by(id=user_id).first()
         profile = Profile(
-            email=user.email,
+            username=request.form['username'],
             bio=request.form['bio'],
+            name=request.form['name'],
             address1=request.form['address1'],
             address2=request.form['address2'],
             city=request.form['city'],
@@ -770,8 +785,9 @@ def admin_profiles_edit(id):
         user_id = request.form['user_id']
         user = User.query.filter_by(id=user_id).first()
         if profile:
-            profile.email = user.email,
+            profile.username = request.form.get('username')
             profile.bio = request.form.get('bio')
+            profile.name = request.form.get('name')
             profile.address1 = request.form.get('address1')
             profile.address2 = request.form.get('address2')
             profile.city = request.form.get('city')
@@ -802,8 +818,12 @@ def admin_profiles_delete(id):
 @login_required
 def profile():
     user_id = current_user.get_id()
-    profile = Profile.query.filter_by(id=user_id).first()
-    return render_template('profile.html', profile=profile)
+    user = User.query.filter_by(id=user_id).first()
+    profile = Profile.query.filter_by(user_id=user_id).first()
+    if profile:
+        return render_template('profile.html', user=user, profile=profile)
+    else:
+        return render_template('profile.html', user=user)
 
 
 @app.route('/profile/<id>')
@@ -818,10 +838,10 @@ def get_profile(id):
 def profile_add():
     if 'submit-add' in request.form:
         user_id = current_user.get_id()
-        user = User.query.filter_by(id=user_id).first()
         profile = Profile(
-            email=user.email,
+            username=request.form['username'],
             bio=request.form['bio'],
+            name=request.form['name'],
             address1=request.form['address1'],
             address2=request.form['address2'],
             city=request.form['city'],
@@ -839,14 +859,13 @@ def profile_add():
 @app.route('/profile/edit', methods=['POST', 'GET'])
 @login_required
 def profile_edit():
-
+    user_id = current_user.get_id()
+    profile = Profile.query.filter_by(user_id=user_id).first()
     if 'submit-edit' in request.form:
-        user_id = current_user.get_id()
-        user = User.query.filter_by(id=user_id).first()
-        profile = Profile.query.filter_by(id=user_id).first()
         if profile:
-            profile.email = request.form.get('email')
+            profile.username = request.form.get('username')
             profile.bio = request.form.get('bio')
+            profile.name = request.form.get('name')
             profile.address1 = request.form.get('address1')
             profile.address2 = request.form.get('address2')
             profile.city = request.form.get('city')
@@ -863,25 +882,13 @@ def profile_edit():
 @login_required
 def profile_delete():
     user_id = current_user.get_id()
-    profile = Profile.query.filter_by(id=user_id).first()
+    profile = Profile.query.filter_by(user_id=user_id).first()
     if 'submit-delete' in request.form:
         if profile:
             db.session.delete(profile)
             db.session.commit()
         return redirect(url_for('profile'))
     return render_template('profile_delete.html', profile=profile)
-
-
-@app.route('/admin/message/edit', methods=['POST', 'GET'])
-@roles_required('admin')
-def admin_message_edit():
-    message = Message.query.first()
-    if 'submit-edit' in request.form and message:
-        message.subject = request.form.get('subject')
-        message.message = request.form.get('message')
-        db.session.commit()
-        return redirect(url_for('admin_message_edit', message=message))
-    return render_template('admin_message_edit.html', message=message)
 
 
 if __name__ == "__main__":

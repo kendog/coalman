@@ -1,5 +1,5 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "admin_profiles_delete" %}
+{% set active_section = "profile_delete" %}
 
 {% block title %}Delete User{% endblock %}
 
@@ -16,12 +16,16 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input disabled type="text" class="form-control" id="email" name="email" value="{{ profile.email }}" >
+                    <label for="username">Username:</label>
+                    <input disabled type="text" class="form-control" id="username" name="username" value="{{ profile.username }}" >
                 </div>
                 <div class="form-group">
-                    <label for="bio">bio:</label>
+                    <label for="bio">Bio:</label>
                     <input disabled type="text" class="form-control" id="bio" name="bio" value="{{ profile.bio }}" >
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input disabled type="text" class="form-control" id="name" name="name" value="{{ profile.name }}" >
                 </div>
                 <div class="form-group">
                     <label for="address1">address1:</label>
@@ -32,6 +36,10 @@
                     <input disabled type="text" class="form-control" id="address2" name="address2" value="{{ profile.address2 }}" >
                 </div>
                 <div class="form-group">
+                    <label for="city">City:</label>
+                    <input disabled type="text" class="form-control" id="city" name="city" value="{{ profile.city }}" >
+                </div>
+                <div class="form-group">
                     <label for="state">state:</label>
                     <input disabled type="text" class="form-control" id="state" name="state" value="{{ profile.state }}" >
                 </div>
@@ -40,21 +48,8 @@
                     <input disabled type="text" class="form-control" id="zip" name="zip" value="{{ profile.zip }}" >
                 </div>
                 <div class="form-group">
-                    <label for="phone">phone:</label>
+                    <label for="phone">Phone:</label>
                     <input disabled type="text" class="form-control" id="phone" name="phone" value="{{ profile.phone }}" >
-                </div>
-                <div class="form-group">
-                    <label for="user_id">User:</label>
-                    <select disabled id="user_id" name="user_id" class="form-control">
-                        <option value="">Select Type</option>
-                        {%  for user in users %}
-                          {% if user.id == profile.user_id %}
-                            <option selected value="{{ user.email }}">{{ user.id }}</option>
-                          {% else %}
-                            <option value="{{ user.email }}">{{ user.id }}</option>
-                          {% endif %}
-                        {% endfor %}
-                    </select>
                 </div>
 
                 <hr>
@@ -80,19 +75,21 @@
 
     <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
     <script type="text/javascript">
+/*
         $(function () {
             $("#profiles-form").validate({
               rules: {
-                email: "required",
+                firstname: "required",
+                lastname: "required",
                 bio: "required",
                 address1: "required",
+                city: "required",
                 state: "required",
-                zip: "required",
-                phone: "required"
+                zip: "required"
               }
             });
         });
-
+*/
     </script>
 
 {% endblock %}
