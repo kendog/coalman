@@ -1,10 +1,11 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/app/static/images/logo-medium.png)
 =========
 
-Coleman is an open-source file management, packaging and distribution microservice written in Python and Flask.
+Coleman is an open-source file management, zipping and distribution microservice written in Python and Flask.
 
 * Built-in CMS and scalable taging system
 * Create zip packages for distribution
+* S3 Integration (Incomplete)
 * Email notifications
 * APIs for your front-end applications
 
