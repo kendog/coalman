@@ -19,13 +19,14 @@ Installation
 
 5. Run `flask migrate db`.  
 
-When running `flask migrate db`, you may need to set enviromental vars for main app: `export FLASK_APP=main.py` (MAC/Linux)  `set FLASK_APP = main.py` (WIN), `$env:FLASK_APP = "main.py` (PowerShell)
+*You may need to set enviromental vars for main app: `export FLASK_APP=main.py` (MAC/Linux)  `set FLASK_APP = main.py` (WIN), `$env:FLASK_APP = "main.py` (PowerShell)
 
 Development
 -----------
 
-To run the application for development execute `app.py` with the Python interpreter from the flask virtual environment.
+To run the application for development execute `main.py` with the Python interpreter from the flask virtual environment.
 
+Example: `flask run`
 
 Docker Deployment
 -----------
