@@ -17,7 +17,7 @@ Installation
 
 4. Install dependencies from `requirements.txt`.
 
-5. db.create_all() and seed.
+5. Run flask migrate db (export FLASK_APP=main.py)
 
 Development
 -----------
