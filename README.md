@@ -21,9 +21,9 @@ Installation
 3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
 4. Install dependencies from `requirements.txt`.
 5. Set enviromental vars when for Flask-Migrate: 
-  * `export FLASK_APP=main.py` (MAC/Linux)  
-  * `set FLASK_APP = main.py` (WIN), 
-  * `$env:FLASK_APP = main.py` (PowerShell)
+   * `export FLASK_APP=main.py` (MAC/Linux)  
+   * `set FLASK_APP = main.py` (WIN), 
+   * `$env:FLASK_APP = main.py` (PowerShell)
 6. Run `flask migrate db`.
 
 Development
