@@ -7,10 +7,12 @@ Coleman is an open-source file management, zipping and distribution microservice
 * Create zip packages for distribution
 * S3 Integration (Incomplete)
 * Email notifications
-  * APIs for your front-end applications
-  * Files: /api/v1/files
-  * Tags: /api/v1/tags
-  * Tag Groups: /api/v1/tag_groups
+* APIs for your front-end applications
+ * [GET] Files: /api/v1/files
+ * [GET] Tags: /api/v1/tags
+ * [GET] Tag Groups: /api/v1/tag_groups
+ * [POST] Create Package: /api/v1/request/package
+ * [GET] Download Package: /download/package/<uuid>
 
 Installation
 ------------
@@ -19,9 +21,9 @@ Installation
 3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
 4. Install dependencies from `requirements.txt`.
 5. Set enviromental vars when for Flask-Migrate: 
-* `export FLASK_APP=main.py` (MAC/Linux)  
-* `set FLASK_APP = main.py` (WIN), 
-* `$env:FLASK_APP = main.py` (PowerShell)
+ * `export FLASK_APP=main.py` (MAC/Linux)  
+ * `set FLASK_APP = main.py` (WIN), 
+ * `$env:FLASK_APP = main.py` (PowerShell)
 6. Run `flask migrate db`.
 
 Development
