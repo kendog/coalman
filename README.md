@@ -9,16 +9,16 @@ Coleman is an open-source content management, packaging and delivery microservic
 Installation
 ------------
 
-1. Download or clone package.
+# Download or clone package.
 
-2. Create a database for coalman on your web server, as well as a user who has all privileges for accessing and modifying it.
+# Create a database for coalman on your web server, as well as a user who has all privileges for accessing and modifying it.
 
-3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
+# Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
 
-4. Install dependencies from `requirements.txt`.
+# Install dependencies from `requirements.txt`.
 
-5. Run `flask migrate db`.  
-** You may need to set enviromental vars for main app: `export FLASK_APP=main.py` (MAC/Linux)  `set FLASK_APP = main.py` (WIN), `$env:FLASK_APP = "main.py` (PowerShell)
+# Run `flask migrate db`.  
+* You may need to set enviromental vars for main app: `export FLASK_APP=main.py` (MAC/Linux)  `set FLASK_APP = main.py` (WIN), `$env:FLASK_APP = "main.py` (PowerShell)
 
 Development
 -----------
