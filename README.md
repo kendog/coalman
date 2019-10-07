@@ -8,6 +8,9 @@ Coleman is an open-source file management, zipping and distribution microservice
 * S3 Integration (Incomplete)
 * Email notifications
 * APIs for your front-end applications
+** Files: /api/v1/files
+** Tags: /api/v1/tags
+** Tag Groups: /api/v1/tag_groups
 
 Installation
 ------------
