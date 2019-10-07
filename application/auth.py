@@ -1,386 +1,46 @@
-import os
-from flask import Flask, jsonify, request, redirect, url_for, render_template, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required, roles_required, utils
-from flask_marshmallow import Marshmallow
-from werkzeug.utils import secure_filename
-import zipfile
-from flask_cors import CORS
-import datetime
-import uuid
-import smtplib
-import babel
-#import re
-#import requests
-from flask_migrate import Migrate
+"""Routes for user authentication."""
+from flask import redirect, render_template, flash, Blueprint, request, url_for
+from flask_login import login_required, logout_user, current_user, login_user
+from flask import current_app as app
+from werkzeug.security import generate_password_hash
+from flask_security import roles_required
+#from .assets import compile_auth_assets
+#from .forms import LoginForm, SignupForm
+from .models import db, User
+from .import login_manager
 
-# Create app
-app = Flask(__name__)
-app.config.from_pyfile('config.py')
-app.config['UPLOAD_FOLDER'] = app.root_path + app.config['UPLOAD_FOLDER']
 
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-migrate = Migrate(app, db)
+# Blueprint Configuration
+auth_bp = Blueprint('auth_bp', __name__,
+                    template_folder='templates',
+                    static_folder='static')
+#compile_auth_assets(app)
 
 
-# Define models
-roles_users = db.Table('roles_users',
-        db.Column('user_id', db.Integer(), db.ForeignKey('Users.id')),
-        db.Column('role_id', db.Integer(), db.ForeignKey('Roles.id')))
 
-
-class Role(db.Model, RoleMixin):
-    __tablename__ = 'Roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
-
-    # __str__ is required by Flask-Admin, so we can have human-readable values for the Role when editing a User.
-    # If we were using Python 2.7, this would be __unicode__ instead.
-
-    def __unicode__ (self):
-        return self.name
-
-    # __hash__ is required to avoid the exception TypeError: unhashable type: 'Role' when saving a User
-    def __hash__(self):
-        return hash(self.name)
-
-
-class User(db.Model, UserMixin):
-    __tablename__ = 'Users'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
-    active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
-    roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
-    profile = db.relationship('Profile', uselist=False, back_populates="user")
-
-
-class Profile(db.Model):
-    __tablename__ = 'Profiles'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(255))
-    bio = db.Column(db.String(255))
-    name = db.Column(db.String(255))
-    address1 = db.Column(db.String(255))
-    address2 = db.Column(db.String(255))
-    city = db.Column(db.String(255))
-    state = db.Column(db.String(255))
-    zip = db.Column(db.String(255))
-    phone = db.Column(db.String(255))
-    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
-    user = db.relationship('User', back_populates='profile')
-
-
-tags_files = db.Table('tags_files',
-    db.Column('tag_id', db.Integer, db.ForeignKey('Tags.id'), primary_key=True),
-    db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True)
-)
-
-
-class File(db.Model):
-    __tablename__ = 'Files'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255))
-    path = db.Column(db.String(255))
-    title = db.Column(db.String(255))
-    desc = db.Column(db.UnicodeText())
-    tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
-    created = db.Column(db.DateTime, default=datetime.datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
-
-
-class Tag(db.Model):
-    __tablename__ = 'Tags'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255))
-    tag_id = db.Column(db.String(255))
-    weight = db.Column(db.Integer())
-    tag_group_id = db.Column(db.Integer, db.ForeignKey('TagGroups.id'))
-    tag_group = db.relationship("TagGroup", back_populates="tags")
-    created = db.Column(db.DateTime, default=datetime.datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
-
-
-class TagGroup(db.Model):
-    __tablename__ = 'TagGroups'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255))
-    tag_id = db.Column(db.String(255))
-    weight = db.Column(db.Integer())
-    tags = db.relationship("Tag", back_populates="tag_group")
-    created = db.Column(db.DateTime, default=datetime.datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
-
-
-packages_files = db.Table('packages_files',
-    db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True),
-    db.Column('package_id', db.Integer, db.ForeignKey('Packages.id'), primary_key=True)
-)
-
-
-class Package(db.Model):
-    __tablename__ = 'Packages'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    uuid = db.Column(db.String(255))
-    name = db.Column(db.String(255))
-    path = db.Column(db.String(255))
-    link = db.Column(db.String(255))
-    user_name = db.Column(db.String(255))
-    user_email = db.Column(db.String(255))
-    files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
-    package_status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
-    package_status = db.relationship("PackageStatus", back_populates="packages")
-    notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
-    notification_status = db.relationship("NotificationStatus", back_populates="packages")
-    downloads = db.Column(db.Integer, default=0)
-    created = db.Column(db.DateTime, default=datetime.datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
-
-
-class PackageStatus(db.Model):
-    __tablename__ = 'PackageStatuses'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255))
-    tag_id = db.Column(db.String(255))
-    packages = db.relationship("Package", back_populates="package_status")
-
-
-class NotificationStatus(db.Model):
-    __tablename__ = 'NotificationStatuses'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(255))
-    tag_id = db.Column(db.String(255))
-    packages = db.relationship("Package", back_populates="notification_status")
-
-
-class Message(db.Model):
-    __tablename__ = 'Messages'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    subject = db.Column(db.String(255))
-    message = db.Column(db.UnicodeText())
-    created = db.Column(db.DateTime, default=datetime.datetime.now)
-    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
-
-
-# Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
-
-
-# Define Schemas
-class TagGroupSchema(ma.Schema):
-    class Meta:
-        model = TagGroup
-        # Fields to expose
-        fields = ('name', 'tag_id')
-
-
-class TagSchema(ma.Schema):
-    tag_group = ma.Nested(TagGroupSchema)
-
-    class Meta:
-        model = Tag
-        # Fields to expose
-        fields = ('name', 'tag_id', 'tag_group')
-
-
-class FileSchema(ma.Schema):
-    tags = ma.Nested(TagGroupSchema, many=True)
-
-    class Meta:
-        model = File
-        # Fields to expose
-        fields = ('id', 'name', 'title', 'desc', 'tags')
-
-
-file_schema = FileSchema()
-files_schema = FileSchema(many=True)
-tag_schema = TagSchema()
-tags_schema = TagSchema(many=True)
-tag_group_schema = TagGroupSchema()
-tag_groups_schema = TagGroupSchema(many=True)
-
-
-# Most "def" initly needed functions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-
-def package_files(uuid):
-    package = Package.query.filter_by(uuid=uuid).first()
-    package.package_status_id = 2
-    db.session.commit()
-    zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
-    for file in package.files:
-        absname = os.path.abspath(os.path.join(file.path + file.name))
-        arcname = absname[len(file.path):]
-        zf.write(absname, arcname)
-    zf.close()
-    package.package_status_id = 3
-    db.session.commit()
-
-
-def send_notification(uuid):
-    package = Package.query.filter_by(uuid=uuid).first()
-    package.notification_status_id = 2
-    db.session.commit()
-    # Build the Mail
-    message = Message.query.first()
-    header = 'From: %s\n' % app.config['MAIL_USERNAME']
-    header += 'To: %s\n' % package.user_email
-    header += 'Subject: %s\n\n' % message.subject
-    message = header + message.message + '\n\n' + package.link;
-    # Send the Mail
-    server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-    results = server.sendmail(app.config['MAIL_USERNAME'], package.user_email, message)
-
-    server.quit()
-    #print "results", results
-    package.notification_status_id = 3
-    db.session.commit()
-    return results
-
-
-# jinja Date Stuff
-def format_datetime(value, format='small'):
-    if format == 'full':
-        format="EEEE, d. MMMM y 'at' HH:mm"
-    elif format == 'medium':
-        format="EE MM/dd/y HH:mm"
-    elif format == 'small':
-        format = "MM/dd/yy HH:mm"
-    return babel.dates.format_datetime(value, format)
-
-
-app.jinja_env.filters['datetime'] = format_datetime
-
-
-# First Run / Init
-@app.before_first_request
-def before_first_request():
-    if not user_datastore.get_user('admin@beasel.io'):
-        encrypted_password = utils.hash_password('admin1234')
-        user_datastore.create_user(email='admin@beasel.io',password=encrypted_password)
-        db.session.commit()
-        user_datastore.add_role_to_user('admin@beasel.io', 'admin')
-        db.session.commit()
-
-
-# Public Frontend
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-# FILE APIs
-@app.route('/api/v1/files', methods=['GET'])
-def api_v1_files():
-    results = files_schema.dump(File.query.all())
-    return jsonify({'results': results.data})
-
-
-@app.route('/api/v1/file/<id>', methods=['GET'])
-def api_v1_file(id):
-    results = file_schema.dump(File.query.filter_by(id=id).first())
-    return jsonify({'results': results.data})
-
-
-@app.route('/download/file/<id>')
+@main_bp.route('/download/file/<id>')
 @login_required
 def download_file(id):
     file = File.query.filter_by(id=id).first()
     return send_from_directory(file.path, file.name)
 
 
-@app.route('/api/v1/request/package', methods=['POST', 'GET'])
-def api_v1_request_package():
-    results = {}
-    if request.json:
-        json_data = request.json  # will be
+@main_bp.route('/error/uploads/<errors>')
+@login_required
+def error_uploads(errors):
+    return render_template('error_uploads.html', errors=errors)
 
-        user_name = json_data.get("user_name")
-        user_email = json_data.get("user_email")
-        file_ids = json_data.get("file_ids")
-
-        package = Package(uuid=str(uuid.uuid4()), user_name=user_name, user_email=user_email)
-        db.session.add(package)
-        db.session.commit()
-        package.package_status_id = 1
-        package.notification_status_id = 1
-        package.name = package.uuid + ".zip"
-        package.path = app.config['TEMP_FOLDER']
-        package.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for('download_package', uuid=package.uuid)
-        db.session.commit()
-
-        # Add Files
-        for item in file_ids:
-            exists = db.session.query(File.id).filter_by(id=item).scalar()
-            if exists:
-                package.files.append(File.query.filter_by(id=item).first())
-                db.session.commit()
-
-        # Send Email
-        if json_data.get("notify"):
-            send_notification(package.uuid)
-
-        results['status'] = 'success'
-        results['uuid'] = package.uuid
-
-    else:
-        results['status'] = 'error - No JSON Payload'
-
-    return jsonify({'results': results})
-
-
-@app.route('/download/package/<uuid>')
-def download_package(uuid):
-    package = Package.query.filter_by(uuid=uuid).first()
-    # check for package first...
-    if not os.path.isfile(package.path + package.name):
-        # File does not exist...  Create Package
-        package_files(package.uuid)
-    package.downloads += 1
-    db.session.commit()
-    return send_from_directory(package.path, package.name)
-
-
-# Tags APIs
-@app.route('/api/v1/tags', methods=['GET'])
-def api_v1_tags_all():
-    results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
-    return jsonify({'results': results.data})
-
-
-@app.route('/api/v1/tags/<tag_group_tag>', methods=['GET'])
-def api_v1_tags(tag_group_tag):
-    tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
-    results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
-    return jsonify({'results': results.data})
-
-
-@app.route('/api/v1/tag_groups', methods=['GET'])
-def api_v1_tag_groups():
-    results = tag_groups_schema.dump(TagGroup.query.order_by(TagGroup.weight).all())
-    return jsonify({'results': results.data})
 
 
 # ADMIN Pages
-@app.route('/admin')
+@auth_bp.route('/admin')
 @login_required
 def admin():
     return redirect(url_for('admin_files'))
 
 
-@app.route('/admin/files')
+@auth_bp.route('/admin/files')
 @login_required
 def admin_files():
     files = File.query.all()
@@ -388,7 +48,7 @@ def admin_files():
     return render_template('admin_files.html', files=files, tag_groups=tag_groups)
 
 
-@app.route('/admin/files/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/files/add', methods=['POST', 'GET'])
 @login_required
 def admin_files_add():
     if 'submit-add' in request.form:
@@ -430,13 +90,7 @@ def admin_files_add():
     return render_template('admin_files_add.html', tag_groups=tag_groups, tag_hash=tag_hash)
 
 
-@app.route('/error/uploads/<errors>')
-@login_required
-def error_uploads(errors):
-    return render_template('error_uploads.html', errors=errors)
-
-
-@app.route('/admin/files/edit/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/files/edit/<id>', methods=['POST', 'GET'])
 @login_required
 def admin_files_edit(id):
     if 'submit-edit' in request.form:
@@ -484,7 +138,7 @@ def admin_files_edit(id):
     return render_template('admin_files_edit.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
 
 
-@app.route('/admin/files/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/files/delete/<id>', methods=['POST', 'GET'])
 @login_required
 def admin_files_delete(id):
     if 'submit-delete' in request.form:
@@ -502,20 +156,20 @@ def admin_files_delete(id):
     return render_template('admin_files_delete.html', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
 
 
-@app.route('/admin/apis')
+@auth_bp.route('/admin/apis')
 @roles_required('admin')
 def admin_apis():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
     return render_template('admin_apis.html', tag_groups=tag_groups)
 
 
-@app.route('/admin/tags')
+@auth_bp.route('/admin/tags')
 @roles_required('admin')
 def admin_tags_all():
     return redirect(url_for('admin_tags', tag_group_tag='all'))
 
 
-@app.route('/admin/tags/<tag_group_tag>')
+@auth_bp.route('/admin/tags/<tag_group_tag>')
 @roles_required('admin')
 def admin_tags(tag_group_tag):
     tag_groups = TagGroup.query.all()
@@ -528,7 +182,7 @@ def admin_tags(tag_group_tag):
     return render_template('admin_tags.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
 
 
-@app.route('/admin/tags/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tags/add', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tags_add():
     if 'submit-add' in request.form:
@@ -540,7 +194,7 @@ def admin_tags_add():
     return render_template('admin_tags_add.html', tag_groups=tag_groups)
 
 
-@app.route('/admin/tags/edit/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tags/edit/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tags_edit(id):
     if 'submit-edit' in request.form:
@@ -559,7 +213,7 @@ def admin_tags_edit(id):
     return render_template('admin_tags_edit.html', tag=tag, tag_groups=tag_groups)
 
 
-@app.route('/admin/tags/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tags/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tags_delete(id):
     if 'submit-delete' in request.form:
@@ -575,14 +229,14 @@ def admin_tags_delete(id):
     return render_template('admin_tags_delete.html', tag=tag, tag_groups=tag_groups)
 
 
-@app.route('/admin/tag_groups')
+@auth_bp.route('/admin/tag_groups')
 @roles_required('admin')
 def admin_tag_groups():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
     return render_template('admin_tag_groups.html', tag_groups=tag_groups)
 
 
-@app.route('/admin/tag_groups/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tag_groups/add', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tag_groups_add():
     if 'submit-add' in request.form:
@@ -592,7 +246,7 @@ def admin_tag_groups_add():
     return render_template('admin_tag_groups_add.html')
 
 
-@app.route('/admin/tag_groups/edit/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tag_groups/edit/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tag_groups_edit(id):
     if 'submit-edit' in request.form:
@@ -608,7 +262,7 @@ def admin_tag_groups_edit(id):
     return render_template('admin_tag_groups_edit.html', tag_group=tag_group)
 
 
-@app.route('/admin/tag_groups/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/tag_groups/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_tag_groups_delete(id):
     if 'submit-delete' in request.form:
@@ -622,14 +276,14 @@ def admin_tag_groups_delete(id):
     return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
 
 
-@app.route('/admin/packages')
+@auth_bp.route('/admin/packages')
 @roles_required('admin')
 def admin_packages():
     packages = Package.query.all()
     return render_template('admin_packages.html', packages=packages)
 
 
-@app.route('/admin/packages/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/packages/add', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_packages_add():
     if 'submit-add' in request.form:
@@ -667,7 +321,7 @@ def admin_packages_add():
     return render_template('admin_packages_add.html', files=files)
 
 
-@app.route('/admin/packages/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/packages/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_packages_delete(id):
     package = Package.query.filter_by(id=id).first()
@@ -679,7 +333,7 @@ def admin_packages_delete(id):
     return render_template('admin_packages_delete.html', package=package)
 
 
-@app.route('/admin/message/edit', methods=['POST', 'GET'])
+@auth_bp.route('/admin/message/edit', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_message_edit():
     message = Message.query.first()
@@ -691,14 +345,14 @@ def admin_message_edit():
     return render_template('admin_message_edit.html', message=message)
 
 
-@app.route('/admin/users')
+@auth_bp.route('/admin/users')
 @roles_required('admin')
 def admin_users():
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
 
-@app.route('/admin/users/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/users/add', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_users_add():
     if 'submit-add' in request.form:
@@ -712,7 +366,7 @@ def admin_users_add():
     return render_template('admin_users_add.html', roles=roles)
 
 
-@app.route('/admin/users/edit/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/users/edit/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_users_edit(id):
     if 'submit-edit' in request.form:
@@ -731,7 +385,7 @@ def admin_users_edit(id):
     return render_template('admin_users_edit.html', user=user, roles=roles)
 
 
-@app.route('/admin/users/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/users/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_users_delete(id):
     if 'submit-delete' in request.form:
@@ -746,14 +400,14 @@ def admin_users_delete(id):
     return render_template('admin_users_delete.html', user=user, roles=roles)
 
 
-@app.route('/admin/profiles')
+@auth_bp.route('/admin/profiles')
 @roles_required('admin')
 def admin_profiles():
     profiles = Profile.query.all()
     return render_template('admin_profiles.html', profiles=profiles)
 
 
-@app.route('/admin/profiles/add', methods=['POST', 'GET'])
+@auth_bp.route('/admin/profiles/add', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_profiles_add():
     if 'submit-add' in request.form:
@@ -777,7 +431,7 @@ def admin_profiles_add():
     return render_template('admin_profiles_add.html', users=users)
 
 
-@app.route('/admin/profiles/edit/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/profiles/edit/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_profiles_edit(id):
     profile = Profile.query.filter_by(id=id).first()
@@ -801,7 +455,7 @@ def admin_profiles_edit(id):
     return render_template('admin_profiles_edit.html', profile=profile, users=users)
 
 
-@app.route('/admin/profiles/delete/<id>', methods=['POST', 'GET'])
+@auth_bp.route('/admin/profiles/delete/<id>', methods=['POST', 'GET'])
 @roles_required('admin')
 def admin_profiles_delete(id):
     profile = Profile.query.filter_by(id=id).first()
@@ -814,7 +468,9 @@ def admin_profiles_delete(id):
     return render_template('admin_profiles_delete.html', profile=profile, users=users)
 
 
-@app.route('/profile')
+
+
+@auth_bp.route('/profile')
 @login_required
 def profile():
     user_id = current_user.get_id()
@@ -826,14 +482,14 @@ def profile():
         return render_template('profile.html', user=user)
 
 
-@app.route('/profile/<id>')
+@auth_bp.route('/profile/<id>')
 @login_required
 def get_profile(id):
     profile = Profile.query.filter_by(id=id).first()
     return render_template('profile.html', profile=profile)
 
 
-@app.route('/profile/add', methods=['POST', 'GET'])
+@auth_bp.route('/profile/add', methods=['POST', 'GET'])
 @login_required
 def profile_add():
     if 'submit-add' in request.form:
@@ -856,7 +512,7 @@ def profile_add():
     return render_template('profile_add.html')
 
 
-@app.route('/profile/edit', methods=['POST', 'GET'])
+@auth_bp.route('/profile/edit', methods=['POST', 'GET'])
 @login_required
 def profile_edit():
     user_id = current_user.get_id()
@@ -878,7 +534,7 @@ def profile_edit():
     return render_template('profile_edit.html', profile=profile)
 
 
-@app.route('/profile/delete', methods=['POST', 'GET'])
+@auth_bp.route('/profile/delete', methods=['POST', 'GET'])
 @login_required
 def profile_delete():
     user_id = current_user.get_id()
@@ -889,8 +545,3 @@ def profile_delete():
             db.session.commit()
         return redirect(url_for('profile'))
     return render_template('profile_delete.html', profile=profile)
-
-
-if __name__ == "__main__":
-#    app.run('localhost')
-    app.run(host='0.0.0.0')

@@ -8,3 +8,4 @@ flask_sqlalchemy
 marshmallow-sqlalchemy
 flask_cors
 Flask-Migrate
+flask_session

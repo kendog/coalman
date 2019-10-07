@@ -3,7 +3,7 @@ venv*
 
 .idea/
 .DS_Store
-config.py
+
 buildfiles/
 
 # exclude everything
