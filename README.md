@@ -17,7 +17,9 @@ Installation
 
 4. Install dependencies from `requirements.txt`.
 
-5. Run flask migrate db (export FLASK_APP=main.py)
+5. Set enviromental vars for main app: `export FLASK_APP=main.py` (MAC/Linux)  `set FLASK_APP = main.py` (WIN), `$env:FLASK_APP = "main.py` (PowerShell)
+
+6. Run `flask migrate db`.  
 
 Development
 -----------
