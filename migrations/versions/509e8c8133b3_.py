@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c789614712b8
+Revision ID: 509e8c8133b3
 Revises:
-Create Date: 2019-10-06 02:21:13.145455
+Create Date: 2019-10-07 23:28:20.254429
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c789614712b8'
+revision = '509e8c8133b3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,7 +37,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.bulk_insert(messages_table, [
-        {'id':1,'subject':'Juniper Verticals Kiosk Downloads','message':'Your Juniper EBC downloads are ready. Download using the link below:',},
+        {'id':1,'subject':'Downloads Ready','message':'Your downloads are ready. Download using the link below:',},
     ])
     notification_statuses_table = op.create_table('NotificationStatuses',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -114,8 +114,6 @@ def upgrade():
     sa.Column('username', sa.String(length=255), nullable=True),
     sa.Column('bio', sa.String(length=255), nullable=True),
     sa.Column('name', sa.String(length=255), nullable=True),
-    sa.Column('firstname', sa.String(length=255), nullable=True),
-    sa.Column('lastname', sa.String(length=255), nullable=True),
     sa.Column('address1', sa.String(length=255), nullable=True),
     sa.Column('address2', sa.String(length=255), nullable=True),
     sa.Column('city', sa.String(length=255), nullable=True),
@@ -158,6 +156,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('tag_id', 'file_id')
     )
     # ### end Alembic commands ###
+
 
 
 def downgrade():

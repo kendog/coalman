@@ -16,3 +16,5 @@ downloads/*
 
 __pycache__
 *.pyc
+
+flask_session

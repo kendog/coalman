@@ -1,0 +1,10 @@
+{% extends "layouts/layout1.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+    <p>Hi {{ current_user.name }}!</p>
+    <a href="{{ url_for('auth_bp.logout_page') }}">Log out</a>
+  {% endif %}
+{% endblock %}

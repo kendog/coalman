@@ -1,28 +1,31 @@
-{% extends "layouts/layout_security.html" %}
+{% extends "layouts/layout1.html" %}
+{% set active_page = "register" %}
 
-<!-- Already on Page... //-->
-{% from "security/_macros.html" import render_field_with_errors, render_field %}
-{% include "security/_messages.html" %}
-{% block title %}BidBook - Register{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="container">
-<div class="form-group wrapper">
 
-<form class="form-signin" action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
-<h3 class="form-signin-heading">bidbook - Registration</h3>
+    <div class="row">
+        <div class="col-md-7">
 
-  {{ register_user_form.hidden_tag() }}
-  {{ render_field_with_errors(register_user_form.email, class="form-control") }}
-  {{ render_field_with_errors(register_user_form.password, class="form-control") }}
-  {% if register_user_form.password_confirm %}
-    {{ render_field_with_errors(register_user_form.password_confirm, class="form-control") }}
-  {% endif %}
-  {{ render_field(register_user_form.submit) }}
-{% include "security/_menu.html" %}
-</form>
-<!--{% include "security/_menu.html" %}-->
-</div>
-</div>
+          <h3 class="form-signin-heading">Registration</h3>
+
+          {% from "security/_macros.html" import render_field_with_errors, render_field %}
+
+          <form class="form-signin" action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
+            {{ register_user_form.hidden_tag() }}
+            {{ render_field_with_errors(register_user_form.email, class="form-control") }}
+            {{ render_field_with_errors(register_user_form.password, class="form-control") }}
+            {% if register_user_form.password_confirm %}
+              {{ render_field_with_errors(register_user_form.password_confirm, class="form-control") }}
+            {% endif %}
+            {{ render_field(register_user_form.submit) }}
+          </form>
+
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-4"></div>
+    </div>
+
+
 {% endblock %}
-

@@ -2,6 +2,7 @@
 from os import environ
 
 class Config:
+    SESSION_TYPE = 'filesystem'
     SQLALCHEMY_DATABASE_URI = 'postgres://postgresql:TD7U5wYNYsJRBFBG@postgresql-dev.cfiolaaedchf.us-west-2.rds.amazonaws.com:5432/beasel3'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'secret_key'

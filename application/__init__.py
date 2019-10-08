@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_session import Session
+from flask_migrate import Migrate
 
 
 db = SQLAlchemy()
@@ -22,15 +23,19 @@ def create_app():
     login_manager = LoginManager(app)
     sess.init_app(app)
 
+    migrate = Migrate(app, db)
+
     with app.app_context():
-        # Import parts of our application
+        # import parts of our application
         from . import apis
-        from . import routes
         #from . import auth
-        #from .assets import compile_assets
-        app.register_blueprint(apis.apis_bp)
-        app.register_blueprint(routes.main_bp)
-        #app.register_blueprint(auth.auth_bp)
-        #compile_assets(app)
+        from . import files
+        from . import packages
+        from . import profiles
+        from . import tags
+        from . import messages
+        from . import public
+        from . import users
+
 
         return app
