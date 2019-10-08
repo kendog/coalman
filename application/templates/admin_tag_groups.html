@@ -25,14 +25,14 @@
                 <td>{{ tag_group.tag_id }}</td>
                 <td>{{ tag_group.weight }}</td>
                 <td>
-                    <a href="{{ url_for('admin_tag_groups_edit', id=tag_group.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="{{ url_for('admin_tag_groups_delete', id=tag_group.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('tags_bp.tag_groups_edit', id=tag_group.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('tags_bp.tag_groups_delete', id=tag_group.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('admin_tag_groups_add') }}" class="btn btn-success">+ Add Tag Group</a>
+    <a href="{{ url_for('tags_bp.tag_groups_add') }}" class="btn btn-success">+ Add Tag Group</a>
 
 {% endblock %}
 

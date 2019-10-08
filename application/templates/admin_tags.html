@@ -37,14 +37,14 @@
                 <td><button class="btn btn-{{ tag.tag_group.tag_id }} btn-xs">{{ tag.tag_group.name }} </button></td>
                 <td>{{ tag.weight }}</td>
                 <td>
-                    <a href="{{ url_for('admin_tags_edit', id=tag.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="{{ url_for('admin_tags_delete', id=tag.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('tags_bp.tags_edit', id=tag.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('tags_bp.tags_delete', id=tag.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('admin_tags_add') }}" class="btn btn-success">+ Add Tag</a>
+    <a href="{{ url_for('tags_bp.tags_add') }}" class="btn btn-success">+ Add Tag</a>
 
 {% endblock %}
 

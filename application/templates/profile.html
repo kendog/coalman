@@ -30,11 +30,11 @@
       <p>{{ profile.state }}</p>
       <p>{{ profile.zip }}</p>
       <p>{{ profile.phone }}</p>
-      <p><a href="{{ url_for('profile_edit') }}" class="btn btn-success">Edit Profile</a></p>
-      <p><a href="{{ url_for('profile_delete') }}" class="btn btn-danger">Delete Profile</a></p>
+      <p><a href="{{ url_for('profiles_bp.profile_edit') }}" class="btn btn-success">Edit Profile</a></p>
+      <p><a href="{{ url_for('profiles_bp.profile_delete') }}" class="btn btn-danger">Delete Profile</a></p>
     {% else %}
       <p>No Profile</p>
-      <p><a href="{{ url_for('profile_add') }}" class="btn btn-success">Create Profile</a></p>
+      <p><a href="{{ url_for('profiles_bp.profile_add') }}" class="btn btn-success">Create Profile</a></p>
     {% endif %}
 
 

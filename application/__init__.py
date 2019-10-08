@@ -25,6 +25,9 @@ def create_app():
 
     migrate = Migrate(app, db)
 
+    app.jinja_env.filters['datetime'] = format_datetime
+
+
     with app.app_context():
         # import parts of our application
         from . import apis
@@ -39,3 +42,13 @@ def create_app():
 
 
         return app
+
+# jinja Date Stuff
+def format_datetime(value, format='small'):
+    if format == 'full':
+        format="EEEE, d. MMMM y 'at' HH:mm"
+    elif format == 'medium':
+        format="EE MM/dd/y HH:mm"
+    elif format == 'small':
+        format = "MM/dd/yy HH:mm"
+    return babel.dates.format_datetime(value, format)

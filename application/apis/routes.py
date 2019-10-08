@@ -1,9 +1,10 @@
 """Routes for logged-in application."""
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template
 from flask_login import current_user
 from flask import current_app as app
 from .schemas import FileSchema, TagSchema, TagGroupSchema
-from ..models import File
+from ..models import File, Tag, TagGroup
+from flask_security import login_required
 
 # Schema Configurations
 file_schema = FileSchema()
@@ -17,6 +18,13 @@ tag_groups_schema = TagGroupSchema(many=True)
 apis_bp = Blueprint('apis_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
+
+
+@apis_bp.route('/api')
+@login_required
+def admin_apis():
+    tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
+    return render_template('admin_apis.html', tag_groups=tag_groups)
 
 
 # FILE APIs
@@ -76,17 +84,17 @@ def api_v1_request_package():
 @apis_bp.route('/api/v1/tags', methods=['GET'])
 def api_v1_tags_all():
     results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
-    return jsonify({'results': results.data})
+    return jsonify({'results': results})
 
 
 @apis_bp.route('/api/v1/tags/<tag_group_tag>', methods=['GET'])
 def api_v1_tags(tag_group_tag):
     tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
     results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
-    return jsonify({'results': results.data})
+    return jsonify({'results': results})
 
 
 @apis_bp.route('/api/v1/tag_groups', methods=['GET'])
 def api_v1_tag_groups():
     results = tag_groups_schema.dump(TagGroup.query.order_by(TagGroup.weight).all())
-    return jsonify({'results': results.data})
+    return jsonify({'results': results})

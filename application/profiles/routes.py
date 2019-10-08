@@ -2,7 +2,7 @@
 from flask import redirect, render_template, flash, Blueprint, request, url_for
 from flask_login import login_required
 from flask import current_app as app
-from flask_security import roles_required
+from flask_security import roles_required, current_user
 #from .assets import compile_auth_assets
 #from .forms import LoginForm, SignupForm
 from ..models import db, User, Profile
