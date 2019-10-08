@@ -16,20 +16,15 @@ Coleman is an open-source file management, zipping and distribution microservice
 
 Installation
 ------------
-1. Download or clone package.
-2. Create a database for coalman on your web server, as well as a user who has all privileges for accessing and modifying it.
+1. Create a database and user
+2. Download or clone package.
 3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
 4. Install dependencies from `requirements.txt`.
-5. Set enviromental vars when for Flask-Migrate: 
-   * `export FLASK_APP=main.py` (MAC/Linux)  
-   * `set FLASK_APP = main.py` (WIN), 
-   * `$env:FLASK_APP = main.py` (PowerShell)
-6. Run `flask migrate db`.
+5. Upgrade database `db_upgrade.sh`
 
 Development
 -----------
-To run the application for development execute `main.py` with the Python interpreter from the flask virtual environment.
-Example: `flask run`
+To run the application for development `start.sh`
 
 Docker Deployment
 -----------
