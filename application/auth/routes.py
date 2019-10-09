@@ -1,8 +1,13 @@
 ''' controller and routes for users '''
 import os
 from flask import request, jsonify, Blueprint
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_jwt_claims)
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    jwt_refresh_token_required, create_refresh_token,
+    get_jwt_identity
+)
+from flask_jwt_extended import get_jwt_claims
+
 from flask import current_app as app
 from flask_jwt_extended import JWTManager
 from ..models import db, User, Role
@@ -23,39 +28,45 @@ auth_bp = Blueprint('auth_bp', __name__,
 
 
 @jwt.user_claims_loader
-def add_claims_to_access_token(identity):
+def add_claims_to_access_token(current_user):
+    user = user_datastore.get_user(current_user)
+    role = "end-user"
+    if user.has_role("admin"):
+        role = "admin"
     return {
-        'username': identity['username'],
-        'role': identity['role']
+        'username': current_user,
+        'role': role
     }
 
 
-@app.route('/auth', methods=['POST'])
+@auth_bp.route('/auth', methods=['POST'])
 def auth_user():
     if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
+        return jsonify({"error": "Missing JSON in request"}), 400
 
     username = request.json.get('username', None)
     password = request.json.get('password', None)
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
+    if not username or not password:
+        return jsonify({"error": "Invalid Credentials"}), 400
 
-    # Create an example UserObject
-    #user = User.query.filter_by(email=username).first()
     user = user_datastore.get_user(username)
     if user and utils.verify_password(password, user.password):
-
-        # Identity can be any data that is json serializable
-        identity = {}
-        identity['username'] = user.email
-        identity['end-user'] = "admin"
-        if user.has_role("admin"):
-            identity['role'] = "admin"
-
-        access_token = create_access_token(identity=identity)
-        refresh_token = create_refresh_token(identity=identity)
+        access_token = create_access_token(identity=username)
+        refresh_token = create_refresh_token(identity=username)
         return jsonify({"access_token":access_token,"refresh_token":refresh_token}), 200
 
-    return jsonify({"msg": "Invalid Credentials"}), 400
+    return jsonify({"error": "Invalid Credentials"}), 400
+
+
+@auth_bp.route('/auth/refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    access_token = create_access_token(identity=current_user)
+    return jsonify({"access_token":access_token}), 200
+
+
+@auth_bp.route('/auth/claims', methods=['GET'])
+@jwt_required
+def protected():
+    return jsonify({'claims': get_jwt_claims()}), 200
