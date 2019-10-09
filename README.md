@@ -1,4 +1,4 @@
-![Coalman](https://github.com/kendog/coalman/blob/master/app/static/images/logo-medium.png)
+![Coalman](https://github.com/kendog/coalman/blob/master/application/static/images/logo-medium.png)
 =========
 
 Coleman is an open-source file management, zipping and distribution microservice written in Python and Flask.
@@ -7,12 +7,13 @@ Coleman is an open-source file management, zipping and distribution microservice
 * Create zip packages for distribution
 * S3 Integration (Incomplete)
 * Email notifications
-* JWT Authenticated APIs for your front-end applications
+* APIs with JWT Authentication
   * Files: [GET] `/api/v1/files`
   * Tags: [GET] `/api/v1/tags`
   * Tag Groups: [GET] `/api/v1/tag_groups`
   * Create Package: [POST] `/api/v1/request/package`
   * Download Package: [GET] `/download/package/<uuid>`
+
 
 Installation
 ------------
