@@ -16,7 +16,7 @@ packages_bp = Blueprint('packages_bp', __name__,
 #compile_auth_assets(app)
 
 
-@packages_bp.route('/download/package/<uuid>')
+@packages_bp.route('/packages/<uuid>')
 def download_package(uuid):
     package = Package.query.filter_by(uuid=uuid).first()
     # check for package first...
