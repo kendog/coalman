@@ -17,7 +17,7 @@ Coleman is an open-source file management, zipping and distribution microservice
 Installation
 ------------
 1. Create a database and user
-2. Download or clone package.
+2. Download or Clone Repo `git clone https://github.com/kendog/coalman`
 3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
 4. Create and Activate Virtual Environment
 5. Install dependencies `pip install -r requirements.txt`.
