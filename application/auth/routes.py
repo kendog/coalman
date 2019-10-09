@@ -23,7 +23,8 @@ jwt = JWTManager(app)
 # Blueprint Configuration
 auth_bp = Blueprint('auth_bp', __name__,
                     template_folder='templates',
-                    static_folder='static')
+                    static_folder='static',
+                    url_prefix='/auth')
 
 
 
@@ -39,7 +40,7 @@ def add_claims_to_access_token(current_user):
     }
 
 
-@auth_bp.route('/auth', methods=['POST'])
+@auth_bp.route('', methods=['POST'])
 def auth_user():
     if not request.is_json:
         return jsonify({"error": "Missing JSON in request"}), 400
@@ -58,7 +59,7 @@ def auth_user():
     return jsonify({"error": "Invalid Credentials"}), 400
 
 
-@auth_bp.route('/auth/refresh', methods=['POST'])
+@auth_bp.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
     current_user = get_jwt_identity()
@@ -66,7 +67,7 @@ def refresh():
     return jsonify({"access_token":access_token}), 200
 
 
-@auth_bp.route('/auth/claims', methods=['GET'])
+@auth_bp.route('/claims', methods=['GET'])
 @jwt_required
 def protected():
     return jsonify({'claims': get_jwt_claims()}), 200
