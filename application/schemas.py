@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from ..models import TagGroup, Tag, File
+from .models import TagGroup, Tag, File
 
 ma = Marshmallow()
 

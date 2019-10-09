@@ -10,7 +10,7 @@ from flask_jwt_extended import get_jwt_claims
 
 from flask import current_app as app
 from flask_jwt_extended import JWTManager
-from ..models import db, User, Role
+from ..models import db, User, Role, roles_users
 from flask_security import SQLAlchemyUserDatastore, utils
 
 
@@ -31,12 +31,10 @@ auth_bp = Blueprint('auth_bp', __name__,
 @jwt.user_claims_loader
 def add_claims_to_access_token(current_user):
     user = user_datastore.get_user(current_user)
-    role = "end-user"
-    if user.has_role("admin"):
-        role = "admin"
+    role = Role.query.join(roles_users).join(User).filter((roles_users.c.user_id == User.id) & (roles_users.c.role_id == Role.id)).filter(User.email == current_user).first()
     return {
         'username': current_user,
-        'role': role
+        'role': role.name
     }
 
 
@@ -70,4 +68,4 @@ def refresh():
 @auth_bp.route('/claims', methods=['GET'])
 @jwt_required
 def protected():
-    return jsonify({'claims': get_jwt_claims()}), 200
+    return jsonify(get_jwt_claims()), 200

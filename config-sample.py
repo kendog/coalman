@@ -25,3 +25,6 @@ class Config:
     MAIL_USE_SSL = True
     MAIL_USERNAME = 'username'
     MAIL_PASSWORD = 'password'
+
+    SITE_ADMIN_EMAIL = 'admin@beasel.io'
+    SITE_ADMIN_PASSWORD = 'admin1234'

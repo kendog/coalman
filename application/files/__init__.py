@@ -3,5 +3,7 @@ from flask import Blueprint
 from flask_login import current_user
 from flask import current_app as app
 from .routes import files_bp
+from .apis import files_apis_bp
 
 app.register_blueprint(files_bp)
+app.register_blueprint(files_apis_bp)

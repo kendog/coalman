@@ -20,11 +20,11 @@ users_bp = Blueprint('users_bp', __name__,
 
 @app.before_first_request
 def before_first_request():
-    if not user_datastore.get_user('admin@beasel.io'):
-        encrypted_password = utils.hash_password('admin1234')
-        user_datastore.create_user(email='admin@beasel.io',password=encrypted_password)
+    if not user_datastore.get_user(app.config['SITE_ADMIN_EMAIL']):
+        encrypted_password = utils.hash_password(app.config['SITE_ADMIN_PASSWORD'])
+        user_datastore.create_user(email=app.config['SITE_ADMIN_EMAIL'],password=encrypted_password)
         db.session.commit()
-        user_datastore.add_role_to_user('admin@beasel.io', 'admin')
+        user_datastore.add_role_to_user(app.config['SITE_ADMIN_EMAIL'], 'admin')
         db.session.commit()
 
 

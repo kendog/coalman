@@ -54,15 +54,6 @@ class Profile(db.Model):
     user = db.relationship('User', back_populates='profile')
 
 
-class AuthUser(db.Model, UserMixin):
-    __tablename__ = 'AuthUser'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True)
-    hash = db.Column(db.String(255))
-    rounds = db.Column(db.String(255))
-    hashed = db.Column(db.String(255))
-
-
 tags_files = db.Table('tags_files',
     db.Column('tag_id', db.Integer, db.ForeignKey('Tags.id'), primary_key=True),
     db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True)

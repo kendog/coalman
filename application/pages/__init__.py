@@ -2,6 +2,6 @@
 from flask import Blueprint
 from flask_login import current_user
 from flask import current_app as app
-from .routes import public_bp
+from .routes import pages_bp
 
-app.register_blueprint(public_bp)
+app.register_blueprint(pages_bp)

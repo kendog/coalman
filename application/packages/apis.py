@@ -2,42 +2,32 @@
 from flask import Blueprint, jsonify, render_template
 from flask_login import current_user
 from flask import current_app as app
-from .schemas import FileSchema
-from ..models import File, Tag, TagGroup
+#from ..schemas import FileSchema
+from ..models import Package
 from flask_security import login_required
 from ..import auth
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 jwt_required, jwt_refresh_token_required, get_jwt_identity, get_jwt_claims)
 
-# Schema Configurations
-file_schema = FileSchema()
-files_schema = FileSchema(many=True)
 
 # Blueprint Configuration
-v1_files_bp = Blueprint('v1_files_bp', __name__,
+packages_apis_bp = Blueprint('packages_apis_bp', __name__,
                     template_folder='templates',
                     static_folder='static',
                     url_prefix='/api/v1')
 
 
-# FILE APIs
-@v1_files_bp.route('/files', methods=['GET'])
+@packages_apis_bp.route('/packages', methods=['GET'])
 @jwt_required
-def files():
-    results = files_schema.dump(File.query.all())
-    return jsonify({'results': results})
+def packages():
+    packages = Package.query.all()
+    return jsonify({'packages': packages})
+    #return render_template('admin_packages.html', packages=packages)
 
 
-@v1_files_bp.route('/file/<id>', methods=['GET'])
+@packages_apis_bp.route('/packages', methods=['POST'])
 @jwt_required
-def file(id):
-    results = file_schema.dump(File.query.filter_by(id=id).first())
-    return jsonify({'results': results.data})
-
-
-@v1_files_bp.route('/request/package', methods=['POST', 'GET'])
-@jwt_required
-def request_package():
+def packages_add():
     results = {}
     if request.json:
         json_data = request.json  # will be
@@ -74,3 +64,14 @@ def request_package():
         results['status'] = 'error - No JSON Payload'
 
     return jsonify({'results': results})
+
+
+@packages_apis_bp.route('/packages/<uuid>', methods=['DELETE'])
+@jwt_required
+def packages_delete(uuid):
+    package = Package.query.filter_by(uuid=uuid).first()
+    if package:
+        db.session.delete(package)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    return jsonify({'error': 'not found'})

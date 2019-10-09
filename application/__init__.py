@@ -34,14 +34,13 @@ def create_app():
 
     with app.app_context():
         # import parts of our application
-        from . import apis
         from . import auth
         from . import files
         from . import packages
         from . import profiles
         from . import tags
         from . import messages
-        from . import public
+        from . import pages
         from . import users
 
         return app
