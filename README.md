@@ -19,33 +19,7 @@ Installation
 1. Create a database and user
 2. Download or clone package.
 3. Find and rename `config-sample.py` to `config.py`, then edit the file and add your database/security configurations.
-4. Install dependencies from `requirements.txt`.
-5. Upgrade database `db_upgrade.sh`
-
-Development
------------
-To run the application for development `start.sh`
-
-Docker Deployment
------------
-1. docker build -f Dockerfile -t coalman:latest .
-2. docker image ls
-3. docker run -p 5001:5000 main
-
-Kubernettes Deployment
------------
-1. kubectl version
-2. kubectl config use-context docker-for-desktop
-3. kubectl get nodes
-4. kubectl apply -f deployment.yaml
-5. kubectl get pods
-
-Mod WSGI Deployment
-----------
-If you are deploying to an Apache server, `apache/coalman.wsgi` has been provided for mod_wsgi deployments.
-
-Follow the mod_wsgi (Apache) instructions here:
-http://flask.pocoo.org/docs/0.12/deploying/mod_wsgi/
-
-Alternative deployment options:
-http://flask.pocoo.org/docs/0.12/deploying/
+4. Create and Activate Virtual Environment
+5. Install dependencies `pip install -r requirements.txt`.
+6. Upgrade database `sh upgrade_db.sh`
+7. Run the application `sh run_app.sh`
