@@ -6,6 +6,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'postgres://postgresql:TD7U5wYNYsJRBFBG@postgresql-dev.cfiolaaedchf.us-west-2.rds.amazonaws.com:5432/beasel3'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'secret_key'
+    JWT_SECRET_KEY = 'jwt_secret_key'
     SECURITY_REGISTERABLE = True
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_PASSWORD_SALT = 'password_salt'

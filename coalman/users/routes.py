@@ -40,7 +40,7 @@ def admin_users():
 def admin_users_add():
     if 'submit-add' in request.form:
         encrypted_password = utils.hash_password(request.form['password'])
-        user_datastore.create_user(username=request.form['username'], password=encrypted_password)
+        user_datastore.create_user(email=request.form['username'], password=encrypted_password)
         db.session.commit()
         user_datastore.add_role_to_user(request.form['username'], request.form['role'])
         db.session.commit()

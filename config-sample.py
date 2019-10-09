@@ -6,10 +6,12 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'db_protocol://user:pass@host:port/database'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'secret_key'
+    JWT_SECRET_KEY = 'jwt_secret_key'
     SECURITY_REGISTERABLE = True
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_PASSWORD_SALT = 'password_salt'
     SECURITY_USER_IDENTITY_ATTRIBUTES = ['email']
+
     DEBUG = True
 
     UPLOAD_FOLDER = '/uploads/'

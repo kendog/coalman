@@ -92,6 +92,15 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
+    op.create_table('ApiUsers',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=255), nullable=True),
+    sa.Column('hash', sa.String(length=255), nullable=True),
+    sa.Column('rounds', sa.String(length=255), nullable=True),
+    sa.Column('hashed', sa.String(length=255), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
+    )
     op.create_table('Packages',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('uuid', sa.String(length=255), nullable=True),

@@ -5,6 +5,9 @@ from flask import current_app as app
 from .schemas import FileSchema, TagSchema, TagGroupSchema
 from ..models import File, Tag, TagGroup
 from flask_security import login_required
+from ..import auth
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_jwt_claims)
 
 # Schema Configurations
 file_schema = FileSchema()
@@ -14,10 +17,20 @@ tags_schema = TagSchema(many=True)
 tag_group_schema = TagGroupSchema()
 tag_groups_schema = TagGroupSchema(many=True)
 
+
 # Blueprint Configuration
 apis_bp = Blueprint('apis_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
+
+"""
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return jsonify({
+        'ok': False,
+        'message': 'Missing Authorization Header'
+    }), 401
+
 
 
 @apis_bp.route('/api')
@@ -25,22 +38,50 @@ apis_bp = Blueprint('apis_bp', __name__,
 def admin_apis():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
     return render_template('admin_apis.html', tag_groups=tag_groups)
-
+"""
 
 # FILE APIs
 @apis_bp.route('/api/v1/files', methods=['GET'])
+@jwt_required
 def api_v1_files():
     results = files_schema.dump(File.query.all())
     return jsonify({'results': results})
 
 
+# In a protected view, get the claims you added to the jwt with the
+# get_jwt_claims() method
+@app.route('/api/v1/claims', methods=['GET'])
+@jwt_required
+def protected():
+    claims = get_jwt_claims()
+    return jsonify({
+        'username': claims['username'],
+        'role': claims['role']
+    }), 200
+
+
+"""
+@app.route('/partially-protected', methods=['GET'])
+@jwt_optional
+def partially_protected():
+    # If no JWT is sent in with the request, get_jwt_identity()
+    # will return None
+    current_user = get_jwt_identity()
+    if current_user:
+        return jsonify(logged_in_as=current_user), 200
+    else:
+        return jsonify(logged_in_as='anonymous user'), 200
+
+
 @apis_bp.route('/api/v1/file/<id>', methods=['GET'])
+@jwt_required
 def api_v1_file(id):
     results = file_schema.dump(File.query.filter_by(id=id).first())
     return jsonify({'results': results.data})
 
 
 @apis_bp.route('/api/v1/request/package', methods=['POST', 'GET'])
+@jwt_required
 def api_v1_request_package():
     results = {}
     if request.json:
@@ -82,12 +123,14 @@ def api_v1_request_package():
 
 # Tags APIs
 @apis_bp.route('/api/v1/tags', methods=['GET'])
+@jwt_required
 def api_v1_tags_all():
     results = tags_schema.dump(Tag.query.order_by(Tag.tag_group_id, Tag.weight).all())
     return jsonify({'results': results})
 
 
 @apis_bp.route('/api/v1/tags/<tag_group_tag>', methods=['GET'])
+@jwt_required
 def api_v1_tags(tag_group_tag):
     tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
     results = tags_schema.dump(Tag.query.filter_by(tag_group=tag_group).order_by(Tag.weight).all())
@@ -95,6 +138,8 @@ def api_v1_tags(tag_group_tag):
 
 
 @apis_bp.route('/api/v1/tag_groups', methods=['GET'])
+@jwt_required
 def api_v1_tag_groups():
     results = tag_groups_schema.dump(TagGroup.query.order_by(TagGroup.weight).all())
     return jsonify({'results': results})
+"""

@@ -4,12 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_session import Session
 from flask_migrate import Migrate
-
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 sess = Session()
-
+flask_bcrypt = Bcrypt()
+jwt = JWTManager()
 
 def create_app():
     """Construct the core application."""
@@ -22,6 +24,8 @@ def create_app():
     db.init_app(app)
     login_manager = LoginManager(app)
     sess.init_app(app)
+    flask_bcrypt = Bcrypt(app)
+    jwt = JWTManager(app)
 
     migrate = Migrate(app, db)
 
@@ -31,7 +35,7 @@ def create_app():
     with app.app_context():
         # import parts of our application
         from . import apis
-        #from . import auth
+        from . import auth
         from . import files
         from . import packages
         from . import profiles
@@ -39,7 +43,6 @@ def create_app():
         from . import messages
         from . import public
         from . import users
-
 
         return app
 
