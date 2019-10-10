@@ -3,9 +3,8 @@
 
 Coleman is an open-source file management, zipping and distribution microservice written in Python and Flask.
 
-* Built-in CMS and scalable taging system
+* Light-weight CMS with scalable taging system
 * Create zip packages for distribution
-* S3 Integration (Incomplete)
 * Email notifications
 * APIs with JWT Authentication
 
