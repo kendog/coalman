@@ -38,32 +38,13 @@
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Files <span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/files">Manage Files</a></li>
-                                <li><a href="/files/add">+ Add File</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Packages <span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/packages">Manage Packages</a></li>
-                                <li><a href="/packages/add">+ Create Package</a></li>
-                            </ul>
-                        </li>
+                        <li><a href="/files">Files</a></li>
+                        <li><a href="/packages">Packages</a></li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tags <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a href="/tags">Manage Tags</a></li>
-                                <li><a href="/tags/add">+ Create Tags</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tag Groups <span class="caret"></span></a>
-                            <ul class="dropdown-menu">
                                 <li><a href="/tag_groups">Manage Tag Groups</a></li>
-                                <li><a href="/tag_groups/add">+ Create Tag Groups</a></li>
                             </ul>
                         </li>
                         <li><a href="/api">APIs</a></li>
@@ -76,12 +57,10 @@
                                 <li><a href="/profile">{{ current_user.email }}</a></li>
                                 <li role="separator" class="divider"></li>
                                 {% if current_user.has_role('admin') %}
-                                    <li><a href="/admin/tags">Manage Tags</a></li>
-                                    <li><a href="/admin/tag_groups">Manage Tag Groups</a></li>
                                     <li><a href="/users">Manage Users</a></li>
-                                    <li><a href="/admin/profiles">Manage Profiles</a></li>
+                                    <li><a href="/profiles">Manage Profiles</a></li>
                                     <li role="separator" class="divider"></li>
-                                    <li><a href="/admin/message/edit">Notification Message</a></li>
+                                    <li><a href="/message/edit">Notification Message</a></li>
                                     <li role="separator" class="divider"></li>
                                 {% endif %}
                                 <li><a href="/logout">Logout</a></li>

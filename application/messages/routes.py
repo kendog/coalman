@@ -13,15 +13,14 @@ messages_bp = Blueprint('messages_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
 
-"""
-@messages_bp.route('/admin/message/edit', methods=['POST', 'GET'])
-@roles_required('admin')
-def admin_message_edit():
+
+@messages_bp.route('/message/edit', methods=['POST', 'GET'])
+#@roles_required('admin')
+def message_edit():
     message = Message.query.first()
     if 'submit-edit' in request.form and message:
         message.subject = request.form.get('subject')
         message.message = request.form.get('message')
         db.session.commit()
-        return redirect(url_for('messages_bp.admin_message_edit', message=message))
-    return render_template('admin_message_edit.html', message=message)
-"""
+        return redirect(url_for('messages_bp.message_edit', message=message))
+    return render_template('messages/form.html', message=message)
