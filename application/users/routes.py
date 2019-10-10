@@ -27,57 +27,55 @@ def before_first_request():
         user_datastore.add_role_to_user(app.config['SITE_ADMIN_EMAIL'], 'admin')
         db.session.commit()
 
-
-@users_bp.route('/admin/users')
-@roles_required('admin')
-def admin_users():
+@users_bp.route('/users')
+#@roles_required('admin')
+def users():
     users = User.query.all()
-    return render_template('admin_users.html', users=users)
+    return render_template('users/list.html', users=users)
 
-
-@users_bp.route('/admin/users/add', methods=['POST', 'GET'])
-@roles_required('admin')
-def admin_users_add():
+@users_bp.route('/users/add', methods=['POST', 'GET'])
+#@roles_required('admin')
+def users_add():
     if 'submit-add' in request.form:
         encrypted_password = utils.hash_password(request.form['password'])
         user_datastore.create_user(email=request.form['username'], password=encrypted_password)
         db.session.commit()
         user_datastore.add_role_to_user(request.form['username'], request.form['role'])
         db.session.commit()
-        return redirect(url_for('users_bp.admin_users'))
+        return redirect(url_for('users_bp.users'))
     roles = Role.query.all()
-    return render_template('admin_users_add.html', roles=roles)
+    return render_template('users/form.html', template_mode='add', roles=roles)
 
 
-@users_bp.route('/admin/users/edit/<id>', methods=['POST', 'GET'])
-@roles_required('admin')
-def admin_users_edit(id):
+@users_bp.route('/users/edit/<id>', methods=['POST', 'GET'])
+#@roles_required('admin')
+def users_edit(id):
     if 'submit-edit' in request.form:
         exists = user_datastore.get_user(id)
         if exists:
             user = user_datastore.get_user(id)
-            user_datastore.remove_role_from_user(user.username, 'admin')
-            user_datastore.remove_role_from_user(user.username, 'end-user')
-            user_datastore.add_role_to_user(user.username, request.form['role'])
-            user.email = request.form['email']
-            user.phone = request.form['phone']
+            user.email = request.form['username']
+            user.password = utils.hash_password(request.form['password'])
+            user_datastore.remove_role_from_user(user.email, 'admin')
+            user_datastore.remove_role_from_user(user.email, 'end-user')
+            user_datastore.add_role_to_user(user.email, request.form['role'])
             db.session.commit()
-        return redirect(url_for('users_bp.admin_users'))
+        return redirect(url_for('users_bp.users'))
     user = User.query.filter_by(id=id).first()
     roles = Role.query.all()
-    return render_template('admin_users_edit.html', user=user, roles=roles)
+    return render_template('users/form.html', template_mode='edit', user=user, roles=roles)
 
 
-@users_bp.route('/admin/users/delete/<id>', methods=['POST', 'GET'])
-@roles_required('admin')
-def admin_users_delete(id):
+@users_bp.route('/users/delete/<id>', methods=['POST', 'GET'])
+#@roles_required('admin')
+def users_delete(id):
     if 'submit-delete' in request.form:
         exists = user_datastore.get_user(id)
         if exists:
             user = user_datastore.get_user(id)
             db.session.delete(user)
             db.session.commit()
-        return redirect(url_for('users_bp.admin_users'))
+        return redirect(url_for('users_bp.users'))
     user = User.query.filter_by(id=id).first()
     roles = Role.query.all()
-    return render_template('admin_users_delete.html', user=user, roles=roles)
+    return render_template('users/form.html', template_mode='delete', user=user, roles=roles)

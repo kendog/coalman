@@ -16,6 +16,9 @@
             <th>Title</th>
             <th>File</th>
             <th>Description</th>
+            {% if current_user.has_role('admin') %}
+            <th>User</th>
+            {% endif %}
             <th>Tags:<br>
                 {%  for group in tag_groups %}
                     <button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button>
@@ -31,6 +34,9 @@
                 <td>{{ file.title }}</td>
                 <td>{{ file.name }}</td>
                 <td>{{ file.desc }}</td>
+                {% if current_user.has_role('admin') %}
+                <td>{{ file.user.email }}</td>
+                {% endif %}
                 <td>
                     {%  for tag in file.tags %}
                         <button class="btn btn-{{ tag.tag_group.tag_id }} btn-xs">{{ tag.name }} </button>

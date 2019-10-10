@@ -128,6 +128,7 @@ def tag_groups_delete(id):
     tag_group = TagGroup.query.filter_by(id=id).first()
     return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
 
+"""
 
 @tags_bp.route('/admin/tags')
 @roles_required('admin')
@@ -240,3 +241,4 @@ def admin_tag_groups_delete(id):
             return redirect(url_for('tags_bp.admin_tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
     return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
+"""

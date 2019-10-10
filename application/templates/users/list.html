@@ -21,21 +21,21 @@
         <tbody>
         {%  for user in users %}
             <tr>
-                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
                 <td>
                     {%  for role in user.roles %}
                         {{ role.name }}
                     {% endfor %}
                 </td>
                 <td>
-                    <a href="{{ url_for('admin_users_edit', id=user.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="{{ url_for('admin_users_delete', id=user.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('users_bp.users_edit', id=user.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('users_bp.users_delete', id=user.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('admin_users_add') }}" class="btn btn-success">+ Add User</a>
+    <a href="{{ url_for('users_bp.users_add') }}" class="btn btn-success">+ Add User</a>
 
 {% endblock %}
 

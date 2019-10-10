@@ -28,7 +28,7 @@
         {%  for package in packages %}
             <tr>
                 <td>{{ package.id }}</td>
-                <td>{{ package.user_name }}<br>{{ package.user_email }}</td>
+                <td>{{ package.recipient_name }} &lt;{{ package.recipient_email }}&gt;</td>
                 <td><a href="{{ package.link }}" target="_blank">{{ package.link }}</a></td>
                 <td>
                     <ul class="list-unstyled">
@@ -43,13 +43,14 @@
                 <td>{{ package.created|datetime }}</td>
                 <td>{{ package.updated|datetime }}</td>
                 <td>
-                    <a href="{{ url_for('packages_bp.admin_packages_delete', id=package.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('packages_bp.packages_edit', id=package.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('packages_bp.packages_delete', id=package.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('packages_bp.admin_packages_add') }}" class="btn btn-success">+ Create Package</a>
+    <a href="{{ url_for('packages_bp.packages_add') }}" class="btn btn-success">+ Create Package</a>
 
 {% endblock %}
 

@@ -91,7 +91,7 @@ def profile_delete():
         return redirect(url_for('profiles_bp.profile'))
     return render_template('profile_delete.html', profile=profile)
 
-
+"""
 @app.route('/admin/profiles')
 @roles_required('admin')
 def admin_profiles():
@@ -158,3 +158,4 @@ def admin_profiles_delete(id):
         return redirect(url_for('profiles_bp.admin_profiles'))
     users = User.query.all()
     return render_template('admin_profiles_delete.html', profile=profile, users=users)
+"""

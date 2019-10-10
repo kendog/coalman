@@ -1,0 +1,111 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "users" %}
+
+{% block title %}User{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add User</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit User</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete User</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="users-form" method="post" action="">
+
+      <div class="row">
+          <div class="col-md-7">
+
+              <hr>
+
+              <div class="form-group">
+                    <label for="username">Username:</label>
+                    {%- if template_mode == "add" %}
+                    <input type="text" class="form-control" id="username" name="username" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user.email }}" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user.email }}" disabled />
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    {%- if template_mode == "add" %}
+                    <input type="password" class="form-control" id="password" name="password" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input type="password" class="form-control" id="password" name="password" value="" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input type="password" class="form-control" id="password" name="password" value="" disabled />
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Role:</label>
+                    <select id="role" name="role" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                        <option value="">Select Type</option>
+                        {%  for role in roles %}
+                          {%- if template_mode == "add" %}
+                            <option value="{{ role.name }}">{{ role.name }}</option>
+                          {% else %}
+                            <option {% if role.name in user.roles %}selected{% endif %} value="{{ role.name }}">{{ role.name }}</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+          {% endif %}
+          {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+          {% endif %}
+          {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+          {% endif %}
+        </div>
+
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+  {%- if template_mode != "delete" %}
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $("#users-form").validate({
+              rules: {
+                  username: "required",
+                  password: "required",
+                  role: "required"
+              }
+          });
+      });
+  </script>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "files" %}
+
+{% block title %}File{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add File</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit File</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete File</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="files-form" method="post" action="" enctype=multipart/form-data>
+
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    {%- if template_mode == "add" %}
+                    <input id="title" name="title" type="text" class="form-control" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input id="title" name="title" type="text" class="form-control" value="{{ file.title }}" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input id="title" name="title" type="text" class="form-control" value="{{ file.title }}" disabled />
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="desc">Description</label>
+                    {%- if template_mode == "add" %}
+                    <input id="desc" name="desc" type="text" class="form-control" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" disabled />
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                {%- if template_mode != "add" %}
+                <div class="form-group">
+                    <label for="path">Path</label>
+                    <input disabled id="path" name="path" type="text" class="form-control" value="{{ file.path }}" />
+                    <label for="name">File</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                    <a href="{{ url_for('files_bp.download_file', id=file.id) }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                  {%- if template_mode == "add" %}
+                    <label for="file">Upload File</label>
+                    <input id="file" name="file" type="file" class="form-control-file">
+                  {% endif %}
+                  {%- if template_mode == "edit" %}
+                    <label for="file">Upload new file</label>
+                    <input id="file" name="file" type="file" class="form-control">
+                  {% endif %}
+                  {%- if template_mode == "delete" %}
+                    <label for="name">File</label>
+                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                  {% endif %}
+                </div>
+
+            </div>
+
+            <div class="col-md-1"></div>
+            <div class="col-md-6">
+              <div class="form-group">
+                  <label for="file">Tags:</label>
+                  {%  for group in tag_groups %}
+                      <p><button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button></p>
+                      <ul class="list-unstyled">
+                          {%  for tag in tag_hash[group.tag_id] %}
+                            {%- if template_mode == "add" %}
+                              <li><input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}</li>
+                            {% endif %}
+                            {%- if template_mode == "edit" %}
+                              <li><input {% if tag in file.tags %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}</li>
+                            {% endif %}
+                            {%- if template_mode == "delete" %}
+                              <li><input disabled {% if tag in file.tags %}checked{% endif %} class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}</li>
+                            {% endif %}
+                          {% endfor %}
+                      </ul>
+                      <br>
+                  {% endfor %}
+              </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+        {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+        {% endif %}
+        {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+        {% endif %}
+        {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+        {% endif %}
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $("#files-form").validate({
+              rules: {
+                  title: "required",
+                  desc: "required"
+              }
+          });
+      });
+  </script>
+
+{% endblock %}

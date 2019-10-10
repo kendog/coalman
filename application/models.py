@@ -36,6 +36,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
     profile = db.relationship('Profile', uselist=False, back_populates="user")
+    files = db.relationship('File', back_populates="user")
 
 
 class Profile(db.Model):
@@ -70,6 +71,8 @@ class File(db.Model):
     tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    user = db.relationship('User', back_populates='files')
 
 
 class Tag(db.Model):
@@ -108,8 +111,8 @@ class Package(db.Model):
     name = db.Column(db.String(255))
     path = db.Column(db.String(255))
     link = db.Column(db.String(255))
-    user_name = db.Column(db.String(255))
-    user_email = db.Column(db.String(255))
+    recipient_name = db.Column(db.String(255))
+    recipient_email = db.Column(db.String(255))
     files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
     package_status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
     package_status = db.relationship("PackageStatus", back_populates="packages")

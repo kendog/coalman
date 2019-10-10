@@ -6,6 +6,7 @@ from flask_session import Session
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
+import babel
 
 db = SQLAlchemy()
 login_manager = LoginManager()

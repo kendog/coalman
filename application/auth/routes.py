@@ -31,10 +31,10 @@ auth_bp = Blueprint('auth_bp', __name__,
 @jwt.user_claims_loader
 def add_claims_to_access_token(current_user):
     user = user_datastore.get_user(current_user)
-    role = Role.query.join(roles_users).join(User).filter((roles_users.c.user_id == User.id) & (roles_users.c.role_id == Role.id)).filter(User.email == current_user).first()
+    roles = Role.query.join(roles_users).join(User).filter((roles_users.c.user_id == User.id) & (roles_users.c.role_id == Role.id)).filter(User.email == current_user).all()
     return {
         'username': current_user,
-        'role': role.name
+        'roles': roles[0].name
     }
 
 
