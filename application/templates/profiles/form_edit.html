@@ -14,6 +14,13 @@
 
                 <hr>
 
+                {% if current_user.has_role('admin') %}
+                <div class="form-group">
+                    <label for="username">User:</label>
+                    <input disabled type="text" class="form-control" id="username" name="username" value="{{ profile.user.email }}" >
+                </div>
+                {% endif %}
+
                 <div class="form-group">
                     <label for="username">Username:</label>
                     <input type="text" class="form-control" id="username" name="username" value="{{ profile.username }}" >

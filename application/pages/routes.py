@@ -31,4 +31,4 @@ def dashboard():
 @login_required
 def api_documetation():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
-    return render_template('admin_apis.html', tag_groups=tag_groups)
+    return render_template('api.html', tag_groups=tag_groups)

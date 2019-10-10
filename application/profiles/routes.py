@@ -57,7 +57,7 @@ def profile_add():
             return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
     users = User.query.all()
-    return render_template('profile_add.html')
+    return render_template('profiles/form_add.html', users=users)
 
 
 @profiles_bp.route('/profile/edit/<id>', methods=['POST', 'GET'])
@@ -84,8 +84,7 @@ def profile_edit(id):
         if current_user.has_role('admin'):
             return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
-    users = User.query.all()
-    return render_template('profile_edit.html', profile=profile)
+    return render_template('profiles/form_edit.html', profile=profile)
 
 
 @profiles_bp.route('/profile/delete/<id>', methods=['POST', 'GET'])
@@ -104,8 +103,7 @@ def profile_delete(id):
             if current_user.has_role('admin'):
                 return redirect(url_for('profiles_bp.profiles_list'))
             return redirect(url_for('profiles_bp.profile'))
-
-    return render_template('profile_delete.html', profile=profile)
+    return render_template('profiles/form_delete.html', profile=profile)
 
 
 @profiles_bp.route('/profiles')
