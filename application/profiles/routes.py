@@ -18,20 +18,18 @@ profiles_bp = Blueprint('profiles_bp', __name__,
 @profiles_bp.route('/profile')
 @login_required
 def profile():
-    user_id = current_user.get_id()
-    user = User.query.filter_by(id=user_id).first()
-    profile = Profile.query.filter_by(user_id=user_id).first()
+    profile = Profile.query.filter_by(user_id=current_user.id).first()
     if profile:
-        return render_template('profile.html', user=user, profile=profile)
+        return render_template('profiles/profile.html', user=current_user, profile=profile)
     else:
-        return render_template('profile.html', user=user)
+        return render_template('profiles/profile.html', user=current_user)
 
 
 @profiles_bp.route('/profile/<id>')
 @login_required
 def get_profile(id):
     profile = Profile.query.filter_by(id=id).first()
-    return render_template('profile.html', profile=profile)
+    return render_template('profiles/profile.html', profile=profile)
 
 
 @profiles_bp.route('/profile/add', methods=['POST', 'GET'])
@@ -39,6 +37,9 @@ def get_profile(id):
 def profile_add():
     if 'submit-add' in request.form:
         user_id = current_user.get_id()
+        if current_user.has_role('admin') and 'user_id' in request.form:
+            user_id = request.form['user_id']
+
         profile = Profile(
             username=request.form['username'],
             bio=request.form['bio'],
@@ -52,16 +53,22 @@ def profile_add():
             user_id=user_id)
         db.session.add(profile)
         db.session.commit()
+        if current_user.has_role('admin'):
+            return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
     users = User.query.all()
     return render_template('profile_add.html')
 
 
-@profiles_bp.route('/profile/edit', methods=['POST', 'GET'])
+@profiles_bp.route('/profile/edit/<id>', methods=['POST', 'GET'])
 @login_required
-def profile_edit():
-    user_id = current_user.get_id()
-    profile = Profile.query.filter_by(user_id=user_id).first()
+def profile_edit(id):
+    profile = []
+    if current_user.has_role('admin'):
+        profile = Profile.query.filter_by(id=id).first()
+    else:
+        profile = Profile.query.filter_by(user_id=current_user.id).first()
+
     if 'submit-edit' in request.form:
         if profile:
             profile.username = request.form.get('username')
@@ -74,22 +81,39 @@ def profile_edit():
             profile.zip = request.form.get('zip')
             profile.phone = request.form.get('phone')
             db.session.commit()
+        if current_user.has_role('admin'):
+            return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
     users = User.query.all()
     return render_template('profile_edit.html', profile=profile)
 
 
-@profiles_bp.route('/profile/delete', methods=['POST', 'GET'])
+@profiles_bp.route('/profile/delete/<id>', methods=['POST', 'GET'])
 @login_required
-def profile_delete():
-    user_id = current_user.get_id()
-    profile = Profile.query.filter_by(user_id=user_id).first()
+def profile_delete(id):
+    profile = []
+    if current_user.has_role('admin'):
+        profile = Profile.query.filter_by(id=id).first()
+    else:
+        profile = Profile.query.filter_by(user_id=current_user.id).first()
+
     if 'submit-delete' in request.form:
         if profile:
             db.session.delete(profile)
             db.session.commit()
-        return redirect(url_for('profiles_bp.profile'))
+            if current_user.has_role('admin'):
+                return redirect(url_for('profiles_bp.profiles_list'))
+            return redirect(url_for('profiles_bp.profile'))
+
     return render_template('profile_delete.html', profile=profile)
+
+
+@profiles_bp.route('/profiles')
+#@roles_required('admin')
+def profiles_list():
+    profiles = Profile.query.all()
+    return render_template('profiles/list.html', profiles=profiles)
+
 
 """
 @app.route('/admin/profiles')
