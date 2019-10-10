@@ -32,7 +32,7 @@ def tags(tag_group_tag):
     else:
         tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
         tags = Tag.query.filter_by(tag_group_id=tag_group.id).order_by(Tag.weight).all()
-    return render_template('admin_tags.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
+    return render_template('tags/tags_list.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
 
 
 @tags_bp.route('/tags/add', methods=['POST', 'GET'])
@@ -44,7 +44,7 @@ def tags_add():
         db.session.commit()
         return redirect(url_for('tags_bp.tags', tag_group_tag=tag_group.tag_id))
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_add.html', tag_groups=tag_groups)
+    return render_template('tags/tags_add.html', tag_groups=tag_groups)
 
 
 @tags_bp.route('/tags/edit/<id>', methods=['POST', 'GET'])
@@ -63,7 +63,7 @@ def tags_edit(id):
             return redirect(url_for('tags_bp.tags', tag_group_tag=tag_group.tag_id))
     tag = Tag.query.filter_by(id=id).first()
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_edit.html', tag=tag, tag_groups=tag_groups)
+    return render_template('tags/tags_edit.html', tag=tag, tag_groups=tag_groups)
 
 
 @tags_bp.route('/tags/delete/<id>', methods=['POST', 'GET'])
@@ -79,14 +79,14 @@ def tags_delete(id):
             return redirect(url_for('tags_bp.tags', tag_group_tag=tag_group.tag_id))
     tag = Tag.query.filter_by(id=id).first()
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_delete.html', tag=tag, tag_groups=tag_groups)
+    return render_template('tags/tags_delete.html', tag=tag, tag_groups=tag_groups)
 
 
 @tags_bp.route('/tag_groups')
 @login_required
 def tag_groups():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
-    return render_template('admin_tag_groups.html', tag_groups=tag_groups)
+    return render_template('tags/tag_groups_list.html', tag_groups=tag_groups)
 
 
 @tags_bp.route('/tag_groups/add', methods=['POST', 'GET'])
@@ -96,7 +96,7 @@ def tag_groups_add():
         db.session.add(TagGroup(name=request.form['name'], tag_id=request.form['tag_id'], weight=request.form['weight']))
         db.session.commit()
         return redirect(url_for('tags_bp.tag_groups'))
-    return render_template('admin_tag_groups_add.html')
+    return render_template('tags/tag_groups_add.html')
 
 
 @tags_bp.route('/tag_groups/edit/<id>', methods=['POST', 'GET'])
@@ -112,7 +112,7 @@ def tag_groups_edit(id):
             db.session.commit()
             return redirect(url_for('tags_bp.tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
-    return render_template('admin_tag_groups_edit.html', tag_group=tag_group)
+    return render_template('tags/tag_groups_edit.html', tag_group=tag_group)
 
 
 @tags_bp.route('/tag_groups/delete/<id>', methods=['POST', 'GET'])
@@ -126,7 +126,7 @@ def tag_groups_delete(id):
             db.session.commit()
             return redirect(url_for('tags_bp.tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
-    return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
+    return render_template('tags/tag_groups_delete.html', tag_group=tag_group)
 
 """
 
@@ -146,7 +146,7 @@ def admin_tags(tag_group_tag):
     else:
         tag_group = TagGroup.query.filter_by(tag_id=tag_group_tag).first()
         tags = Tag.query.filter_by(tag_group_id=tag_group.id).order_by(Tag.weight).all()
-    return render_template('admin_tags.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
+    return render_template('tags/tags.html', tags=tags, tag_group=tag_group, tag_groups=tag_groups)
 
 
 @tags_bp.route('/admin/tags/add', methods=['POST', 'GET'])
@@ -158,7 +158,7 @@ def admin_tags_add():
         db.session.commit()
         return redirect(url_for('tags_bp.admin_tags', tag_group_tag=tag_group.tag_id))
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_add.html', tag_groups=tag_groups)
+    return render_template('tags/tags_add.html', tag_groups=tag_groups)
 
 
 @tags_bp.route('/admin/tags/edit/<id>', methods=['POST', 'GET'])
@@ -177,7 +177,7 @@ def admin_tags_edit(id):
             return redirect(url_for('tags_bp.admin_tags', tag_group_tag=tag_group.tag_id))
     tag = Tag.query.filter_by(id=id).first()
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_edit.html', tag=tag, tag_groups=tag_groups)
+    return render_template('tags/tags_edit.html', tag=tag, tag_groups=tag_groups)
 
 
 @tags_bp.route('/admin/tags/delete/<id>', methods=['POST', 'GET'])
@@ -193,14 +193,14 @@ def admin_tags_delete(id):
             return redirect(url_for('tags_bp.admin_tags', tag_group_tag=tag_group.tag_id))
     tag = Tag.query.filter_by(id=id).first()
     tag_groups = TagGroup.query.all()
-    return render_template('admin_tags_delete.html', tag=tag, tag_groups=tag_groups)
+    return render_template('tags/tags_delete.html', tag=tag, tag_groups=tag_groups)
 
 
 @tags_bp.route('/admin/tag_groups')
 @roles_required('admin')
 def admin_tag_groups():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
-    return render_template('admin_tag_groups.html', tag_groups=tag_groups)
+    return render_template('tags/tag_groups.html', tag_groups=tag_groups)
 
 
 @tags_bp.route('/admin/tag_groups/add', methods=['POST', 'GET'])
@@ -210,7 +210,7 @@ def admin_tag_groups_add():
         db.session.add(TagGroup(name=request.form['name'], tag_id=request.form['tag_id'], weight=request.form['weight']))
         db.session.commit()
         return redirect(url_for('tags_bp.admin_tag_groups'))
-    return render_template('admin_tag_groups_add.html')
+    return render_template('tags/tag_groups_add.html')
 
 
 @tags_bp.route('/admin/tag_groups/edit/<id>', methods=['POST', 'GET'])
@@ -226,7 +226,7 @@ def admin_tag_groups_edit(id):
             db.session.commit()
             return redirect(url_for('tags_bp.admin_tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
-    return render_template('admin_tag_groups_edit.html', tag_group=tag_group)
+    return render_template('tags/tag_groups_edit.html', tag_group=tag_group)
 
 
 @tags_bp.route('/admin/tag_groups/delete/<id>', methods=['POST', 'GET'])
@@ -240,5 +240,5 @@ def admin_tag_groups_delete(id):
             db.session.commit()
             return redirect(url_for('tags_bp.admin_tag_groups'))
     tag_group = TagGroup.query.filter_by(id=id).first()
-    return render_template('admin_tag_groups_delete.html', tag_group=tag_group)
+    return render_template('tags/tag_groups_delete.html', tag_group=tag_group)
 """

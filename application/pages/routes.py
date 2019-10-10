@@ -4,6 +4,8 @@ from flask_login import current_user, login_required
 from flask import current_app as app
 #from .assets import compile_auth_assets
 #from flask_login import login_required
+from ..models import TagGroup
+
 
 # Blueprint Configuration
 pages_bp = Blueprint('pages_bp', __name__,
@@ -31,4 +33,4 @@ def dashboard():
 @login_required
 def api_documetation():
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
-    return render_template('api.html', tag_groups=tag_groups)
+    return render_template('apis.html', tag_groups=tag_groups)
