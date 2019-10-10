@@ -6,14 +6,14 @@ from flask_security import roles_required, roles_accepted, Security, SQLAlchemyU
 #from .forms import LoginForm, SignupForm
 from ..models import db, User, Role
 from flask_login import login_required, current_user
-#from .. import user_datastore, security
+from .. import user_datastore
 
 # Setup Flask-Security
 #user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 #security = Security(app, user_datastore)
 
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+#user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+#security = Security(app, user_datastore)
 
 
 # Blueprint Configuration

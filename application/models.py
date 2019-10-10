@@ -1,5 +1,5 @@
 """Database models."""
-from . import db
+from .db import db
 from flask_login import UserMixin
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin, current_user, login_required, roles_required, utils
 import datetime

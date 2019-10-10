@@ -7,15 +7,16 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 import babel
-from flask_security import SQLAlchemyUserDatastore
-#from .models import User, Role
+from flask_security import Security, SQLAlchemyUserDatastore
+from .db import db
+from .models import User, Role
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 sess = Session()
 flask_bcrypt = Bcrypt()
 jwt = JWTManager()
-#user_datastore = SQLAlchemyUserDatastore()
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
 def create_app():
     """Construct the core application."""
@@ -31,9 +32,8 @@ def create_app():
     flask_bcrypt = Bcrypt(app)
     jwt = JWTManager(app)
 
-#    security = Security(app, user_datastore)
-
     migrate = Migrate(app, db)
+    security = Security(app, user_datastore)
 
     app.jinja_env.filters['datetime'] = format_datetime
 
