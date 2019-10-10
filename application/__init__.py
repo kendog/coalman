@@ -7,12 +7,15 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 import babel
+from flask_security import SQLAlchemyUserDatastore
+#from .models import User, Role
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 sess = Session()
 flask_bcrypt = Bcrypt()
 jwt = JWTManager()
+#user_datastore = SQLAlchemyUserDatastore()
 
 def create_app():
     """Construct the core application."""
@@ -27,6 +30,8 @@ def create_app():
     sess.init_app(app)
     flask_bcrypt = Bcrypt(app)
     jwt = JWTManager(app)
+
+#    security = Security(app, user_datastore)
 
     migrate = Migrate(app, db)
 

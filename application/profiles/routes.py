@@ -107,7 +107,7 @@ def profile_delete(id):
 
 
 @profiles_bp.route('/profiles')
-#@roles_required('admin')
+@roles_required('admin')
 def profiles_list():
     profiles = Profile.query.all()
     return render_template('profiles/list.html', profiles=profiles)

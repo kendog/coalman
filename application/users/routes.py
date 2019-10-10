@@ -1,13 +1,17 @@
 """Routes for user authentication."""
 from flask import redirect, render_template, Blueprint, request, url_for
 from flask import current_app as app
-from flask_security import roles_required, Security, SQLAlchemyUserDatastore, utils
+from flask_security import roles_required, roles_accepted, Security, SQLAlchemyUserDatastore, utils
 #from .assets import compile_auth_assets
 #from .forms import LoginForm, SignupForm
 from ..models import db, User, Role
-
+from flask_login import login_required, current_user
+#from .. import user_datastore, security
 
 # Setup Flask-Security
+#user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+#security = Security(app, user_datastore)
+
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
@@ -28,13 +32,13 @@ def before_first_request():
         db.session.commit()
 
 @users_bp.route('/users')
-#@roles_required('admin')
+@roles_accepted('admin')
 def users():
     users = User.query.all()
     return render_template('users/list.html', users=users)
 
 @users_bp.route('/users/add', methods=['POST', 'GET'])
-#@roles_required('admin')
+@roles_required('admin')
 def users_add():
     if 'submit-add' in request.form:
         encrypted_password = utils.hash_password(request.form['password'])
@@ -48,7 +52,7 @@ def users_add():
 
 
 @users_bp.route('/users/edit/<id>', methods=['POST', 'GET'])
-#@roles_required('admin')
+@roles_required('admin')
 def users_edit(id):
     if 'submit-edit' in request.form:
         exists = user_datastore.get_user(id)
@@ -67,7 +71,7 @@ def users_edit(id):
 
 
 @users_bp.route('/users/delete/<id>', methods=['POST', 'GET'])
-#@roles_required('admin')
+@roles_required('admin')
 def users_delete(id):
     if 'submit-delete' in request.form:
         exists = user_datastore.get_user(id)
