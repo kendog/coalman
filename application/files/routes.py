@@ -7,7 +7,14 @@ from flask import current_app as app
 #from .forms import LoginForm, SignupForm
 from ..models import db, File, Tag, TagGroup
 from werkzeug.utils import secure_filename
+import boto3
 
+
+s3 = boto3.client(
+   "s3",
+   aws_access_key_id=app.config['S3_KEY'],
+   aws_secret_access_key=app.config['S3_SECRET']
+)
 
 # Blueprint Configuration
 files_bp = Blueprint('files_bp', __name__,
@@ -68,7 +75,7 @@ def files_add():
         if 'file' in request.files:
             the_actual_file = request.files['file']
             if the_actual_file and allowed_file(the_actual_file.filename):
-                directory = app.config['UPLOAD_FOLDER'] + str(file.id) + '/'
+                directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
                 try:
                     os.stat(directory)
                 except:
@@ -80,6 +87,11 @@ def files_add():
                 file.path = directory
                 db.session.commit()
 
+                if app.config['UPLOAD_TO_S3']:
+                    the_actual_file.filename = secure_filename(the_actual_file.filename)
+                    s3_key = app.config['S3_UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
+                    upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+
         return redirect(url_for('files_bp.files'))
 
     tag_hash = {}
@@ -87,6 +99,30 @@ def files_add():
     for groups in tag_groups:
         tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
     return render_template('files/form.html', template_mode='add', tag_groups=tag_groups, tag_hash=tag_hash)
+
+
+def upload_file_to_s3(file, s3_key, bucket_name):
+
+    """
+    Docs: http://boto3.readthedocs.io/en/latest/guide/s3.html
+    """
+
+    try:
+
+        s3.upload_fileobj(
+            file,
+            bucket_name,
+            s3_key,
+            ExtraArgs={
+                "ContentType": file.content_type
+            }
+        )
+
+    except Exception as e:
+        print("Something Happened: ", e)
+        return e
+
+    return "{}{}".format(app.config["S3_URL"], file.filename)
 
 
 @files_bp.route('/files/edit/<id>', methods=['POST', 'GET'])

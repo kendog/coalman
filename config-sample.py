@@ -28,3 +28,10 @@ class Config:
 
     SITE_ADMIN_EMAIL = 'admin@beasel.io'
     SITE_ADMIN_PASSWORD = 'admin1234'
+
+    UPLOAD_TO_S3 = True
+    S3_BUCKET = 'S3_BUCKET'
+    S3_KEY = 'S3_KEY'
+    S3_SECRET = 'S3_SECRET'
+    S3_UPLOAD_FOLDER = 'uploads/'
+    S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)

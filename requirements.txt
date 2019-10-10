@@ -11,3 +11,4 @@ Flask-Migrate
 flask_session
 Flask_JWT_Extended
 Flask_Bcrypt
+boto3
