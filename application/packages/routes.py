@@ -31,57 +31,54 @@ packages_bp = Blueprint('packages_bp', __name__,
 def download_package(uuid):
 
     package = Package.query.filter_by(uuid=uuid).first()
-    package.downloads += 1
-    db.session.commit()
-
-    #package_files(package.uuid)
-    #if not os.path.isfile(package.path + package.name):
-        # File does not exist...  Create Package
-    #    package_files(package.uuid)
-
-    #return send_from_directory(package.path, package.name)
-
-    if app.config['MEMORY']:
-        memory_file = BytesIO()
-        with zipfile.ZipFile(memory_file, 'w') as zf:
-            for file in package.files:
-                if app.config['UPLOAD_TO_S3']:
-                    response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
-                    zf.writestr(file.name, response['Body'].read())
-                else:
-                    absname = os.path.abspath(os.path.join(file.path + file.name))
-                    #zf.write(absname, file.name)
-                    in_file = open(absname, "rb") # opening for [r]eading as [b]inary
-                    data = in_file.read() # if you only wanted to read 512 bytes, do .read(512)
-                    in_file.close()
-                    zf.writestr(file.name, data)
-        memory_file.seek(0)
-        return send_file(memory_file, attachment_filename=uuid + '.zip', as_attachment=True)
-    else:
-        #if not os.path.isfile(package.path + package.name):
-            # File does not exist...  Create Package
-        package_files(package.uuid)
-        return send_from_directory(package.path, package.name)
-
-
-def package_files(uuid):
-    package = Package.query.filter_by(uuid=uuid).first()
     package.package_status_id = 2
     db.session.commit()
 
-    zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
-    for file in package.files:
-        if app.config['UPLOAD_TO_S3']:
-            response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
-            zf.writestr(file.name, response['Body'].read())
-        else:
-            absname = os.path.abspath(os.path.join(file.path + file.name))
-            zf.write(absname, file.name)
-    zf.close()
+    if app.config['IN_MEMORY_PACKAGE']:
+        return send_file(get_package_memory(package), attachment_filename=package.name, as_attachment=True)
 
+    if os.path.isfile(package.path + package.name) and app.config['DISK_PACKAGE_CACHING']:
+        # File does exist...  SKIP Create Package
+        return send_from_directory(package.path, package.name)
+    else:
+        create_package_file(package)
+        return send_from_directory(package.path, package.name)
+
+
+    package.downloads += 1
     package.package_status_id = 3
     db.session.commit()
 
+
+def create_package_file(package):
+
+
+        zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
+        for file in package.files:
+            if app.config['UPLOAD_TO_S3']:
+                response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
+                zf.writestr(file.name, response['Body'].read())
+            else:
+                absname = os.path.abspath(os.path.join(file.path + file.name))
+                zf.write(absname, file.name)
+        zf.close()
+
+
+def get_package_memory(package):
+    memory_file = BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        for file in package.files:
+            if app.config['UPLOAD_TO_S3']:
+                response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
+                zf.writestr(file.name, response['Body'].read())
+            else:
+                absname = os.path.abspath(os.path.join(file.path + file.name))
+                in_file = open(absname, "rb") # opening for [r]eading as [b]inary
+                data = in_file.read() # if you only wanted to read 512 bytes, do .read(512)
+                in_file.close()
+                zf.writestr(file.name, data)
+    memory_file.seek(0)
+    return memory_file
 
 
 def send_notification(uuid):

@@ -35,4 +35,5 @@ class Config:
     S3_BUCKET = 'S3_BUCKET'
     S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
 
-    MEMORY = True
+    IN_MEMORY_PACKAGE = True
+    DISK_PACKAGE_CACHING = False
