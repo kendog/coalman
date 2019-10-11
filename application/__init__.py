@@ -43,7 +43,7 @@ def create_app():
         # import parts of our application
         from . import auth
         from . import files
-        from . import packages
+        from . import archives
         from . import profiles
         from . import tags
         from . import messages

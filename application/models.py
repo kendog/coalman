@@ -100,14 +100,14 @@ class TagGroup(db.Model):
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 
-packages_files = db.Table('packages_files',
+archives_files = db.Table('archives_files',
     db.Column('file_id', db.Integer, db.ForeignKey('Files.id'), primary_key=True),
-    db.Column('package_id', db.Integer, db.ForeignKey('Packages.id'), primary_key=True)
+    db.Column('archive_id', db.Integer, db.ForeignKey('Archives.id'), primary_key=True)
 )
 
 
-class Package(db.Model):
-    __tablename__ = 'Packages'
+class Archive(db.Model):
+    __tablename__ = 'Archives'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uuid = db.Column(db.String(255))
     name = db.Column(db.String(255))
@@ -115,22 +115,22 @@ class Package(db.Model):
     link = db.Column(db.String(255))
     recipient_name = db.Column(db.String(255))
     recipient_email = db.Column(db.String(255))
-    files = db.relationship('File', secondary=packages_files, lazy='subquery', backref=db.backref('Packages', lazy=True))
-    package_status_id = db.Column(db.Integer, db.ForeignKey('PackageStatuses.id'))
-    package_status = db.relationship("PackageStatus", back_populates="packages")
+    files = db.relationship('File', secondary=archives_files, lazy='subquery', backref=db.backref('Archives', lazy=True))
+    archive_status_id = db.Column(db.Integer, db.ForeignKey('ArchiveStatuses.id'))
+    archive_status = db.relationship("ArchiveStatus", back_populates="archives")
     notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
-    notification_status = db.relationship("NotificationStatus", back_populates="packages")
+    notification_status = db.relationship("NotificationStatus", back_populates="archives")
     downloads = db.Column(db.Integer, default=0)
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
 
 
-class PackageStatus(db.Model):
-    __tablename__ = 'PackageStatuses'
+class ArchiveStatus(db.Model):
+    __tablename__ = 'ArchiveStatuses'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
     tag_id = db.Column(db.String(255))
-    packages = db.relationship("Package", back_populates="package_status")
+    archives = db.relationship("Archive", back_populates="archive_status")
 
 
 class NotificationStatus(db.Model):
@@ -138,7 +138,7 @@ class NotificationStatus(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
     tag_id = db.Column(db.String(255))
-    packages = db.relationship("Package", back_populates="notification_status")
+    archives = db.relationship("Archive", back_populates="notification_status")
 
 
 class Message(db.Model):

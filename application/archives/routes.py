@@ -5,7 +5,7 @@ from flask import current_app as app
 from flask_security import roles_required
 #from .assets import compile_auth_assets
 #from .forms import LoginForm, SignupForm
-from ..models import db, Package, File
+from ..models import db, Archive, File
 import uuid
 import smtplib
 import boto3
@@ -21,40 +21,40 @@ s3_client = boto3.client(
 )
 
 # Blueprint Configuration
-packages_bp = Blueprint('packages_bp', __name__,
+archives_bp = Blueprint('archives_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
 #compile_auth_assets(app)
 
 
-@packages_bp.route('/packages/<uuid>')
-def download_package(uuid):
+@archives_bp.route('/archives/<uuid>')
+def download_archive(uuid):
 
-    package = Package.query.filter_by(uuid=uuid).first()
-    package.package_status_id = 2
+    archive = Archive.query.filter_by(uuid=uuid).first()
+    archive.archive_status_id = 2
     db.session.commit()
 
     if app.config['IN_MEMORY_PACKAGE']:
-        return send_file(get_package_memory(package), attachment_filename=package.name, as_attachment=True)
+        return send_file(get_archive_memory(archive), attachment_filename=archive.name, as_attachment=True)
 
-    if os.path.isfile(package.path + package.name) and app.config['DISK_PACKAGE_CACHING']:
-        # File does exist...  SKIP Create Package
-        return send_from_directory(package.path, package.name)
+    if os.path.isfile(archive.path + archive.name) and app.config['DISK_PACKAGE_CACHING']:
+        # File does exist...  SKIP Create Archive
+        return send_from_directory(archive.path, archive.name)
     else:
-        create_package_file(package)
-        return send_from_directory(package.path, package.name)
+        create_archive_file(archive)
+        return send_from_directory(archive.path, archive.name)
 
 
-    package.downloads += 1
-    package.package_status_id = 3
+    archive.downloads += 1
+    archive.archive_status_id = 3
     db.session.commit()
 
 
-def create_package_file(package):
+def create_archive_file(archive):
 
 
-        zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
-        for file in package.files:
+        zf = zipfile.ZipFile(archive.path + archive.name, "w", zipfile.ZIP_DEFLATED)
+        for file in archive.files:
             if app.config['UPLOAD_TO_S3']:
                 response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
                 zf.writestr(file.name, response['Body'].read())
@@ -64,10 +64,10 @@ def create_package_file(package):
         zf.close()
 
 
-def get_package_memory(package):
+def get_archive_memory(archive):
     memory_file = BytesIO()
     with zipfile.ZipFile(memory_file, 'w') as zf:
-        for file in package.files:
+        for file in archive.files:
             if app.config['UPLOAD_TO_S3']:
                 response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
                 zf.writestr(file.name, response['Body'].read())
@@ -82,56 +82,56 @@ def get_package_memory(package):
 
 
 def send_notification(uuid):
-    package = Package.query.filter_by(uuid=uuid).first()
-    package.notification_status_id = 2
+    archive = Archive.query.filter_by(uuid=uuid).first()
+    archive.notification_status_id = 2
     db.session.commit()
     # Build the Mail
     message = Message.query.first()
     header = 'From: %s\n' % app.config['MAIL_USERNAME']
-    header += 'To: %s\n' % package.user_email
+    header += 'To: %s\n' % archive.user_email
     header += 'Subject: %s\n\n' % message.subject
-    message = header + message.message + '\n\n' + package.link;
+    message = header + message.message + '\n\n' + archive.link;
     # Send the Mail
     server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
     server.ehlo()
     server.starttls()
     server.ehlo()
     server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-    results = server.sendmail(app.config['MAIL_USERNAME'], package.user_email, message)
+    results = server.sendmail(app.config['MAIL_USERNAME'], archive.user_email, message)
 
     server.quit()
     #print "results", results
-    package.notification_status_id = 3
+    archive.notification_status_id = 3
     db.session.commit()
     return results
 
 
-@packages_bp.route('/packages')
+@archives_bp.route('/archives')
 @login_required
-def packages():
-    packages = Package.query.all()
-    return render_template('packages/list.html', packages=packages)
+def archives():
+    archives = Archive.query.all()
+    return render_template('archives/list.html', archives=archives)
 
 
-@packages_bp.route('/packages/add', methods=['POST', 'GET'])
+@archives_bp.route('/archives/add', methods=['POST', 'GET'])
 @login_required
-def packages_add():
+def archives_add():
     if 'submit-add' in request.form:
         # Update Metadata
         recipient_name = request.form.get('recipient_name')
         recipient_email = request.form.get("recipient_email")
         file_ids = request.form.getlist("files")
 
-        package = Package(uuid=str(uuid.uuid4()), recipient_name=recipient_name, recipient_email=recipient_email)
-        db.session.add(package)
+        archive = Archive(uuid=str(uuid.uuid4()), recipient_name=recipient_name, recipient_email=recipient_email)
+        db.session.add(archive)
         db.session.commit()
 
-        package.package_status_id = 1
-        package.notification_status_id = 1
-        package.name = package.uuid + ".zip"
-        package.path = app.config['TEMP_FOLDER']
-        package.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for(
-            'packages_bp.download_package', uuid=package.uuid)
+        archive.archive_status_id = 1
+        archive.notification_status_id = 1
+        archive.name = archive.uuid + ".zip"
+        archive.path = app.config['TEMP_FOLDER']
+        archive.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for(
+            'archives_bp.download_archive', uuid=archive.uuid)
         db.session.commit()
 
         # Add Files
@@ -139,31 +139,31 @@ def packages_add():
             #print item
             exists = db.session.query(File.id).filter_by(id=item).scalar()
             if exists:
-                package.files.append(File.query.filter_by(id=item).first())
+                archive.files.append(File.query.filter_by(id=item).first())
                 db.session.commit()
 
         # Send Email
         if request.form.get("notify"):
-            send_notification(package.uuid)
+            send_notification(archive.uuid)
 
-        return redirect(url_for('packages_bp.packages'))
+        return redirect(url_for('archives_bp.archives'))
     files = File.query.all()
-    return render_template('packages/form.html', template_mode='add', files=files)
+    return render_template('archives/form.html', template_mode='add', files=files)
 
 
-@packages_bp.route('/packages/edit/<id>', methods=['POST', 'GET'])
+@archives_bp.route('/archives/edit/<id>', methods=['POST', 'GET'])
 @login_required
-def packages_edit(id):
-    package = Package.query.filter_by(id=id).first()
+def archives_edit(id):
+    archive = Archive.query.filter_by(id=id).first()
     if 'submit-edit' in request.form:
         # Update Metadata
         recipient_name = request.form.get('recipient_name')
         recipient_email = request.form.get("recipient_email")
         file_ids = request.form.getlist("files")
 
-        package.recipient_name = recipient_name
-        package.recipient_email = recipient_email
-        package.files[:] = []
+        archive.recipient_name = recipient_name
+        archive.recipient_email = recipient_email
+        archive.files[:] = []
         db.session.commit()
 
         # Add Files
@@ -171,25 +171,25 @@ def packages_edit(id):
             #print item
             exists = db.session.query(File.id).filter_by(id=item).scalar()
             if exists:
-                package.files.append(File.query.filter_by(id=item).first())
+                archive.files.append(File.query.filter_by(id=item).first())
                 db.session.commit()
 
         # Send Email
         if request.form.get("notify"):
-            send_notification(package.uuid)
+            send_notification(archive.uuid)
 
-        return redirect(url_for('packages_bp.packages'))
+        return redirect(url_for('archives_bp.archives'))
     files = File.query.all()
-    return render_template('packages/form.html', template_mode='edit', package=package, files=files)
+    return render_template('archives/form.html', template_mode='edit', archive=archive, files=files)
 
 
-@packages_bp.route('/packages/delete/<id>', methods=['POST', 'GET'])
+@archives_bp.route('/archives/delete/<id>', methods=['POST', 'GET'])
 @login_required
-def packages_delete(id):
-    package = Package.query.filter_by(id=id).first()
+def archives_delete(id):
+    archive = Archive.query.filter_by(id=id).first()
     if 'submit-delete' in request.form:
-        if package:
-            db.session.delete(package)
+        if archive:
+            db.session.delete(archive)
             db.session.commit()
-            return redirect(url_for('packages_bp.packages'))
-    return render_template('packages/form.html', template_mode='delete', package=package)
+            return redirect(url_for('archives_bp.archives'))
+    return render_template('archives/form.html', template_mode='delete', archive=archive)
