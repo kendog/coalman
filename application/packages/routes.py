@@ -1,5 +1,5 @@
-"""Routes for user authentication."""
-from flask import redirect, render_template, Blueprint, request, url_for
+import os
+from flask import redirect, render_template, Blueprint, request, url_for, send_from_directory, send_file
 from flask_login import login_required
 from flask import current_app as app
 from flask_security import roles_required
@@ -8,7 +8,17 @@ from flask_security import roles_required
 from ..models import db, Package, File
 import uuid
 import smtplib
+import boto3
+import zipfile
+import codecs
+import json
+from io import BytesIO
 
+s3_client = boto3.client(
+   "s3",
+   aws_access_key_id=app.config['AWS_ACCESS_KEY'],
+   aws_secret_access_key=app.config['AWS_SECRET_KEY']
+)
 
 # Blueprint Configuration
 packages_bp = Blueprint('packages_bp', __name__,
@@ -19,14 +29,84 @@ packages_bp = Blueprint('packages_bp', __name__,
 
 @packages_bp.route('/packages/<uuid>')
 def download_package(uuid):
+
     package = Package.query.filter_by(uuid=uuid).first()
-    # check for package first...
-    if not os.path.isfile(package.path + package.name):
-        # File does not exist...  Create Package
-        package_files(package.uuid)
     package.downloads += 1
     db.session.commit()
-    return send_from_directory(package.path, package.name)
+
+    #package_files(package.uuid)
+    #if not os.path.isfile(package.path + package.name):
+        # File does not exist...  Create Package
+    #    package_files(package.uuid)
+
+    #return send_from_directory(package.path, package.name)
+
+    if app.config['MEMORY']:
+        memory_file = BytesIO()
+        with zipfile.ZipFile(memory_file, 'w') as zf:
+            for file in package.files:
+                if app.config['UPLOAD_TO_S3']:
+                    response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
+                    zf.writestr(file.name, response['Body'].read())
+                else:
+                    absname = os.path.abspath(os.path.join(file.path + file.name))
+                    #zf.write(absname, file.name)
+                    in_file = open(absname, "rb") # opening for [r]eading as [b]inary
+                    data = in_file.read() # if you only wanted to read 512 bytes, do .read(512)
+                    in_file.close()
+                    zf.writestr(file.name, data)
+        memory_file.seek(0)
+        return send_file(memory_file, attachment_filename=uuid + '.zip', as_attachment=True)
+    else:
+        #if not os.path.isfile(package.path + package.name):
+            # File does not exist...  Create Package
+        package_files(package.uuid)
+        return send_from_directory(package.path, package.name)
+
+
+def package_files(uuid):
+    package = Package.query.filter_by(uuid=uuid).first()
+    package.package_status_id = 2
+    db.session.commit()
+
+    zf = zipfile.ZipFile(package.path + package.name, "w", zipfile.ZIP_DEFLATED)
+    for file in package.files:
+        if app.config['UPLOAD_TO_S3']:
+            response = s3_client.get_object(Bucket=app.config['S3_BUCKET'], Key=file.s3_key)
+            zf.writestr(file.name, response['Body'].read())
+        else:
+            absname = os.path.abspath(os.path.join(file.path + file.name))
+            zf.write(absname, file.name)
+    zf.close()
+
+    package.package_status_id = 3
+    db.session.commit()
+
+
+
+def send_notification(uuid):
+    package = Package.query.filter_by(uuid=uuid).first()
+    package.notification_status_id = 2
+    db.session.commit()
+    # Build the Mail
+    message = Message.query.first()
+    header = 'From: %s\n' % app.config['MAIL_USERNAME']
+    header += 'To: %s\n' % package.user_email
+    header += 'Subject: %s\n\n' % message.subject
+    message = header + message.message + '\n\n' + package.link;
+    # Send the Mail
+    server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+    results = server.sendmail(app.config['MAIL_USERNAME'], package.user_email, message)
+
+    server.quit()
+    #print "results", results
+    package.notification_status_id = 3
+    db.session.commit()
+    return results
 
 
 @packages_bp.route('/packages')

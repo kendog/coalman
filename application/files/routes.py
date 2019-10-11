@@ -89,7 +89,8 @@ def files_add():
                 if app.config['UPLOAD_TO_S3']:
                     the_actual_file.filename = secure_filename(the_actual_file.filename)
                     s3_key = current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
-                    s3_url = upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+                    s3_client.upload_file(os.path.join(directory, secure_filename(the_actual_file.filename)), app.config["S3_BUCKET"], s3_key, ExtraArgs={'ContentType': "application/pdf"})
+                    s3_url = "{}{}".format(app.config["S3_URL"], s3_key)
                     file.s3_key = s3_key
                     file.s3_url = s3_url
                     db.session.commit()
@@ -143,7 +144,8 @@ def files_edit(id):
                     if app.config['UPLOAD_TO_S3']:
                         the_actual_file.filename = secure_filename(the_actual_file.filename)
                         s3_key = current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
-                        s3_url = upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+                        s3_client.upload_file(os.path.join(directory, secure_filename(the_actual_file.filename)), app.config["S3_BUCKET"], s3_key, ExtraArgs={'ContentType': "application/pdf"})
+                        s3_url = "{}{}".format(app.config["S3_URL"], s3_key)
                         file.s3_key = s3_key
                         file.s3_url = s3_url
                         db.session.commit()
@@ -217,27 +219,3 @@ def get_matching_s3_keys(bucket, prefix='', suffix=''):
             kwargs['ContinuationToken'] = resp['NextContinuationToken']
         except KeyError:
             break
-
-
-def upload_file_to_s3(file, s3_key, bucket_name):
-
-    """
-    Docs: http://boto3.readthedocs.io/en/latest/guide/s3.html
-    """
-
-    try:
-
-        s3_client.upload_fileobj(
-            file,
-            bucket_name,
-            s3_key,
-            ExtraArgs={
-                "ContentType": file.content_type
-            }
-        )
-
-    except Exception as e:
-        print("Something Happened: ", e)
-        return e
-
-    return "{}{}".format(app.config["S3_URL"], s3_key)
