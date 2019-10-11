@@ -12,8 +12,8 @@ import boto3
 
 s3 = boto3.client(
    "s3",
-   aws_access_key_id=app.config['S3_KEY'],
-   aws_secret_access_key=app.config['S3_SECRET']
+   aws_access_key_id=app.config['AWS_ACCESS_KEY'],
+   aws_secret_access_key=app.config['AWS_SECRET_KEY']
 )
 
 # Blueprint Configuration
@@ -76,10 +76,12 @@ def files_add():
             the_actual_file = request.files['file']
             if the_actual_file and allowed_file(the_actual_file.filename):
                 directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
-                try:
-                    os.stat(directory)
-                except:
-                    os.mkdir(directory)
+
+                os.makedirs(directory, exist_ok=True)
+#                try:
+#                    os.stat(directory)
+#                except:
+#                    os.mkdir(directory)
                 # upload the file
                 the_actual_file.save(os.path.join(directory, secure_filename(the_actual_file.filename)))
                 # update the db
@@ -89,7 +91,7 @@ def files_add():
 
                 if app.config['UPLOAD_TO_S3']:
                     the_actual_file.filename = secure_filename(the_actual_file.filename)
-                    s3_key = app.config['S3_UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
+                    s3_key = current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
                     upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
 
         return redirect(url_for('files_bp.files'))

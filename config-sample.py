@@ -30,8 +30,7 @@ class Config:
     SITE_ADMIN_PASSWORD = 'admin1234'
 
     UPLOAD_TO_S3 = True
+    AWS_ACCESS_KEY = 'AWS_ACCESS_KEY'
+    AWS_SECRET_KEY = 'AWS_SECRET_KEY'
     S3_BUCKET = 'S3_BUCKET'
-    S3_KEY = 'S3_KEY'
-    S3_SECRET = 'S3_SECRET'
-    S3_UPLOAD_FOLDER = 'uploads/'
     S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
