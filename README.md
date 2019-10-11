@@ -22,3 +22,9 @@ Installation
 6. Install dependencies `pip install -r requirements.txt`.
 7. Upgrade database `sh upgrade_db.sh`
 8. Run the application `sh run_app.sh`
+
+
+Installation
+------------
+Default admin user credentials can be configured in `config.py`.
+Change password after initial login.
