@@ -1,7 +1,7 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/application/static/images/logo-medium.png)
 =========
 
-Coleman is a file management, achiving and distribution microservice written in Python and Flask.
+Coleman is a file achiving and distribution microservice written in Python and Flask.
 
 * Lite CMS to manage and serve zip achives
 * APIs with JWT Authentication
