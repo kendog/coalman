@@ -34,3 +34,5 @@ class Config:
     AWS_SECRET_KEY = 'AWS_SECRET_KEY'
     S3_BUCKET = 'S3_BUCKET'
     S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
+
+    MEMORY = True
