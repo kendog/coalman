@@ -71,6 +71,8 @@ class File(db.Model):
     tags = db.relationship('Tag', secondary=tags_files, lazy='subquery', backref=db.backref('Files', lazy=True))
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
+    s3_key = db.Column(db.String(255))
+    s3_url = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
     user = db.relationship('User', back_populates='files')
 

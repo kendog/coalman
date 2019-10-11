@@ -9,7 +9,7 @@ from flask_login import login_required, current_user
 from .. import user_datastore
 
 # Setup Flask-Security
-#user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 #security = Security(app, user_datastore)
 
 #user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -22,6 +22,7 @@ users_bp = Blueprint('users_bp', __name__,
                     static_folder='static')
 
 
+
 @app.before_first_request
 def before_first_request():
     if not user_datastore.get_user(app.config['SITE_ADMIN_EMAIL']):
@@ -30,6 +31,7 @@ def before_first_request():
         db.session.commit()
         user_datastore.add_role_to_user(app.config['SITE_ADMIN_EMAIL'], 'admin')
         db.session.commit()
+
 
 @users_bp.route('/users')
 @roles_accepted('admin')

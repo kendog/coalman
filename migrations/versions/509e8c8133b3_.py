@@ -90,6 +90,8 @@ def upgrade():
     sa.Column('desc', sa.UnicodeText(), nullable=True),
     sa.Column('created', sa.DateTime(), nullable=True),
     sa.Column('updated', sa.DateTime(), nullable=True),
+    sa.Column('s3_key', sa.String(length=255), nullable=True),
+    sa.Column('s3_url', sa.String(length=255), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ),
     sa.PrimaryKeyConstraint('id')

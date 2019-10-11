@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 import babel
-from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import Security, SQLAlchemyUserDatastore, utils
 from .db import db
 from .models import User, Role
 
@@ -38,6 +38,7 @@ def create_app():
     app.jinja_env.filters['datetime'] = format_datetime
 
 
+
     with app.app_context():
         # import parts of our application
         from . import auth
@@ -50,6 +51,7 @@ def create_app():
         from . import users
 
         return app
+
 
 # jinja Date Stuff
 def format_datetime(value, format='small'):

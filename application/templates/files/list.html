@@ -16,6 +16,8 @@
             <th>Title</th>
             <th>File</th>
             <th>Description</th>
+            <th>S3 Key</th>
+            <th>S3 URL</th>
             {% if current_user.has_role('admin') %}
             <th>User</th>
             {% endif %}
@@ -34,6 +36,8 @@
                 <td>{{ file.title }}</td>
                 <td>{{ file.name }}</td>
                 <td>{{ file.desc }}</td>
+                <td>{{ file.s3_key }}</td>
+                <td>{{ file.s3_url }}</td>
                 {% if current_user.has_role('admin') %}
                 <td>{{ file.user.email }}</td>
                 {% endif %}

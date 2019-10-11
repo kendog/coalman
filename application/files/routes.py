@@ -8,9 +8,9 @@ from flask import current_app as app
 from ..models import db, File, Tag, TagGroup
 from werkzeug.utils import secure_filename
 import boto3
+import shutil
 
-
-s3 = boto3.client(
+s3_client = boto3.client(
    "s3",
    aws_access_key_id=app.config['AWS_ACCESS_KEY'],
    aws_secret_access_key=app.config['AWS_SECRET_KEY']
@@ -77,11 +77,8 @@ def files_add():
             if the_actual_file and allowed_file(the_actual_file.filename):
                 directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
 
+                # Create DIR Python 3.2 or above
                 os.makedirs(directory, exist_ok=True)
-#                try:
-#                    os.stat(directory)
-#                except:
-#                    os.mkdir(directory)
                 # upload the file
                 the_actual_file.save(os.path.join(directory, secure_filename(the_actual_file.filename)))
                 # update the db
@@ -92,7 +89,10 @@ def files_add():
                 if app.config['UPLOAD_TO_S3']:
                     the_actual_file.filename = secure_filename(the_actual_file.filename)
                     s3_key = current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
-                    upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+                    s3_url = upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+                    file.s3_key = s3_key
+                    file.s3_url = s3_url
+                    db.session.commit()
 
         return redirect(url_for('files_bp.files'))
 
@@ -101,30 +101,6 @@ def files_add():
     for groups in tag_groups:
         tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
     return render_template('files/form.html', template_mode='add', tag_groups=tag_groups, tag_hash=tag_hash)
-
-
-def upload_file_to_s3(file, s3_key, bucket_name):
-
-    """
-    Docs: http://boto3.readthedocs.io/en/latest/guide/s3.html
-    """
-
-    try:
-
-        s3.upload_fileobj(
-            file,
-            bucket_name,
-            s3_key,
-            ExtraArgs={
-                "ContentType": file.content_type
-            }
-        )
-
-    except Exception as e:
-        print("Something Happened: ", e)
-        return e
-
-    return "{}{}".format(app.config["S3_URL"], file.filename)
 
 
 @files_bp.route('/files/edit/<id>', methods=['POST', 'GET'])
@@ -153,17 +129,24 @@ def files_edit(id):
             if 'file' in request.files:
                 the_actual_file = request.files['file']
                 if the_actual_file and allowed_file(the_actual_file.filename):
-                    directory = app.config['UPLOAD_FOLDER'] + str(file.id) + '/'
-                    try:
-                        os.stat(directory)
-                    except:
-                        os.mkdir(directory)
+                    directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
+
+                    # Create DIR Python 3.2 or above
+                    os.makedirs(directory, exist_ok=True)
                     # upload the file
                     the_actual_file.save(os.path.join(directory, secure_filename(the_actual_file.filename)))
                     # update the db
                     file.name = secure_filename(the_actual_file.filename)
                     file.path = directory
                     db.session.commit()
+
+                    if app.config['UPLOAD_TO_S3']:
+                        the_actual_file.filename = secure_filename(the_actual_file.filename)
+                        s3_key = current_user.email + '/' + str(file.id) + '/' + the_actual_file.filename
+                        s3_url = upload_file_to_s3(the_actual_file, s3_key, app.config["S3_BUCKET"])
+                        file.s3_key = s3_key
+                        file.s3_url = s3_url
+                        db.session.commit()
 
             return redirect(url_for('files_bp.files'))
 
@@ -184,10 +167,77 @@ def files_delete(id):
             file = File.query.filter_by(id=id).first()
             db.session.delete(file)
             db.session.commit()
+
+            directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
+            shutil.rmtree(directory)
+
+            if app.config['UPLOAD_TO_S3']:
+                s3_key_prefix = current_user.email + '/' + str(file.id) + '/'
+                for key in get_matching_s3_keys(bucket=app.config["S3_BUCKET"], prefix=s3_key_prefix):
+                    s3_client.delete_object(Bucket=app.config["S3_BUCKET"], Key=key)
             return redirect(url_for('files_bp.files'))
+
     file = File.query.filter_by(id=id).first()
     tag_hash = {}
     tag_groups = TagGroup.query.order_by(TagGroup.weight).all()
     for groups in tag_groups:
         tag_hash[groups.tag_id] = Tag.query.filter_by(tag_group=TagGroup.query.filter_by(tag_id=groups.tag_id).first()).order_by(Tag.weight).all()
     return render_template('files/form.html', template_mode='delete', file=file, tag_groups=tag_groups, tag_hash=tag_hash)
+
+
+def get_matching_s3_keys(bucket, prefix='', suffix=''):
+    """
+    Generate the keys in an S3 bucket.
+
+    :param bucket: Name of the S3 bucket.
+    :param prefix: Only fetch keys that start with this prefix (optional).
+    :param suffix: Only fetch keys that end with this suffix (optional).
+    """
+    kwargs = {'Bucket': bucket}
+
+    # If the prefix is a single string (not a tuple of strings), we can
+    # do the filtering directly in the S3 API.
+    if isinstance(prefix, str):
+        kwargs['Prefix'] = prefix
+
+    while True:
+
+        # The S3 API response is a large blob of metadata.
+        # 'Contents' contains information about the listed objects.
+        resp = s3_client.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            key = obj['Key']
+            if key.startswith(prefix) and key.endswith(suffix):
+                yield key
+
+        # The S3 API is paginated, returning up to 1000 keys at a time.
+        # Pass the continuation token into the next response, until we
+        # reach the final page (when this field is missing).
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except KeyError:
+            break
+
+
+def upload_file_to_s3(file, s3_key, bucket_name):
+
+    """
+    Docs: http://boto3.readthedocs.io/en/latest/guide/s3.html
+    """
+
+    try:
+
+        s3_client.upload_fileobj(
+            file,
+            bucket_name,
+            s3_key,
+            ExtraArgs={
+                "ContentType": file.content_type
+            }
+        )
+
+    except Exception as e:
+        print("Something Happened: ", e)
+        return e
+
+    return "{}{}".format(app.config["S3_URL"], s3_key)
