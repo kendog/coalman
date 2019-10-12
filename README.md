@@ -1,7 +1,7 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/application/static/images/logo-medium.png)
 =========
 
-Coleman is a microservice for managing and archiving (zip) files written in Python and Flask.
+Coleman is a microservice for managing and archiving (zip) files written in Python/Flask.
 
 * Barebones CMS for managing and archiving (zip) files.
 * JWT Authentication for APIs
