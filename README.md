@@ -27,7 +27,7 @@ Installation
 4. Edit `config.py` with your database/security configurations.
 5. Create and activate python3 virtual environment
 6. Install dependencies `pip install -r requirements.txt`.
-7. Upgrade database `sh upgrade_db.sh`
+7. Update database `sh db_upgrade.sh`
 8. Run the application `sh run_app.sh`
 
 Default admin user credentials can be configured in `config.py`.
