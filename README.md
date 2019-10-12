@@ -15,11 +15,13 @@ Coleman is a microservice for managing and archiving (zip) files written in Pyth
 
 Requirements
 ------------
-1. Create a database and user
+* Python3
+* PostgreSQL
+
 
 Installation
 ------------
-1. Create a database and user
+1. Create PostgreSQL database and user
 2. Create S3 Bucket and credentials (optional)
 3. Download or Clone Repo `git clone https://github.com/kendog/coalman`
 4. Edit `config.py` with your database/security configurations.
