@@ -11,7 +11,11 @@ Coleman is a microservice for managing and archiving (zip) files written in Pyth
 * Performance Options:
   * In-memory zipper
   * Local caching
-  
+
+
+Requirements
+------------
+1. Create a database and user
 
 Installation
 ------------
