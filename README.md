@@ -18,7 +18,7 @@ Installation
 1. Create a database and user
 2. Create S3 Bucket and credentials (optional)
 3. Download or Clone Repo `git clone https://github.com/kendog/coalman`
-4. Rename `config-sample.py` to `config.py`, then edit with your database/security configurations.
+4. Edit `config.py` with your database/security configurations.
 5. Create and activate python3 virtual environment
 6. Install dependencies `pip install -r requirements.txt`.
 7. Upgrade database `sh upgrade_db.sh`
