@@ -75,7 +75,7 @@ def files_add():
         if 'file' in request.files:
             the_actual_file = request.files['file']
             if the_actual_file and allowed_file(the_actual_file.filename):
-                directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
+                directory = app.instance_path + app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
 
                 # Create DIR Python 3.2 or above
                 os.makedirs(directory, exist_ok=True)
@@ -130,7 +130,7 @@ def files_edit(id):
             if 'file' in request.files:
                 the_actual_file = request.files['file']
                 if the_actual_file and allowed_file(the_actual_file.filename):
-                    directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
+                    directory = app.instance_path + app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
 
                     # Create DIR Python 3.2 or above
                     os.makedirs(directory, exist_ok=True)
@@ -170,7 +170,7 @@ def files_delete(id):
             db.session.delete(file)
             db.session.commit()
 
-            directory = app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
+            directory = app.instance_path + app.config['UPLOAD_FOLDER'] + current_user.email + '/' + str(file.id) + '/'
             shutil.rmtree(directory)
 
             if app.config['UPLOAD_TO_S3']:

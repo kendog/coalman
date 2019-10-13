@@ -27,16 +27,18 @@
         <nav class="navbar navbar-default">
             <div class="container">
                 <div class="navbar-header">
-                {% if current_user.is_authenticated %}
+                  {% if current_user.is_authenticated %}
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="/admin"><img src="/static/images/logo-lt.png" height="30" width="30" ></a>
+                    <a class="navbar-brand" href="{{ url_for('pages_bp.index') }}"><img src="/static/images/logo-lt.png" height="30" width="30" ></a>
+                  {% endif %}
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    {% if current_user.is_authenticated %}
                     <ul class="nav navbar-nav">
                         <li><a href="/files">Files</a></li>
                         <li><a href="/archives">Archives</a></li>
@@ -52,23 +54,24 @@
 
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account <span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_user.email }} <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="/profile">{{ current_user.email }}</a></li>
+                                <li><a href="/profile">My Profile</a></li>
                                 <li role="separator" class="divider"></li>
                                 {% if current_user.has_role('admin') %}
                                     <li><a href="/users">Manage Users</a></li>
                                     <li><a href="/profiles">Manage Profiles</a></li>
                                     <li role="separator" class="divider"></li>
-                                    <li><a href="/message/edit">Notification Message</a></li>
+                                    <li><a href="/message/edit">Manage Notifications</a></li>
                                     <li role="separator" class="divider"></li>
                                 {% endif %}
-                                <li><a href="/logout">Logout</a></li>
+                                <li><a href="{{ url_for('security.logout') }}">Logout</a></li>
                             </ul>
                         </li>
                     </ul>
+                    {% endif %}
 
-                 {% endif %}
+
 
                 </div>
 

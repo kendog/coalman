@@ -7,12 +7,12 @@ from flask_security import roles_required
 #from .forms import LoginForm, SignupForm
 from ..models import db, Archive, File
 import uuid
-import smtplib
 import boto3
 import zipfile
 import codecs
 import json
 from io import BytesIO
+from ..notifications import send_notification
 
 s3_client = boto3.client(
    "s3",
@@ -34,7 +34,7 @@ def download_archive(uuid):
     archive.archive_status_id = 2
     db.session.commit()
 
-    if app.config['IN_MEMORY_PACKAGE']:
+    if app.config['IN_MEMORY_ARCHIVES']:
         return send_file(get_archive_memory(archive), attachment_filename=archive.name, as_attachment=True)
 
     if os.path.isfile(archive.path + archive.name) and app.config['DISK_PACKAGE_CACHING']:
@@ -81,29 +81,6 @@ def get_archive_memory(archive):
     return memory_file
 
 
-def send_notification(uuid):
-    archive = Archive.query.filter_by(uuid=uuid).first()
-    archive.notification_status_id = 2
-    db.session.commit()
-    # Build the Mail
-    message = Message.query.first()
-    header = 'From: %s\n' % app.config['MAIL_USERNAME']
-    header += 'To: %s\n' % archive.user_email
-    header += 'Subject: %s\n\n' % message.subject
-    message = header + message.message + '\n\n' + archive.link;
-    # Send the Mail
-    server = smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT'])
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
-    results = server.sendmail(app.config['MAIL_USERNAME'], archive.user_email, message)
-
-    server.quit()
-    #print "results", results
-    archive.notification_status_id = 3
-    db.session.commit()
-    return results
 
 
 @archives_bp.route('/archives')

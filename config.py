@@ -1,5 +1,4 @@
-"""App configuration."""
-from os import environ
+import os
 
 class Config:
     SESSION_TYPE = 'filesystem'
@@ -15,16 +14,17 @@ class Config:
     DEBUG = True
 
     UPLOAD_FOLDER = '/uploads/'
+
     TEMP_FOLDER = '/tmp/'
     ALLOWED_EXTENSIONS = set(['pdf', 'PDF', 'png', 'PNG'])
     DOWNLOAD_PROTOCOL = 'https'
     DOWNLOAD_DOMAIN = 'coalman.io'
 
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_SSL = True
-    MAIL_USERNAME = os.environ['MAIL_USERNAME']
-    MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
+    SMTP_SERVER = 'smtp.gmail.com'
+    SMTP_PORT = 587
+    SMTP_USE_SSL = True
+    SMTP_USERNAME = os.environ['SMTP_USERNAME']
+    SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 
     SITE_ADMIN_EMAIL = os.environ['SITE_ADMIN_EMAIL']
     SITE_ADMIN_PASSWORD = os.environ['SITE_ADMIN_PASSWORD']
@@ -35,5 +35,5 @@ class Config:
     S3_BUCKET = 'S3_BUCKET'
     S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
 
-    IN_MEMORY_PACKAGE = True
-    DISK_PACKAGE_CACHING = False
+    IN_MEMORY_ARCHIVES = True
+    LOCAL_CACHING = False
