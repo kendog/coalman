@@ -40,13 +40,12 @@ def error_uploads(errors):
     return render_template('error_uploads.html', errors=errors)
 
 
-
 # Files Pages
 @files_bp.route('/files')
 @login_required
 def files():
     files = []
-    if current_user.has_role('admin'):
+    if current_user.has_role('super-admin'):
         files = File.query.all()
     else:
         files = File.query.filter_by(user_id=current_user.id).all()

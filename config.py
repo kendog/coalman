@@ -32,7 +32,7 @@ class Config:
     UPLOAD_TO_S3 = True
     AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
     AWS_SECRET_KEY = os.environ['AWS_SECRET_KEY']
-    S3_BUCKET = 'S3_BUCKET'
+    S3_BUCKET = os.environ['S3_BUCKET']
     S3_URL = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
 
     IN_MEMORY_ARCHIVES = True
