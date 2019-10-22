@@ -38,13 +38,12 @@ def get_profile(id):
 def profile_add():
     if 'submit-add' in request.form:
         user_id = current_user.get_id()
-        if current_user.has_role('admin') and 'user_id' in request.form:
+        if current_user.has_role('super-admin') and 'user_id' in request.form:
             user_id = request.form['user_id']
 
         profile = Profile(
-            username=request.form['username'],
-            bio=request.form['bio'],
             name=request.form['name'],
+            bio=request.form['bio'],
             address1=request.form['address1'],
             address2=request.form['address2'],
             city=request.form['city'],
@@ -54,27 +53,27 @@ def profile_add():
             user_id=user_id)
         db.session.add(profile)
         db.session.commit()
-        if current_user.has_role('admin'):
+        if current_user.has_role('super-admin'):
             return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
     users = User.query.all()
-    return render_template('profiles/form_add.html', users=users)
+    profile = []
+    return render_template('profiles/form.html', template_mode='add', profile=profile, users=users)
 
 
 @profiles_bp.route('/profile/edit/<id>', methods=['POST', 'GET'])
 @login_required
 def profile_edit(id):
     profile = []
-    if current_user.has_role('admin'):
+    if current_user.has_role('super-admin'):
         profile = Profile.query.filter_by(id=id).first()
     else:
         profile = Profile.query.filter_by(user_id=current_user.id).first()
 
     if 'submit-edit' in request.form:
         if profile:
-            profile.username = request.form.get('username')
-            profile.bio = request.form.get('bio')
             profile.name = request.form.get('name')
+            profile.bio = request.form.get('bio')
             profile.address1 = request.form.get('address1')
             profile.address2 = request.form.get('address2')
             profile.city = request.form.get('city')
@@ -82,17 +81,18 @@ def profile_edit(id):
             profile.zip = request.form.get('zip')
             profile.phone = request.form.get('phone')
             db.session.commit()
-        if current_user.has_role('admin'):
+        if current_user.has_role('super-admin'):
             return redirect(url_for('profiles_bp.profiles_list'))
         return redirect(url_for('profiles_bp.profile'))
-    return render_template('profiles/form_edit.html', profile=profile)
+    users = User.query.all()
+    return render_template('profiles/form.html', template_mode='edit', profile=profile, users=users)
 
 
 @profiles_bp.route('/profile/delete/<id>', methods=['POST', 'GET'])
 @login_required
 def profile_delete(id):
     profile = []
-    if current_user.has_role('admin'):
+    if current_user.has_role('super-admin'):
         profile = Profile.query.filter_by(id=id).first()
     else:
         profile = Profile.query.filter_by(user_id=current_user.id).first()
@@ -101,14 +101,15 @@ def profile_delete(id):
         if profile:
             db.session.delete(profile)
             db.session.commit()
-            if current_user.has_role('admin'):
+            if current_user.has_role('super-admin'):
                 return redirect(url_for('profiles_bp.profiles_list'))
             return redirect(url_for('profiles_bp.profile'))
-    return render_template('profiles/form_delete.html', profile=profile)
+    users = User.query.all()
+    return render_template('profiles/form.html', template_mode='delete', profile=profile, users=users)
 
 
 @profiles_bp.route('/profiles')
-@roles_required('admin')
+@roles_required('super-admin')
 def profiles_list():
     profiles = Profile.query.all()
     return render_template('profiles/list.html', profiles=profiles)

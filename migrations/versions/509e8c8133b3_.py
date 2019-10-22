@@ -129,9 +129,8 @@ def upgrade():
     )
     op.create_table('Profiles',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('username', sa.String(length=255), nullable=True),
-    sa.Column('bio', sa.String(length=255), nullable=True),
     sa.Column('name', sa.String(length=255), nullable=True),
+    sa.Column('bio', sa.String(length=255), nullable=True),
     sa.Column('address1', sa.String(length=255), nullable=True),
     sa.Column('address2', sa.String(length=255), nullable=True),
     sa.Column('city', sa.String(length=255), nullable=True),

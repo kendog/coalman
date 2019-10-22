@@ -62,9 +62,8 @@ class Project(db.Model):
 class Profile(db.Model):
     __tablename__ = 'Profiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(255))
-    bio = db.Column(db.String(255))
     name = db.Column(db.String(255))
+    bio = db.Column(db.String(255))
     address1 = db.Column(db.String(255))
     address2 = db.Column(db.String(255))
     city = db.Column(db.String(255))
