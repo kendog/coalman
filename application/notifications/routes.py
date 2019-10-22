@@ -15,7 +15,7 @@ notifications_bp = Blueprint('notifications_bp', __name__,
 
 
 @notifications_bp.route('/message/edit', methods=['POST', 'GET'])
-@roles_required('admin')
+@roles_required('super-admin')
 def message_edit():
     message = Message.query.first()
     if 'submit-edit' in request.form and message:

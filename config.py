@@ -26,8 +26,8 @@ class Config:
     SMTP_USERNAME = os.environ['SMTP_USERNAME']
     SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
 
-    SITE_ADMIN_EMAIL = os.environ['SITE_ADMIN_EMAIL']
-    SITE_ADMIN_PASSWORD = os.environ['SITE_ADMIN_PASSWORD']
+    SUPER_ADMIN_EMAIL = os.environ['SUPER_ADMIN_EMAIL']
+    SUPER_ADMIN_PASSWORD = os.environ['SUPER_ADMIN_PASSWORD']
 
     UPLOAD_TO_S3 = True
     AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']

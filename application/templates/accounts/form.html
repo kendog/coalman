@@ -1,0 +1,85 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "accounts" %}
+
+{% block title %}Project{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add Account</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit Account</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete Account</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="accounts-form" method="post" action="">
+
+      <div class="row">
+          <div class="col-md-7">
+
+              <hr>
+
+              <div class="form-group">
+                    <label for="name">Account Name:</label>
+                    {%- if template_mode == "add" %}
+                    <input type="text" class="form-control" id="name" name="name" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input type="text" class="form-control" id="name" name="name" value="{{ account.name }}" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input type="text" class="form-control" id="name" name="name" value="{{ account.name }}" disabled />
+                    {% endif %}
+                </div>
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+          {% endif %}
+          {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+          {% endif %}
+          {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+          {% endif %}
+        </div>
+
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+  {%- if template_mode != "delete" %}
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $("#accounts-form").validate({
+              rules: {
+                  username: "required",
+                  password: "required",
+                  role: "required"
+              }
+          });
+      });
+  </script>
+  {% endif %}
+
+{% endblock %}

@@ -61,8 +61,9 @@ def upgrade():
     sa.UniqueConstraint('name')
     )
     op.bulk_insert(roles_table, [
-        {'id':1,'name':'admin','description':'Administrator',},
-        {'id':2,'name':'end-user','description':'End user',},
+        {'id':1,'name':'super-admin','description':'Super Admin',},
+        {'id':2,'name':'admin','description':'Admin',},
+        {'id':3,'name':'end-user','description':'End User',},
     ])
     op.create_table('TagGroups',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -79,8 +80,15 @@ def upgrade():
     sa.Column('password', sa.String(length=255), nullable=True),
     sa.Column('active', sa.Boolean(), nullable=True),
     sa.Column('confirmed_at', sa.DateTime(), nullable=True),
+    sa.Column('account_id', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
+    )
+    op.create_table('Projects',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=True),
+    sa.Column('account_id', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Files',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -93,7 +101,9 @@ def upgrade():
     sa.Column('s3_key', sa.String(length=255), nullable=True),
     sa.Column('s3_url', sa.String(length=255), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('project_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ),
+    sa.ForeignKeyConstraint(['project_id'], ['Projects.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Archives',
@@ -111,6 +121,11 @@ def upgrade():
     sa.Column('updated', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['notification_status_id'], ['NotificationStatuses.id'], ),
     sa.ForeignKeyConstraint(['archive_status_id'], ['ArchiveStatuses.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('Accounts',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Profiles',
@@ -171,11 +186,13 @@ def downgrade():
     op.drop_table('Tags')
     op.drop_table('Profiles')
     op.drop_table('Archives')
-    op.drop_table('Users')
     op.drop_table('TagGroups')
     op.drop_table('Roles')
     op.drop_table('ArchiveStatuses')
     op.drop_table('NotificationStatuses')
     op.drop_table('Messages')
     op.drop_table('Files')
+    op.drop_table('Projects')
+    op.drop_table('Accounts')
+    op.drop_table('Users')
     # ### end Alembic commands ###

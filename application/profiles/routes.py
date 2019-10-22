@@ -19,10 +19,11 @@ profiles_bp = Blueprint('profiles_bp', __name__,
 @login_required
 def profile():
     profile = Profile.query.filter_by(user_id=current_user.id).first()
-    if profile:
-        return render_template('profiles/profile.html', user=current_user, profile=profile)
-    else:
-        return render_template('profiles/profile.html', user=current_user)
+    if not profile:
+        profile = Profile(user_id=current_user.id)
+        db.session.add(profile)
+        db.session.commit()
+    return render_template('profiles/profile.html', profile=profile)
 
 
 @profiles_bp.route('/profile/<id>')

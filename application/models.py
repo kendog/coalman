@@ -34,9 +34,28 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())
     confirmed_at = db.Column(db.DateTime())
+    account_id = db.Column(db.Integer, db.ForeignKey('Accounts.id'))
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
     profile = db.relationship('Profile', uselist=False, back_populates="user")
     files = db.relationship('File', back_populates="user")
+    account = db.relationship("Account")
+
+
+class Account(db.Model):
+    __tablename__ = 'Accounts'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
+    users = db.relationship('User', back_populates="account")
+    projects = db.relationship('Project', back_populates="account")
+
+
+class Project(db.Model):
+    __tablename__ = 'Projects'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
+    account_id = db.Column(db.Integer, db.ForeignKey('Accounts.id'))
+    account = db.relationship("Account")
+    files = db.relationship('File', back_populates="project")
 
 
 class Profile(db.Model):
@@ -75,6 +94,8 @@ class File(db.Model):
     s3_url = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
     user = db.relationship('User', back_populates='files')
+    project_id = db.Column(db.Integer, db.ForeignKey('Projects.id'))
+    project = db.relationship('Project', back_populates='files')
 
 
 class Tag(db.Model):

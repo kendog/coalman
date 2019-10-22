@@ -45,6 +45,8 @@ def create_app():
         from . import files
         from . import archives
         from . import profiles
+        from . import accounts
+        from . import projects
         from . import tags
         from . import messages
         from . import pages

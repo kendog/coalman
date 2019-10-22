@@ -50,14 +50,32 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="name">Role:</label>
-                    <select id="role" name="role" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
-                        <option value="">Select Type</option>
+                    <label for="name">Role(s):</label>
+                    <ul class="list-unstyled">
                         {%  for role in roles %}
                           {%- if template_mode == "add" %}
-                            <option value="{{ role.name }}">{{ role.name }}</option>
+                            <li><input class="form-check-input" type="checkbox" id="roles" name="roles" value="{{ role.name }}"> {{ role.name }}</li>
+                          {% endif %}
+                          {%- if template_mode == "edit" %}
+                            <li><input {% if role in user.roles %}checked{% endif %} class="form-check-input" type="checkbox" id="roles" name="roles" value="{{ role.name }}"> {{ role.name }}</li>
+                          {% endif %}
+                          {%- if template_mode == "delete" %}
+                            <li><input disabled {% if role in user.roles %}checked{% endif %} class="form-check-input" type="checkbox" id="roles" name="roles" value="{{ role.name }}"> {{ role.name }}</li>
+                          {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="account_id">Account:</label>
+                    <select id="account_id" name="account_id" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                        <option value="">Select Account</option>
+                        {%  for account in accounts %}
+                          {%- if template_mode == "add" %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
                           {% else %}
-                            <option {% if role.name in user.roles %}selected{% endif %} value="{{ role.name }}">{{ role.name }}</option>
+                            <option {% if account.id == user.account_id %}selected{% endif %} value="{{ account.id }}">{{ account.name }}</option>
                           {% endif %}
                         {% endfor %}
                     </select>
@@ -100,8 +118,7 @@
           $("#users-form").validate({
               rules: {
                   username: "required",
-                  password: "required",
-                  role: "required"
+                  password: "required"
               }
           });
       });

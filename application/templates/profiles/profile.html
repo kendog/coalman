@@ -7,25 +7,6 @@
 
 {% block content %}
 
-    <h3>Account</h3>
-    <hr>
-    {% if user %}
-      <p>email: {{ user.email }}</p>
-      <div class="form-group">
-          <label for="password">Password:</label>
-          <input type="text" class="form-control" id="password" name="password" value="" >
-      </div>
-      <div class="form-group">
-        <label for="password2">Re-enter Password:</label>
-        <input type="text" class="form-control" id="password2" name="password2" value="" >
-      </div>
-      <p><a href="{{ url_for('profiles_bp.profile_add') }}" class="btn btn-success">Update Password</a></p>
-    {% else %}
-      <p>No User Info</p>
-    {% endif %}
-
-    <br/>
-
     <h3>Profile</h3>
     <hr>
 
