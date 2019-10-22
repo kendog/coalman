@@ -23,7 +23,10 @@
         {%  for notification in notifications %}
             <tr>
                 <td>{{ notification.user.email }}</td>
-                <td>{{ notification.message.name }}</td>
+                <td>
+                  <p>{{ notification.message.subject }}</p>
+                  <p>{{ notification.message.name }}</p>
+                </td>
                 <td>{{ notification.notification_status.name }}</td>
                 <td>
                     <a href="{{ url_for('notifications_bp.notifications_edit', id=notification.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>

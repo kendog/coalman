@@ -12,7 +12,7 @@ import zipfile
 import codecs
 import json
 from io import BytesIO
-from ..notifications import send_notification
+from ..notifications import create_notification
 
 s3_client = boto3.client(
    "s3",
@@ -46,7 +46,6 @@ def download_archive(uuid):
 
 
     archive.downloads += 1
-    #archive.archive_status_id = 3
     db.session.commit()
 
 
@@ -121,7 +120,7 @@ def archives_add():
 
         # Send Email
         if request.form.get("notify"):
-            send_notification(archive.uuid)
+            create_notification(2, 1, True, False)
 
         return redirect(url_for('archives_bp.archives'))
     files = File.query.all()
@@ -153,7 +152,7 @@ def archives_edit(id):
 
         # Send Email
         if request.form.get("notify"):
-            send_notification(archive.uuid)
+            create_notification(2, 1, True, False)
 
         return redirect(url_for('archives_bp.archives'))
     files = File.query.all()

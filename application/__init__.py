@@ -51,6 +51,7 @@ def create_app():
         from . import messages
         from . import pages
         from . import users
+        from . import notifications
 
         return app
 

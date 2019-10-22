@@ -13,11 +13,6 @@ notifications_bp = Blueprint('notifications_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
 
-# Blueprint Configuration
-notifications_bp = Blueprint('notifications_bp', __name__,
-                    template_folder='templates',
-                    static_folder='static')
-
 
 @notifications_bp.route('/notifications')
 @roles_required('super-admin')
@@ -30,15 +25,7 @@ def notifications():
 @roles_required('super-admin')
 def notifications_add():
     if 'submit-add' in request.form:
-        notification_status = NotificationStatus.query.first()
-        notification = Notification(user_id=request.form['user_id'], message_id=request.form['message_id'], notification_status_id=notification_status.id)
-        db.session.add(notification)
-        db.session.commit()
-        #send email/sms
-        if request.form.get("notify_email"):
-            send_email_notification(notification.id)
-        if request.form.get("notify_sms"):
-            send_sms_notification(notification.id)
+        create_notification(request.form['user_id'], request.form['message_id'], request.form.get("notify_email"), request.form.get("notify_sms"))
         return redirect(url_for('notifications_bp.notifications'))
     users = User.query.all()
     messages = Message.query.all()
@@ -79,6 +66,18 @@ def notifications_delete(id):
     return render_template('notifications/form.html', template_mode='delete', notification=notification, users=users, messages=messages)
 
 
+def create_notification(user_id, message_id, send_email, send_sms):
+    notification_status = NotificationStatus.query.first()
+    notification = Notification(user_id=user_id, message_id=message_id, notification_status_id=notification_status.id)
+    db.session.add(notification)
+    db.session.commit()
+    #send email/sms
+    if send_email:
+        send_email_notification(notification.id)
+    if send_sms:
+        send_sms_notification(notification.id)
+    return redirect(url_for('notifications_bp.notifications'))
+
 
 def send_email_notification(notification_id):
 
@@ -102,13 +101,13 @@ def send_email_notification(notification_id):
 
     server.quit()
 
-    notification.notification_status_id = 2
+    notification.notification_status_id = 1
     db.session.commit()
     return results
 
 
 def send_sms_notification(notification_id):
     notification = Notification.query.filter_by(id=notification_id).first()
-    notification.notification_status_id = 2
+    notification.notification_status_id = 1
     db.session.commit()
     return True
