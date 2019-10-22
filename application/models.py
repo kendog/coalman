@@ -47,6 +47,7 @@ class Account(db.Model):
     name = db.Column(db.String(255))
     users = db.relationship('User', back_populates="account")
     projects = db.relationship('Project', back_populates="account")
+    messages = db.relationship('Message', back_populates="account")
 
 
 class Project(db.Model):
@@ -165,7 +166,10 @@ class NotificationStatus(db.Model):
 class Message(db.Model):
     __tablename__ = 'Messages'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255))
     subject = db.Column(db.String(255))
     message = db.Column(db.UnicodeText())
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
+    account_id = db.Column(db.Integer, db.ForeignKey('Accounts.id'))
+    account = db.relationship('Account', back_populates='messages')
