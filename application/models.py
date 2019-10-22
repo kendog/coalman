@@ -38,6 +38,7 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('Users', lazy='dynamic'))
     profile = db.relationship('Profile', uselist=False, back_populates="user")
     files = db.relationship('File', back_populates="user")
+    notifications = db.relationship('Notification', back_populates="user")
     account = db.relationship("Account")
 
 
@@ -139,8 +140,6 @@ class Archive(db.Model):
     files = db.relationship('File', secondary=archives_files, lazy='subquery', backref=db.backref('Archives', lazy=True))
     archive_status_id = db.Column(db.Integer, db.ForeignKey('ArchiveStatuses.id'))
     archive_status = db.relationship("ArchiveStatus", back_populates="archives")
-    notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
-    notification_status = db.relationship("NotificationStatus", back_populates="archives")
     downloads = db.Column(db.Integer, default=0)
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
@@ -154,12 +153,25 @@ class ArchiveStatus(db.Model):
     archives = db.relationship("Archive", back_populates="archive_status")
 
 
+class Notification(db.Model):
+    __tablename__ = 'Notifications'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    user = db.relationship('User', back_populates='notifications')
+    message_id = db.Column(db.Integer, db.ForeignKey('Messages.id'))
+    message = db.relationship('Message', back_populates='notifications')
+    notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
+    notification_status = db.relationship("NotificationStatus", back_populates="notifications")
+    created = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
+
+
 class NotificationStatus(db.Model):
     __tablename__ = 'NotificationStatuses'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
     tag_id = db.Column(db.String(255))
-    archives = db.relationship("Archive", back_populates="notification_status")
+    notifications = db.relationship("Notification", back_populates="notification_status")
 
 
 class Message(db.Model):
@@ -172,3 +184,4 @@ class Message(db.Model):
     updated = db.Column(db.DateTime, onupdate=datetime.datetime.now)
     account_id = db.Column(db.Integer, db.ForeignKey('Accounts.id'))
     account = db.relationship('Account', back_populates='messages')
+    notifications = db.relationship('Notification', back_populates="message")

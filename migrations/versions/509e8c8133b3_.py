@@ -35,10 +35,11 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.bulk_insert(notification_statuses_table, [
-        {'id':1,'name':'Waiting','tag_id':'waiting',},
-        {'id':2,'name':'In Progress','tag_id':'in-progress',},
-        {'id':3,'name':'Sent','tag_id':'sent',},
-        {'id':4,'name':'Error','tag_id':'error',},
+        {'id':0,'name':'Created','tag_id':'created',},
+        {'id':1,'name':'Sent','tag_id':'sent',},
+        {'id':2,'name':'Received','tag_id':'received',},
+        {'id':3,'name':'Approved','tag_id':'approved',},
+        {'id':4,'name':'Rejected','tag_id':'rejected',},
     ])
     archive_statuses_table = op.create_table('ArchiveStatuses',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -114,12 +115,21 @@ def upgrade():
     sa.Column('recipient_name', sa.String(length=255), nullable=True),
     sa.Column('recipient_email', sa.String(length=255), nullable=True),
     sa.Column('archive_status_id', sa.Integer(), nullable=True),
-    sa.Column('notification_status_id', sa.Integer(), nullable=True),
     sa.Column('downloads', sa.Integer(), nullable=True),
     sa.Column('created', sa.DateTime(), nullable=True),
     sa.Column('updated', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['notification_status_id'], ['NotificationStatuses.id'], ),
     sa.ForeignKeyConstraint(['archive_status_id'], ['ArchiveStatuses.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('Notifications',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('message_id', sa.Integer(), nullable=True),
+    sa.Column('notification_status_id', sa.Integer(), nullable=True),
+    sa.Column('created', sa.DateTime(), nullable=True),
+    sa.Column('updated', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['Users.id'], ),
+    sa.ForeignKeyConstraint(['notification_status_id'], ['NotificationStatuses.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('Accounts',
@@ -187,9 +197,10 @@ def downgrade():
     op.drop_table('TagGroups')
     op.drop_table('Roles')
     op.drop_table('ArchiveStatuses')
-    op.drop_table('NotificationStatuses')
     op.drop_table('Messages')
     op.drop_table('Files')
+    op.drop_table('Notifications')
+    op.drop_table('NotificationStatuses')
     op.drop_table('Projects')
     op.drop_table('Accounts')
     op.drop_table('Users')

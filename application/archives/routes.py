@@ -31,8 +31,8 @@ archives_bp = Blueprint('archives_bp', __name__,
 def download_archive(uuid):
 
     archive = Archive.query.filter_by(uuid=uuid).first()
-    archive.archive_status_id = 2
-    db.session.commit()
+    #archive.archive_status_id = 2
+    #db.session.commit()
 
     if app.config['IN_MEMORY_ARCHIVES']:
         return send_file(get_archive_memory(archive), attachment_filename=archive.name, as_attachment=True)
@@ -46,7 +46,7 @@ def download_archive(uuid):
 
 
     archive.downloads += 1
-    archive.archive_status_id = 3
+    #archive.archive_status_id = 3
     db.session.commit()
 
 
@@ -103,8 +103,8 @@ def archives_add():
         db.session.add(archive)
         db.session.commit()
 
-        archive.archive_status_id = 1
-        archive.notification_status_id = 1
+        #archive.archive_status_id = 1
+        #archive.notification_status_id = 1
         archive.name = archive.uuid + ".zip"
         archive.path = app.config['TEMP_FOLDER']
         archive.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for(

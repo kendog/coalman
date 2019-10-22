@@ -1,0 +1,100 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "notifications" %}
+
+{% block title %}Notification{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add Notification</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit Notification</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete Notification</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="notifications-form" method="post" action="">
+
+      <div class="row">
+          <div class="col-md-7">
+
+              <hr>
+
+              <div class="form-group">
+                  <label for="user_id">User:</label>
+                  <select id="user_id" name="user_id" class="form-control" {% if template_mode == 'delete' %}disabled{% endif %}>
+                      <option value="">Select User</option>
+                      {%  for user in users %}
+                        <option {% if template_mode != 'add' %}{% if user.id == notification.user_id %} selected {% endif %}{% endif %} value="{{ user.id }}">{{ user.email }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+
+              <div class="form-group">
+                  <label for="message_id">Message:</label>
+                  <select id="message_id" name="message_id" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                      <option value="">Select Account</option>
+                      {%  for message in messages %}
+                        <option {% if template_mode != 'add' %}{% if message.id == notification.message_id %}selected{% endif %}{% endif %} value="{{ message.id }}">{{ message.name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+
+              {%- if template_mode != "delete" %}
+                <div class="form-group">
+                    <input id="notify_email" name="notify_email" type="checkbox" class="form-check-input" value="1" /> Send Email
+                </div>
+                <div class="form-group">
+                    <input id="notify_sms" name="notify_sms" type="checkbox" class="form-check-input" value="1" /> Send SMS
+                </div>
+              {% endif %}
+
+              <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+          {% endif %}
+          {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+          {% endif %}
+          {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+          {% endif %}
+        </div>
+
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+  {%- if template_mode != "delete" %}
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $("#notifications-form").validate({
+              rules: {
+                  user_id: "required",
+                  message_id: "required"
+              }
+          });
+      });
+  </script>
+  {% endif %}
+
+{% endblock %}
