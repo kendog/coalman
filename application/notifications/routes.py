@@ -4,9 +4,10 @@ from flask import current_app as app
 from flask_security import roles_required
 #from .assets import compile_auth_assets
 #from .forms import LoginForm, SignupForm
-from ..models import db, User, Message, Notification, NotificationStatus
+from ..models import db, User, MessageTemplate, Notification, NotificationStatus
 import smtplib
-
+from flask_mail import Message
+from .. import mail
 
 # Blueprint Configuration
 notifications_bp = Blueprint('notifications_bp', __name__,
@@ -28,7 +29,7 @@ def notifications_add():
         create_notification(request.form['user_id'], request.form['message_id'], request.form.get("notify_email"), request.form.get("notify_sms"))
         return redirect(url_for('notifications_bp.notifications'))
     users = User.query.all()
-    messages = Message.query.all()
+    messages = MessageTemplate.query.all()
     return render_template('notifications/form.html', template_mode='add', users=users, messages=messages)
 
 
@@ -48,7 +49,7 @@ def notifications_edit(id):
                 send_sms_notification(notification.id)
         return redirect(url_for('notifications_bp.notifications'))
     users = User.query.all()
-    messages = Message.query.all()
+    messages = MessageTemplate.query.all()
     return render_template('notifications/form.html', template_mode='edit', notification=notification, users=users, messages=messages)
 
 
@@ -62,7 +63,7 @@ def notifications_delete(id):
             db.session.commit()
         return redirect(url_for('notifications_bp.notifications'))
     users = User.query.all()
-    messages = Message.query.all()
+    messages = MessageTemplate.query.all()
     return render_template('notifications/form.html', template_mode='delete', notification=notification, users=users, messages=messages)
 
 
@@ -85,29 +86,17 @@ def send_email_notification(notification_id):
 
     # Build the Mail
     user = User.query.filter_by(id=notification.user_id).first()
-    message_template = Message.query.filter_by(id=notification.message_id).first()
+    message_template = MessageTemplate.query.filter_by(id=notification.message_id).first()
 
-    header = 'From: %s\n' % app.config['SMTP_USERNAME']
-    header += 'To: %s\n' % user.email
-    header += 'Subject: %s\n\n' % message_template.subject
-    message = header + message_template.message
-    # Send the Mail
-    server = smtplib.SMTP(app.config['SMTP_SERVER'], app.config['SMTP_PORT'])
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(app.config['SMTP_USERNAME'], app.config['SMTP_PASSWORD'])
-    results = server.sendmail(app.config['SMTP_USERNAME'], user.email, message)
-
-    server.quit()
+    msg = Message(message_template.subject, sender=app.config['MAIL_USERNAME'], recipients=[user.email])
+    msg.body = message_template.message
+    mail.send(msg)
 
     notification.notification_status_id = 1
     db.session.commit()
-    return results
 
 
 def send_sms_notification(notification_id):
     notification = Notification.query.filter_by(id=notification_id).first()
     notification.notification_status_id = 1
     db.session.commit()
-    return True

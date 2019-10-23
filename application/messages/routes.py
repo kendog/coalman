@@ -4,7 +4,7 @@ from flask import current_app as app
 from flask_security import roles_required
 #from .assets import compile_auth_assets
 #from .forms import LoginForm, SignupForm
-from ..models import db, Message, Account
+from ..models import db, MessageTemplate, Account
 
 
 
@@ -17,7 +17,7 @@ messages_bp = Blueprint('messages_bp', __name__,
 @messages_bp.route('/messages')
 @roles_required('super-admin')
 def messages():
-    messages = Message.query.all()
+    messages = MessageTemplate.query.all()
     return render_template('messages/list.html', messages=messages)
 
 
@@ -25,7 +25,7 @@ def messages():
 @roles_required('super-admin')
 def messages_add():
     if 'submit-add' in request.form:
-        message = Message(name=request.form['name'],subject=request.form['subject'], message=request.form['message'], account_id=request.form['account_id'])
+        message = MessageTemplate(name=request.form['name'],subject=request.form['subject'], message=request.form['message'], account_id=request.form['account_id'])
         db.session.add(message)
         db.session.commit()
         return redirect(url_for('messages_bp.messages'))
@@ -36,7 +36,7 @@ def messages_add():
 @messages_bp.route('/messages/edit/<id>', methods=['POST', 'GET'])
 @roles_required('super-admin')
 def messages_edit(id):
-    message = Message.query.filter_by(id=id).first()
+    message = MessageTemplate.query.filter_by(id=id).first()
     if 'submit-edit' in request.form:
         if message:
             message.name = request.form['name']
@@ -50,7 +50,7 @@ def messages_edit(id):
 @messages_bp.route('/messages/delete/<id>', methods=['POST', 'GET'])
 @roles_required('super-admin')
 def messages_delete(id):
-    message = Message.query.filter_by(id=id).first()
+    message = MessageTemplate.query.filter_by(id=id).first()
     if 'submit-delete' in request.form:
         if message:
             db.session.delete(message)

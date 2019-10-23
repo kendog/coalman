@@ -48,7 +48,7 @@ class Account(db.Model):
     name = db.Column(db.String(255))
     users = db.relationship('User', back_populates="account")
     projects = db.relationship('Project', back_populates="account")
-    messages = db.relationship('Message', back_populates="account")
+    messages = db.relationship('MessageTemplate', back_populates="account")
 
 
 class Project(db.Model):
@@ -158,8 +158,8 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
     user = db.relationship('User', back_populates='notifications')
-    message_id = db.Column(db.Integer, db.ForeignKey('Messages.id'))
-    message = db.relationship('Message', back_populates='notifications')
+    message_id = db.Column(db.Integer, db.ForeignKey('MessageTemplates.id'))
+    message = db.relationship('MessageTemplate', back_populates='notifications')
     notification_status_id = db.Column(db.Integer, db.ForeignKey('NotificationStatuses.id'))
     notification_status = db.relationship("NotificationStatus", back_populates="notifications")
     created = db.Column(db.DateTime, default=datetime.datetime.now)
@@ -174,8 +174,8 @@ class NotificationStatus(db.Model):
     notifications = db.relationship("Notification", back_populates="notification_status")
 
 
-class Message(db.Model):
-    __tablename__ = 'Messages'
+class MessageTemplate(db.Model):
+    __tablename__ = 'MessageTemplates'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255))
     subject = db.Column(db.String(255))
