@@ -16,4 +16,4 @@ __pycache__
 flask_session
 instance
 
-venv.sh
+env.sh
