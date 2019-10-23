@@ -1,5 +1,5 @@
 Flask
-Flask-Security
+-e git+https://github.com/mattupstate/flask-security#egg=application
 bcrypt
 psycopg2-binary
 PyMySQL
@@ -12,3 +12,4 @@ flask_session
 Flask_JWT_Extended
 Flask_Bcrypt
 boto3
+Flask-Mail

@@ -10,6 +10,7 @@ import babel
 from flask_security import Security, SQLAlchemyUserDatastore, utils
 from .db import db
 from .models import User, Role
+from flask_mail import Mail
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -17,6 +18,7 @@ sess = Session()
 flask_bcrypt = Bcrypt()
 jwt = JWTManager()
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+mail = Mail()
 
 def create_app():
     """Construct the core application."""
@@ -31,6 +33,7 @@ def create_app():
     sess.init_app(app)
     flask_bcrypt = Bcrypt(app)
     jwt = JWTManager(app)
+    mail.init_app(app)
 
     migrate = Migrate(app, db)
     security = Security(app, user_datastore)

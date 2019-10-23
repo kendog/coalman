@@ -20,11 +20,11 @@ class Config:
     DOWNLOAD_PROTOCOL = 'https'
     DOWNLOAD_DOMAIN = 'coalman.io'
 
-    SMTP_SERVER = 'smtp.gmail.com'
-    SMTP_PORT = 587
-    SMTP_USE_SSL = True
-    SMTP_USERNAME = os.environ['SMTP_USERNAME']
-    SMTP_PASSWORD = os.environ['SMTP_PASSWORD']
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = os.environ['MAIL_USERNAME']
+    MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
 
     SUPER_ADMIN_EMAIL = os.environ['SUPER_ADMIN_EMAIL']
     SUPER_ADMIN_PASSWORD = os.environ['SUPER_ADMIN_PASSWORD']
