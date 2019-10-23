@@ -1,5 +1,5 @@
-"""Routes for logged-in application."""
-from flask import Blueprint, render_template, redirect, url_for
+import os
+from flask import Blueprint, render_template, redirect, url_for, send_from_directory
 from flask_login import current_user, login_required
 from flask import current_app as app
 #from .assets import compile_auth_assets
@@ -12,6 +12,13 @@ pages_bp = Blueprint('pages_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
 #compile_auth_assets(app)
+
+
+# favicon for older bowsers
+@pages_bp.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 # Public Frontend
