@@ -28,43 +28,25 @@ def upgrade():
     sa.Column('account_id', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    notification_statuses_table = op.create_table('NotificationStatuses',
+    op.create_table('NotificationStatuses',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=True),
     sa.Column('tag_id', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.bulk_insert(notification_statuses_table, [
-        {'id':0,'name':'Created','tag_id':'created',},
-        {'id':1,'name':'Sent','tag_id':'sent',},
-        {'id':2,'name':'Received','tag_id':'received',},
-        {'id':3,'name':'Approved','tag_id':'approved',},
-        {'id':4,'name':'Rejected','tag_id':'rejected',},
-    ])
-    archive_statuses_table = op.create_table('ArchiveStatuses',
+    op.create_table('ArchiveStatuses',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=True),
     sa.Column('tag_id', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.bulk_insert(archive_statuses_table, [
-        {'id':1,'name':'Waiting','tag_id':'waiting',},
-        {'id':2,'name':'In Progress','tag_id':'in-progress',},
-        {'id':3,'name':'Complete','tag_id':'complete',},
-        {'id':4,'name':'Error','tag_id':'error',},
-    ])
-    roles_table = op.create_table('Roles',
+    op.create_table('Roles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=80), nullable=True),
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.bulk_insert(roles_table, [
-        {'id':1,'name':'super-admin','description':'Super Admin',},
-        {'id':2,'name':'admin','description':'Admin',},
-        {'id':3,'name':'end-user','description':'End User',},
-    ])
     op.create_table('TagGroups',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=True),
