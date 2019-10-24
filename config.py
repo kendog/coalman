@@ -28,6 +28,7 @@ class Config:
 
     SUPER_ADMIN_EMAIL = os.environ['SUPER_ADMIN_EMAIL']
     SUPER_ADMIN_PASSWORD = os.environ['SUPER_ADMIN_PASSWORD']
+    MAIL_DEFAULT_SENDER = os.environ['MAIL_DEFAULT_SENDER']
 
     UPLOAD_TO_S3 = True
     AWS_ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
