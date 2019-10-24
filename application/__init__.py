@@ -12,7 +12,6 @@ from .db import db
 from .models import User, Role
 from flask_mail import Mail
 
-db = SQLAlchemy()
 login_manager = LoginManager()
 sess = Session()
 flask_bcrypt = Bcrypt()
@@ -55,6 +54,7 @@ def create_app():
         from . import pages
         from . import users
         from . import notifications
+        from . import seed
 
         return app
 
