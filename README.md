@@ -1,9 +1,9 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/application/static/images/logo-medium.png)
 =========
 
-Coleman is a Flask microservice for managing and archiving data.
+Coleman is a Flask microservice for managing and archiving files.
 
-* Barebones CMS for managing and archiving (zip) data.
+* Barebones CMS for managing and archiving (zip) files.
 * JWT Authentication for APIs
 * S3 Integration
   * Manage S3 objects
