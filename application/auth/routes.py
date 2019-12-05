@@ -10,7 +10,8 @@ from flask_jwt_extended import get_jwt_claims
 
 from flask import current_app as app
 from flask_jwt_extended import JWTManager
-from ..models import db, User, Role, roles_users
+from ..db import db
+from ..models import User, Role, roles_users
 from flask_security import SQLAlchemyUserDatastore, utils
 
 

@@ -23,8 +23,8 @@
         <thead>
         <tr>
             <th>Name</th>
-            <th>Tag ID</th>
-            <th>Group</th>
+            <th>Description</th>
+            <th>Tag Group</th>
             <th>Weight</th>
             <th></th>
         </tr>
@@ -33,26 +33,28 @@
         {%  for tag in tags %}
             <tr>
                 <td>{{ tag.name }}</td>
-                <td>{{ tag.tag_id }}</td>
-                <td><button class="btn btn-{{ tag.tag_group.tag_id }} btn-xs">{{ tag.tag_group.name }} </button></td>
+                <td>{{ tag.description }}</td>
+                <td>{{ tag.tag_group.description }} ({{ tag.tag_group.name }})</td>
                 <td>{{ tag.weight }}</td>
                 <td>
-                    <a href="{{ url_for('tags_bp.tags_edit', id=tag.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
-                    <a href="{{ url_for('tags_bp.tags_delete', id=tag.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
+                    <a href="{{ url_for('manage_tags_bp.tags_edit', id=tag.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
+                    <a href="{{ url_for('manage_tags_bp.tags_delete', id=tag.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="{{ url_for('tags_bp.tags_add') }}" class="btn btn-success">+ Add Tag</a>
+    <a href="{{ url_for('manage_tags_bp.tags_add') }}" class="btn btn-success">+ Add Tag</a>
 
 {% endblock %}
 
 {% block plugins %}
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.csss"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.csss"/>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
         $(document).ready(function() {

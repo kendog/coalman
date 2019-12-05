@@ -1,43 +1,23 @@
 {% extends "layouts/layout1.html" %}
-{% set active_section = "accounts" %}
+{% set active_section = "users" %}
 
-{% block title %}Project{% endblock %}
+{% block title %}User{% endblock %}
 
 {% block content %}
 
-    {%- if template_mode == "add" %}
-      <h3>Add Account</h3>
-    {% endif %}
-    {%- if template_mode == "edit" %}
-      <h3>Edit Account</h3>
-    {% endif %}
-    {%- if template_mode == "delete" %}
-      <h3>Delete Account</h3><p>Are you sure???</p>
-    {% endif %}
+    <h3>Account Settings</h3>
 
     <hr>
 
-    <form id="accounts-form" method="post" action="">
+    <form id="users-form" method="post" action="">
 
       <div class="row">
           <div class="col-md-7">
 
-              <hr>
-
               <div class="form-group">
-                    <label for="name">Account Name:</label>
-                    {%- if template_mode == "add" %}
-                    <input type="text" class="form-control" id="name" name="name" value="" />
-                    {% endif %}
-                    {%- if template_mode == "edit" %}
-                    <input type="text" class="form-control" id="name" name="name" value="{{ account.name }}" />
-                    {% endif %}
-                    {%- if template_mode == "delete" %}
-                    <input type="text" class="form-control" id="name" name="name" value="{{ account.name }}" disabled />
-                    {% endif %}
-                </div>
-
-                <hr>
+                <label for="recipient_name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ current_user.account.name }}" {% if ((current_user.account.name == "ROOT") or not (current_user.has_role('admin') or current_user.has_role('super-admin'))) %}disabled{% endif %} />
+              </div>
 
              </div>
 
@@ -45,21 +25,31 @@
 
             <div class="col-md-4">
 
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Switch Accounts
+                </button>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                  {%  for account in current_accounts %}
+                    {%- if account.id == current_user.account.id %}
+                      <a href="#" class="dropdown-item disabled">{{ account.name }}</a>
+                    {% else %}
+                      <a class="dropdown-item" href="{{ url_for('accounts_bp.switch_account', id=account.id) }}">{{ account.name }}</a>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+
+
+
             </div>
         </div>
 
+        {% if (current_user.has_role('admin') or current_user.has_role('super-admin')) %}
         <div class="form-group">
-          {%- if template_mode == "add" %}
-            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
-          {% endif %}
-          {%- if template_mode == "edit" %}
-            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
-          {% endif %}
-          {%- if template_mode == "delete" %}
-            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
-          {% endif %}
+          <input type="submit" class="btn btn-primary" name="submit-edit" value="Update" {% if current_user.account.name == "ROOT" %}disabled{% endif %}>
         </div>
-
+        {% endif %}
 
     </form>
 
@@ -71,11 +61,9 @@
   <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
   <script type="text/javascript">
       $(function () {
-          $("#accounts-form").validate({
+          $("#users-form").validate({
               rules: {
-                  username: "required",
-                  password: "required",
-                  role: "required"
+                  name: "required"
               }
           });
       });

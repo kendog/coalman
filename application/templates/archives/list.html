@@ -13,14 +13,12 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>Created For</th>
+            <th>Project</th>
             <th>Download Link</th>
+            <th>Status</th>
             <th>File(s)</th>
-            <th>Packaging</th>
-            <th>Notification</th>
-            <th>Downloads</th>
-            <th>Created</th>
-            <th>Updated</th>
+            <th>Downloads(s)</th>
+            <th>Creator</th>
             <th></th>
         </tr>
         </thead>
@@ -28,8 +26,9 @@
         {%  for archive in archives %}
             <tr>
                 <td>{{ archive.id }}</td>
-                <td>{{ archive.recipient_name }} &lt;{{ archive.recipient_email }}&gt;</td>
+                <td>{{ archive.project.name }}</td>
                 <td><a href="{{ archive.link }}" target="_blank">{{ archive.link }}</a></td>
+                <td>{{ archive.status.name }}</td>
                 <td>
                     <ul class="list-unstyled">
                         {%  for file in archive.files %}
@@ -37,11 +36,12 @@
                         {% endfor %}
                     </ul>
                 </td>
-                <td>{{ archive.archive_status.name }}</td>
-                <td>{{ archive.notification_status.name }}</td>
                 <td>{{ archive.downloads }}</td>
-                <td>{{ archive.created|datetime }}</td>
-                <td>{{ archive.updated|datetime }}</td>
+                <td>{{ archive.creator.email }}
+                      {%  for role in archive.creator.roles %}
+                          ({{ role.name }})
+                      {% endfor %}
+                </td>
                 <td>
                     <a href="{{ url_for('archives_bp.archives_edit', id=archive.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
                     <a href="{{ url_for('archives_bp.archives_delete', id=archive.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
@@ -56,9 +56,12 @@
 
 {% block plugins %}
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.csss"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.csss"/>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
         $(document).ready(function() {

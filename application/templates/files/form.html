@@ -3,6 +3,10 @@
 
 {% block title %}File{% endblock %}
 
+{% block resources %}
+  {{ dropzone.load_css() }}
+{% endblock %}
+
 {% block content %}
 
     {%- if template_mode == "add" %}
@@ -34,29 +38,33 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    <label for="desc">Description</label>
+                    <label for="description">Description</label>
                     {%- if template_mode == "add" %}
-                    <input id="desc" name="desc" type="text" class="form-control" value="" />
+                    <input id="description" name="description" type="text" class="form-control" value="" />
                     {% endif %}
                     {%- if template_mode == "edit" %}
-                    <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" />
+                    <input id="description" name="description" type="text" class="form-control" value="{{ file.description }}" />
                     {% endif %}
                     {%- if template_mode == "delete" %}
-                    <input id="desc" name="desc" type="text" class="form-control" value="{{ file.desc }}" disabled />
+                    <input id="description" name="description" type="text" class="form-control" value="{{ file.description }}" disabled />
                     {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="project_id">Project:</label>
+                    <select id="project_id" name="project_id" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                        <option value="">Select Project</option>
+                        {%  for project in current_projects %}
+                          {%- if template_mode == "add" %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                          {% else %}
+                            <option {% if project.id == file.project_id %}selected{% endif %} value="{{ project.id }}">{{ project.name }}</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <hr>
-
-                {%- if template_mode != "add" %}
-                <div class="form-group">
-                    <label for="path">Path</label>
-                    <input disabled id="path" name="path" type="text" class="form-control" value="{{ file.path }}" />
-                    <label for="name">File</label>
-                    <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
-                    <a href="{{ url_for('files_bp.download_file', id=file.id) }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
-                </div>
-                {% endif %}
 
                 <div class="form-group">
                   {%- if template_mode == "add" %}
@@ -65,11 +73,12 @@
                   {% endif %}
                   {%- if template_mode == "edit" %}
                     <label for="file">Upload new file</label>
-                    <input id="file" name="file" type="file" class="form-control">
+                    <input id="file" name="file" type="file" class="form-control-file">
                   {% endif %}
                   {%- if template_mode == "delete" %}
-                    <label for="name">File</label>
+                    <label for="name">Uploaded File</label>
                     <input disabled id="name" name="name" type="text" class="form-control" value="{{ file.name }}" />
+                    <a href="{{ url_for('files_bp.download_file', id=file.id) }}" class="btn btn-block btn-xs" target="_blank">Preview</a>
                   {% endif %}
                 </div>
 
@@ -79,10 +88,10 @@
             <div class="col-md-6">
               <div class="form-group">
                   <label for="file">Tags:</label>
-                  {%  for group in tag_groups %}
-                      <p><button class="btn btn-{{ group.tag_id }} btn-xs">{{ group.name }}</button></p>
+                  {%  for group in current_tag_groups %}
+                      <p><button class="btn btn-{{ group.name }} btn-xs">{{ group.description }}</button></p>
                       <ul class="list-unstyled">
-                          {%  for tag in tag_hash[group.tag_id] %}
+                          {%  for tag in current_tag_hash[group.name] %}
                             {%- if template_mode == "add" %}
                               <li><input class="form-check-input" type="checkbox" id="tags" name="tags" value="{{ tag.id }}"> {{ tag.name }}</li>
                             {% endif %}
@@ -126,10 +135,15 @@
           $("#files-form").validate({
               rules: {
                   title: "required",
-                  desc: "required"
+                  project_id: "required",
+                  {%- if template_mode == "add" %}
+                    file:"required"
+                  {% endif %}
               }
           });
       });
   </script>
+
+  {{ dropzone.load_js() }}
 
 {% endblock %}

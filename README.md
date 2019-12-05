@@ -1,13 +1,14 @@
 ![Coalman](https://github.com/kendog/coalman/blob/master/application/static/images/logo-medium.png)
 =========
 
-Coleman is a Flask microservice for managing and archiving files.
+Coleman is a Headless CMS Microservice for S3 written in Python/Flask.
 
-* Barebones CMS for managing and archiving (zip) files.
-* JWT Authentication for APIs
+* Light-weight CMS for managing and archiving (zip) files.
+* Access to content via JWT Authenticated REST APIs.
 * S3 Integration
   * Manage S3 objects
   * Stream S3 objects into zip archives.
+* Local Disk Option (non-scaling instances).
 * Performance Options:
   * In-memory zipper
   * Local caching

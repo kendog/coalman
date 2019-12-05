@@ -1,0 +1,126 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "profile_edit" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add Profile</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit Profile</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete Profile</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="profiles-form" method="post" action="">
+
+        <div class="row">
+            <div class="col-md-7">
+
+                <div class="form-group">
+                    <label for="user_id">Username:</label>
+                    <select id="user_id" name="user_id" class="form-control" {% if template_mode == 'delete' %}disabled{% endif %}>
+                        <option value="">Select User</option>
+                        {%  for user in users %}
+                          <option {% if profile.user  %}{% if user.id == profile.user.id %} selected {% endif %}{% endif %} value="{{ user.id }}">{{ user.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{% if profile.name  %}{{ profile.name }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <input type="text" class="form-control" id="bio" name="bio" value="{% if profile.bio  %}{{ profile.bio }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="address1">Address 1:</label>
+                    <input type="text" class="form-control" id="address1" name="address1" value="{% if profile.address1  %}{{ profile.address1 }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="address2">Address 2:</label>
+                    <input type="text" class="form-control" id="address1" name="address2" value="{% if profile.address2  %}{{ profile.address2 }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{% if profile.city  %}{{ profile.city }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <input type="text" class="form-control" id="state" name="state" value="{% if profile.state  %}{{ profile.state }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="zip">Zip:</label>
+                    <input type="text" class="form-control" id="zip" name="zip" value="{% if profile.zip  %}{{ profile.zip }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="text" class="form-control" id="phone" name="phone" value="{% if profile.phone  %}{{ profile.phone }}{% endif %}" {% if template_mode == 'delete' %}disabled{% endif %}>
+                </div>
+
+                <div class="form-group">
+                    <label for="account_id">Account:</label>
+                    <select id="account_id" name="account_id" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                        <option value="">Select Account</option>
+                        {%  for account in accounts %}
+                          {%- if template_mode == "add" %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
+                          {% else %}
+                            <option {% if account.id == profile.account_id %}selected{% endif %} value="{{ account.id }}">{{ account.name }}</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+          {% endif %}
+          {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+          {% endif %}
+          {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+          {% endif %}
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+    <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            $("#profiles-form").validate({
+                rules: {
+                  {% if current_user.has_role('super-admin') %}
+                  user_id: "required"
+                  {% endif %}
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}

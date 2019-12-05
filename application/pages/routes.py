@@ -4,7 +4,9 @@ from flask_login import current_user, login_required
 from flask import current_app as app
 #from .assets import compile_auth_assets
 #from flask_login import login_required
-from ..models import TagGroup
+from ..models import TagGroup, Account, Project
+from sqlalchemy import or_, and_
+import datetime
 
 
 # Blueprint Configuration
@@ -12,6 +14,7 @@ pages_bp = Blueprint('pages_bp', __name__,
                     template_folder='templates',
                     static_folder='static')
 #compile_auth_assets(app)
+
 
 
 # favicon for older bowsers
@@ -25,9 +28,26 @@ def favicon():
 @pages_bp.route('/')
 def index():
     if current_user.is_authenticated:
-        return render_template('dashboard.html')
+        return redirect(url_for('pages_bp.dashboard'))
     else:
-        return render_template('index.html')
+        return redirect(url_for('security.login'))
+
+@pages_bp.route('/dashboard')
+@login_required
+def dashboard():
+
+    months_ago = datetime.datetime.now() + datetime.timedelta(-90)
+    years_ago = datetime.datetime.now() + datetime.timedelta(-365)
+
+    if current_user.has_role('super-admin'):
+        projects = Project.query.all()
+        return render_template('dashboard.html', projects=projects, months_ago=months_ago, years_ago=years_ago)
+    else:
+        projects = Project.query\
+            .join(Account)\
+            .filter(and_(Project.account_id == Account.id, Account.id == current_user.account_id))\
+            .order_by(Project.account_id).all()
+        return render_template('dashboard.html', months_ago=months_ago, years_ago=years_ago)
 
 
 # API Documentation

@@ -1,0 +1,120 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "projects" %}
+
+{% block title %}Project{% endblock %}
+
+{% block content %}
+
+    <h3>{{ project.account.name }}</h3>
+    <h4>{{ project.name }}</h4>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-md-7">
+
+            <div class="form-group">
+                <label for="duedate">Due Date:</label>
+                <div class='input-group date' id='datetimepicker1'>
+                    <input type='text' class="form-control" id='duedate' name='duedate' placeholder="Enter Bid date" disabled />
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="files">Issues:</label>
+                <ul>
+                    {%  for issue in project.issues %}
+                    <li><a href="{{ url_for('issues_bp.issues_home', id=issue.id) }}">{{ issue.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+           </div>
+
+          <div class="col-md-1"></div>
+
+          <div class="col-md-4">
+
+            <div class="form-group">
+                <label for="files">Users:</label>
+                <ul>
+                    {%  for user in project.users %}
+                    <li>{{ user.email }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="files">Specs:</label>
+                <ul>
+                    {%  for spec in project.specs %}
+                    <li><a href="{{ url_for('specs_bp.spec', id=spec.id) }}" >{{ spec.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="files">Files:</label>
+                <ul>
+                    {%  for file in project.files %}
+                    <li><a href="{{ url_for('files_bp.download_file', id=file.id) }}" target="_blank">{{ file.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="files">Archives:</label>
+                <ul>
+                    {%  for archive in project.archives %}
+                    <li><a href="{{ url_for('archives_bp.download_archive', uuid=archive.uuid) }}" target="_blank">{{ archive.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+          </div>
+      </div>
+
+      <div class="form-group">
+        {%- if template_mode == "add" %}
+          <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+        {% endif %}
+        {%- if template_mode == "edit" %}
+          <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+        {% endif %}
+        {%- if template_mode == "delete" %}
+          <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+        {% endif %}
+      </div>
+
+
+{% endblock %}
+
+{% block plugins %}
+
+  <!--  datetimepicker() //-->
+  <script type="text/javascript" src="/static/js/moment.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+  <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css"/>
+
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $('#duedate').datetimepicker({
+            format: 'MM/DD/YYYY',
+            {%- if template_mode != "add" %}
+            defaultDate: "{{ project.duedate }}",
+            {% endif %}
+          });
+          $("#projects-form").validate({
+              rules: {
+                  name: "required",
+                  duedate: "required",
+                  account_id: "required",
+                  user_id: "required"
+              }
+          });
+      });
+  </script>
+
+{% endblock %}

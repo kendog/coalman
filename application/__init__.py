@@ -11,6 +11,9 @@ from flask_security import Security, SQLAlchemyUserDatastore, utils
 from .db import db
 from .models import User, Role
 from flask_mail import Mail
+#from flask_moment import Moment
+#from flask_wtf.csrf import CSRFProtect
+from flask_dropzone import Dropzone
 
 login_manager = LoginManager()
 sess = Session()
@@ -18,6 +21,7 @@ flask_bcrypt = Bcrypt()
 jwt = JWTManager()
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 mail = Mail()
+
 
 def create_app():
     """Construct the core application."""
@@ -33,15 +37,19 @@ def create_app():
     flask_bcrypt = Bcrypt(app)
     jwt = JWTManager(app)
     mail.init_app(app)
+    #moment = Moment(app)
+    #csrf = CSRFProtect(app)
+    dropzone = Dropzone(app)
 
     migrate = Migrate(app, db)
     security = Security(app, user_datastore)
 
     app.jinja_env.filters['datetime'] = format_datetime
-
+    #app.jinja_env.globals['momentjs'] = momentjs
 
 
     with app.app_context():
+
         # import parts of our application
         from . import auth
         from . import files
@@ -50,21 +58,24 @@ def create_app():
         from . import accounts
         from . import projects
         from . import tags
-        from . import messages
+        from . import message_templates
         from . import pages
         from . import users
         from . import notifications
+#        from . import issues
+#        from . import calendar
+#        from . import specs
+#        from . import specmanager
         from . import seed
-
         return app
 
 
 # jinja Date Stuff
-def format_datetime(value, format='small'):
+def format_datetime(value, format='default'):
     if format == 'full':
         format="EEEE, d. MMMM y 'at' HH:mm"
-    elif format == 'medium':
-        format="EE MM/dd/y HH:mm"
-    elif format == 'small':
+    elif format == 'dateonly':
+        format="MM/dd/YYYY"
+    elif format == 'default':
         format = "MM/dd/yy HH:mm"
     return babel.dates.format_datetime(value, format)

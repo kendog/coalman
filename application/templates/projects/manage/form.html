@@ -1,0 +1,135 @@
+{% extends "layouts/layout1.html" %}
+{% set active_section = "projects" %}
+
+{% block title %}Project{% endblock %}
+
+{% block content %}
+
+    {%- if template_mode == "add" %}
+      <h3>Add Project</h3>
+    {% endif %}
+    {%- if template_mode == "edit" %}
+      <h3>Edit Project</h3>
+    {% endif %}
+    {%- if template_mode == "delete" %}
+      <h3>Delete Project</h3><p>Are you sure???</p>
+    {% endif %}
+
+    <hr>
+
+    <form id="projects-form" method="post" action="">
+
+      <div class="row">
+          <div class="col-md-7">
+
+              <hr>
+
+              <div class="form-group">
+                    <label for="name">Project Name:</label>
+                    {%- if template_mode == "add" %}
+                    <input type="text" class="form-control" id="name" name="name" value="" />
+                    {% endif %}
+                    {%- if template_mode == "edit" %}
+                    <input type="text" class="form-control" id="name" name="name" value="{{ project.name }}" />
+                    {% endif %}
+                    {%- if template_mode == "delete" %}
+                    <input type="text" class="form-control" id="name" name="name" value="{{ project.name }}" disabled />
+                    {% endif %}
+              </div>
+
+              <div class="form-group">
+                  <label for="duedate">Due Date:</label>
+                  <div class='input-group date' id='datetimepicker1'>
+                      <input type='text' class="form-control" id='duedate' name='duedate' placeholder="Enter Bid date" {%- if template_mode == "delete" %}disabled{% endif %}/>
+                      <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label for="account_id">Account:</label>
+                  <select id="account_id" name="account_id" class="form-control" {%- if template_mode == "delete" %}disabled{% endif %}>
+                      <option value="">Select Account</option>
+                      {%  for account in accounts %}
+                        {%- if template_mode == "add" %}
+                          <option value="{{ account.id }}">{{ account.name }}</option>
+                        {% else %}
+                          <option {% if account.id == project.account_id %}selected{% endif %} value="{{ account.id }}">{{ account.name }}</option>
+                        {% endif %}
+                      {% endfor %}
+                  </select>
+              </div>
+
+
+              <hr>
+
+             </div>
+
+            <div class="col-md-1"></div>
+
+            <div class="col-md-4">
+
+              <div class="form-group">
+                  <label for="user_ids">Users:</label>
+                  <ul class="list-unstyled">
+                  {%  for user in current_users %}
+                  <li>
+                      {%- if template_mode == "add" %}
+                        <input class="form-check-input" type="checkbox" id="user_ids" name="user_ids" value="{{ user.id }}"> {{ user.email }}
+                      {% endif %}
+                      {%- if template_mode == "edit" %}
+                        <input class="form-check-input" type="checkbox" id="user_ids" name="user_ids" {% if user in project.users %}checked{% endif %} value="{{ user.id }}"> {{ user.email }}
+                      {% endif %}
+                      {%- if template_mode == "delete" %}
+                        <input disabled class="form-check-input" type="checkbox" id="user_ids" name="user_ids" {% if user in project.users %}checked{% endif %} value="{{ user.id }}"> {{ user.email }}
+                      {% endif %}
+                  </li>
+                  {% endfor %}
+                  </ul>
+              </div>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+          {%- if template_mode == "add" %}
+            <input type="submit" class="btn btn-primary" name="submit-add" value="Submit">
+          {% endif %}
+          {%- if template_mode == "edit" %}
+            <input type="submit" class="btn btn-primary" name="submit-edit" value="Update">
+          {% endif %}
+          {%- if template_mode == "delete" %}
+            <input type="submit" class="btn btn-danger" name="submit-delete" value="Delete">
+          {% endif %}
+        </div>
+
+
+    </form>
+
+{% endblock %}
+
+{% block plugins %}
+
+  <!--  datetimepicker() //-->
+  <script type="text/javascript" src="/static/js/moment.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.min.js"></script>
+  <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css"/>
+
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript">
+      $(function () {
+          $('#duedate').datetimepicker({
+            format: 'MM/DD/YYYY',
+            {%- if template_mode != "add" %}
+            defaultDate: "{{ project.duedate }}",
+            {% endif %}
+          });
+          $("#projects-form").validate({
+              rules: {
+                  name: "required",
+                  duedate: "required"
+              }
+          });
+      });
+  </script>
+
+{% endblock %}

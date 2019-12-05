@@ -1,18 +1,18 @@
 {% extends "layouts/layout1.html" %}
 {% set active_section = "messages" %}
 
-{% block title %}Message{% endblock %}
+{% block title %}Message Templates{% endblock %}
 
 {% block content %}
 
     {%- if template_mode == "add" %}
-      <h3>Add Message</h3>
+      <h3>Add Message Templates</h3>
     {% endif %}
     {%- if template_mode == "edit" %}
-      <h3>Edit Message</h3>
+      <h3>Edit Message Templates</h3>
     {% endif %}
     {%- if template_mode == "delete" %}
-      <h3>Delete Message</h3><p>Are you sure???</p>
+      <h3>Delete Message Templates</h3><p>Are you sure???</p>
     {% endif %}
 
     <hr>
@@ -30,10 +30,10 @@
                     <input type="text" class="form-control" id="name" name="name" value="" />
                     {% endif %}
                     {%- if template_mode == "edit" %}
-                    <input type="text" class="form-control" id="name" name="name" value="{{ message.name }}" />
+                    <input type="text" class="form-control" id="name" name="name" value="{{ message_template.name }}" />
                     {% endif %}
                     {%- if template_mode == "delete" %}
-                    <input type="text" class="form-control" id="name" name="name" value="{{ message.name }}" disabled />
+                    <input type="text" class="form-control" id="name" name="name" value="{{ message_template.name }}" disabled />
                     {% endif %}
               </div>
 
@@ -43,10 +43,10 @@
                     <input type="text" class="form-control" id="subject" name="subject" value="" />
                     {% endif %}
                     {%- if template_mode == "edit" %}
-                    <input type="text" class="form-control" id="subject" name="subject" value="{{ message.subject }}" >
+                    <input type="text" class="form-control" id="subject" name="subject" value="{{ message_template.subject }}" >
                     {% endif %}
                     {%- if template_mode == "delete" %}
-                    <input type="text" class="form-control" id="subject" name="subject" value="{{ message.subject }}" disabled />
+                    <input type="text" class="form-control" id="subject" name="subject" value="{{ message_template.subject }}" disabled />
                     {% endif %}
               </div>
 
@@ -56,10 +56,10 @@
                     <textarea class="form-control" id="message" name="message" rows="5"></textarea>
                     {% endif %}
                     {%- if template_mode == "edit" %}
-                    <textarea class="form-control" id="message" name="message" rows="5">{{ message.message }}</textarea>
+                    <textarea class="form-control" id="message" name="message" rows="5">{{ message_template.message }}</textarea>
                     {% endif %}
                     {%- if template_mode == "delete" %}
-                    <textarea disabled class="form-control" id="message" name="message" rows="5">{{ message.message }}</textarea>
+                    <textarea disabled class="form-control" id="message" name="message" rows="5">{{ message_template.message }}</textarea>
                     {% endif %}
               </div>
 
@@ -71,7 +71,7 @@
                         {%- if template_mode == "add" %}
                           <option value="{{ account.id }}">{{ account.name }}</option>
                         {% else %}
-                          <option {% if account.id == message.account_id %}selected{% endif %} value="{{ account.id }}">{{ account.name }}</option>
+                          <option {% if account.id == message_template.account_id %}selected{% endif %} value="{{ account.id }}">{{ account.name }}</option>
                         {% endif %}
                       {% endfor %}
                   </select>

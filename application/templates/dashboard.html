@@ -3,15 +3,247 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h3>Dashboard</h3>
+<h3>{{ current_user.account.name }}</h3>
+<h4>Dashboard</h4>
 
 <hr>
 
+<div id='script-warning'>Error Loading Data</div>
+<div id='loading'>loading...</div>
+
 <div class="row">
-    <div class="col-md-12">
-        {% if current_user.is_authenticated %}
-        <p>Hi {{ current_user.email }}!</p>
-        {% endif %}
-    </div>
+
+      <div class="col-md-4">
+        <h4>Upcoming Projects</h4>
+        <div id='calendar' class="calendar"></div>
+      </div>
+
+      <div class="col-md-4">
+        <h4>Past Projects</h4>
+        <div id='calendar2' class="calendar"></div>
+      </div>
+
+      <div class="col-md-4">
+          <h4>All Projects</h4>
+          <div id='calendar3' class="calendar"></div>
+      </div>
+
 </div>
+
+
+
+{% endblock %}
+
+
+{% block plugins %}
+
+<meta charset='utf-8' />
+<link href='/static/js/fullcalendar/core/main.css' rel='stylesheet' />
+<link href='/static/js/fullcalendar/daygrid/main.css' rel='stylesheet' />
+<link href='/static/js/fullcalendar/timegrid/main.css' rel='stylesheet' />
+<link href='/static/js/fullcalendar/list/main.css' rel='stylesheet' />
+<script src='/static/js/fullcalendar/core/main.js'></script>
+<script src='/static/js/fullcalendar/interaction/main.js'></script>
+<script src='/static/js/fullcalendar/daygrid/main.js'></script>
+<script src='/static/js/fullcalendar/timegrid/main.js'></script>
+<script src='/static/js/fullcalendar/list/main.js'></script>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      height: 284,
+      plugins: [ 'interaction', 'list' ],
+      header: {
+        left:'',
+        center: '',
+        right: ''
+      },
+      footer: {
+        left:'',
+        center: '',
+        right: 'next30,next365'
+      },
+      defaultView: 'next30',
+      views: {
+        next30: {
+          type: 'list',
+          duration: { days: 90 },
+          buttonText: '90 days'
+        },
+        next365: {
+          type: 'list',
+          duration: { days: 365 },
+          buttonText: '365 days'
+        }
+      },
+      editable: true,
+      navLinks: true, // can click day/week names to navigate views
+      eventLimit: true, // allow "more" link when too many events
+      events: {
+        url: '/api/v1/calendar/events',
+        failure: function() {
+          document.getElementById('script-warning').style.display = 'block'
+        }
+      },
+      loading: function(bool) {
+        document.getElementById('loading').style.display =
+          bool ? 'block' : 'none';
+      }
+    });
+
+    calendar.render();
+
+    var calendar2El = document.getElementById('calendar2');
+    var calendar2 = new FullCalendar.Calendar(calendar2El, {
+      height: 284,
+      plugins: [ 'interaction', 'list' ],
+      header: {
+        left:'',
+        center: '',
+        right: ''
+      },
+      footer: {
+        left:'',
+        center: '',
+        right: 'last90,last365'
+      },
+      defaultDate:'{{ months_ago }}',
+      defaultView: 'last90',
+      views: {
+        last90: {
+          type: 'list',
+          duration: { days: 120 },
+          buttonText: '90 days'
+        },
+        last365: {
+          type: 'list',
+          duration: { days: 395 },
+          buttonText: '365 days'
+        }
+      },
+      editable: true,
+      navLinks: true, // can click day/week names to navigate views
+      eventLimit: true, // allow "more" link when too many events
+      events: {
+        url: '/api/v1/calendar/events',
+        failure: function() {
+          document.getElementById('script-warning').style.display = 'block'
+        }
+      },
+      loading: function(bool) {
+        document.getElementById('loading').style.display =
+          bool ? 'block' : 'none';
+      }
+    });
+
+    calendar2.render();
+
+
+    $('.fc-last90-button').click(function(){
+      calendar2.gotoDate('{{ months_ago }}');
+      //render();
+    });
+
+    $('.fc-last365-button').click(function(){
+      calendar2.gotoDate('{{ years_ago }}');
+      //calendar2.render();
+    });
+
+    var calendar3El = document.getElementById('calendar3');
+    var calendar3 = new FullCalendar.Calendar(calendar3El, {
+      height: 250,
+      plugins: [ 'interaction', 'list' ],
+      header: {
+        left:'',
+        center: '',
+        right: ''
+      },
+      footer: {
+        left:'',
+        center: '',
+        right: ''
+      },
+      defaultDate:'{{ years_ago }}',
+      defaultView: 'next365',
+      views: {
+        next365: {
+          type: 'list',
+          duration: { days: 730 },
+          buttonText: '365 days'
+        }
+      },
+      editable: true,
+      navLinks: true, // can click day/week names to navigate views
+      eventLimit: true, // allow "more" link when too many events
+      events: {
+        url: '/api/v1/calendar/events',
+        failure: function() {
+          document.getElementById('script-warning').style.display = 'block'
+        }
+      },
+      loading: function(bool) {
+        document.getElementById('loading').style.display =
+          bool ? 'block' : 'none';
+      }
+    });
+
+    calendar3.render();
+
+  });
+
+
+
+
+
+</script>
+<style>
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+
+  #script-warning {
+    display: none;
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    padding: 0 10px;
+    line-height: 40px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    color: red;
+  }
+
+  #loading {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+
+  .calendar {
+    margin: 0;
+    padding: 0;
+  }
+
+  .fc-list-item-time
+  {
+    display: none;
+  }
+
+  .col-md-6
+  {
+    max-width: 250px;
+    padding: 0;
+    margin: 0;
+  }
+</style>
+
 {% endblock %}

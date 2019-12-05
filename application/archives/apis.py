@@ -3,7 +3,8 @@ from flask import Blueprint, jsonify, render_template, request, url_for
 from flask_login import current_user
 from flask import current_app as app
 #from ..schemas import FileSchema
-from ..models import db, Archive, File
+from ..db import db
+from ..models import Archive, File
 from flask_security import login_required
 from ..import auth
 from flask_jwt_extended import (create_access_token, create_refresh_token,
@@ -41,8 +42,7 @@ def archives_add():
         archive = Archive(uuid=str(uuid.uuid4()), recipient_name=recipient_name, recipient_email=recipient_email)
         db.session.add(archive)
         db.session.commit()
-        archive.archive_status_id = 1
-        archive.notification_status_id = 1
+        archive.status_name = "created"
         archive.name = archive.uuid + ".zip"
         archive.path = app.config['TEMP_FOLDER']
         archive.link = app.config['DOWNLOAD_PROTOCOL'] + '://' + app.config['DOWNLOAD_DOMAIN'] + url_for('archives_bp.download_archive', uuid=archive.uuid)

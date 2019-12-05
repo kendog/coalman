@@ -14,8 +14,10 @@
         <thead>
             <tr>
                 <th>User</th>
-                <th>Message</th>
+                <th>Message Template</th>
                 <th>Status</th>
+                <th>Project</th>
+                <th>Creator</th>
                 <th></th>
             </tr>
         </thead>
@@ -24,10 +26,17 @@
             <tr>
                 <td>{{ notification.user.email }}</td>
                 <td>
-                  <p>{{ notification.message.subject }}</p>
-                  <p>{{ notification.message.name }}</p>
+                  <p>{{ notification.message_template.subject }}</p>
+                  <p>{{ notification.message_template.name }}</p>
+                  <p>{{ notification.message_template.message }}</p>
                 </td>
-                <td>{{ notification.notification_status.name }}</td>
+                <td>{{ notification.status.name }}</td>
+                <td>{{ notification.project.name }}</td>
+                <td>{{ notification.creator.email }}
+                      {%  for role in notification.creator.roles %}
+                          ({{ role.name }})
+                      {% endfor %}
+                </td>
                 <td>
                     <a href="{{ url_for('notifications_bp.notifications_edit', id=notification.id) }}" class="btn btn-warning btn-block btn-xs">Edit</a>
                     <a href="{{ url_for('notifications_bp.notifications_delete', id=notification.id) }}" class="btn btn-danger btn-block btn-xs">Delete</a>
@@ -42,9 +51,11 @@
 
 {% block plugins %}
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.csss"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.csss"/>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
         $(document).ready(function() {

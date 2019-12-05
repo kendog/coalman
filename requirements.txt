@@ -1,5 +1,5 @@
 Flask
--e git+https://github.com/mattupstate/flask-security#egg=application
+Flask-Security
 bcrypt
 psycopg2-binary
 PyMySQL
@@ -13,3 +13,4 @@ Flask_JWT_Extended
 Flask_Bcrypt
 boto3
 Flask-Mail
+flask-dropzone
